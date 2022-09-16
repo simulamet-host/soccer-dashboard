@@ -125,10 +125,10 @@ class SoccerPlayer:
             ]
         ).T
 
-    def to_dataframe(self, pseudonym):
+    def to_dataframe(self):
         feature_df = pd.DataFrame(
             {
-                "player_name": [pseudonym] * len(self.daily_load),
+                #"player_name": [self.name] * len(self.daily_load),
                 "daily_load": self.daily_load,
                 "atl": self.atl,
                 "weekly_load": self.weekly_load,
@@ -144,7 +144,6 @@ class SoccerPlayer:
                 "sleep-quality": self.sleep_quality,
                 "soreness": self.soreness,
                 "stress": self.stress,
-                "injury_ts": self.injury_ts,
             },
         )
         return feature_df
