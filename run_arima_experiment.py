@@ -34,7 +34,7 @@ def evaluate_model(X_train, y_train, params: Dict[str, List]):
     for components, readiness_order, feature_order in zip(params["nr_components"],
                                                           params["readiness_order"],
                                                           params["feature_order"]):
-        arima = ArimaPlayerModel.fit(X_train, y_train, components,
+        arima = ArimaPlayerModel.fit("name", X_train, y_train, components,
                                  readiness_order,
                                  feature_order)
         results.append(
@@ -63,7 +63,7 @@ def evaluate_forecasting(teams):
             amount_missing_data = player.stress.isna().sum()
             X_train, y_train, X_test, y_test = prepare_player_data(player)
             decomp_test = decompose_features(X_test, 3)[:, 1]
-            model = ArimaPlayerModel.fit(X_train, y_train, 3, (1, 1, 2), (1, 1, 0))
+            model = ArimaPlayerModel.fit(player.name, X_train, y_train, 3, (1, 1, 2), (1, 1, 0))
             res = model.forecasting(decomp_test, y_test, window_size)
             res["missing"] = amount_missing_data.astype("float64")
             player_results.append(res)
@@ -83,13 +83,17 @@ def prepare_player_data(player):
     player_df = df_strip_nans(player.to_dataframe())
     col_names = player_df.columns
     X_train, X_test = train_test_split(player_df, test_size=0.2, shuffle=False)
+    train_index = X_train.index
+    test_index = X_test.index
     X_train_np, X_test_np = iterative_imputation(X_train, X_test)
     X_train = pd.DataFrame(X_train_np, columns=col_names)
     X_test = pd.DataFrame(X_test_np, columns=col_names)
     y_test = X_test["readiness"]
+    y_test.index = test_index
+    X_test.index = test_index
+    X_train.index = train_index
     X_test_done = X_test.drop(["readiness"], axis=1)
     return X_train, X_train["readiness"], X_test_done,  y_test
-
 
 if __name__ == "__main__":
     path_to_data = Path(__file__).parent / "data" / "pickles" / "teams.pkl"
