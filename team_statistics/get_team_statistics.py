@@ -24,15 +24,15 @@ def get_injury_categories(players: List[SoccerPlayer]):
     return gathered.groupby(["location", "severity"]).size().unstack(fill_value=0)
 
 
-def get_readiness_quantile_ts(players: List[SoccerPlayer]):
+def get_feature_quantile_ts(players: List[SoccerPlayer], feature):
     time_idx = list(players)[0].readiness.index
-    nan_df = pd.DataFrame(np.array([player.readiness for player in players]).T, index=time_idx)
-    readiness_df = df_strip_nans(nan_df)
-    median = readiness_df.apply(lambda x: np.nanmedian(x), axis=1)
-    lower_quantile = readiness_df.apply(lambda x: np.nanquantile(x, 0.25), axis=1)
-    higher_quantile = readiness_df.apply(lambda x: np.nanquantile(x, 0.75), axis=1)
+    nan_df = pd.DataFrame(np.array([getattr(player, feature) for player in players]).T, index=time_idx)
+    feature_df = df_strip_nans(nan_df)
+    median = feature_df.apply(lambda x: np.nanmedian(x), axis=1)
+    lower_quantile = feature_df.apply(lambda x: np.nanquantile(x, 0.25), axis=1)
+    higher_quantile = feature_df.apply(lambda x: np.nanquantile(x, 0.75), axis=1)
     return pd.DataFrame({"median": median, "lower_quantile": lower_quantile, "higher_quantile": higher_quantile},
-                        index=readiness_df.index)
+                        index=feature_df.index)
 
 
 def get_average_metric_overview(players: List[SoccerPlayer]):
@@ -47,6 +47,21 @@ def get_average_metric_overview(players: List[SoccerPlayer]):
     "μ Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
     }
     return pd.DataFrame(averages, index=[player.name[6:] for player in players])
+
+
+def get_std_metric_overview(players: List[SoccerPlayer]):
+    stds = {
+    "STD ATL": [player.atl.std().round(2) for player in players],
+    "STD ACWR" : [player.acwr.std().round(2) for player in players],
+    "STD CTL28" : [player.ctl28.std().round(2) for player in players],
+    "STD CTL42" : [player.ctl42.std().round(2) for player in players],
+    "STD Strain" : [player.strain.std().round(2) for player in players],
+    "STD Monotony" : [player.monotony.std().round(2) for player in players],
+    "STD Daily Load" : [player.daily_load.std().round(2) for player in players],
+    "STD Session RPE" : [np.round(np.nanstd(player.srpe), 2) for player in players]
+    }
+    return pd.DataFrame(stds, index=[player.name[6:] for player in players])
+
 
 #def get_correlation_matrix(players: List[SoccerPlayer]):
 #    features = ["daily_load", "srpe", "rpe", "duration", "atl", "weekly_load", "monotony", "strain", "acwr", "ctl28",
