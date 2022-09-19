@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 import datetime
 
-from team_statistics.get_team_statistics import get_injury_categories, get_readiness_quantile_ts
+from team_statistics.get_team_statistics import get_average_metric_overview, get_injury_categories, get_readiness_quantile_ts
 
 
 def team_statistics(teams, models):
@@ -33,3 +33,5 @@ def team_statistics(teams, models):
                      readiness_plot_data["higher_quantile"], alpha=0.5)
     ax2.set_xlim(pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]))
     st.pyplot(fig)
+    st.subheader("Table of Averaged Training Load Metrics")
+    st.table(get_average_metric_overview(teams[filter_team[1]].players.values()).style.format("{:.2}"))
