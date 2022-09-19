@@ -16,7 +16,7 @@ def save_as_pickle(path_to_save: Path, file_name: str, model: ArimaPlayerModel):
 
 def train_models(players, path_to_save):
     for name, player in players.items():
-        X_train, y_train, X_test, y_test = prepare_player_data(player)
+        X_train, y_train = prepare_player_data(player)
         model = ArimaPlayerModel.fit(name, X_train, y_train, 3, (1, 1, 2), (1, 1, 0))
         save_as_pickle(path_to_save, f"{name}.pkl", model)
 
@@ -61,7 +61,7 @@ def evaluate_forecasting(teams):
         player_results = []
         for player in all_players:
             amount_missing_data = player.stress.isna().sum()
-            X_train, y_train, X_test, y_test = prepare_player_data(player)
+            X_train, y_train, X_test, y_test = prepare_player_data_for_eval(player)
             decomp_test = decompose_features(X_test, 3)[:, 1]
             model = ArimaPlayerModel.fit(player.name, X_train, y_train, 3, (1, 1, 2), (1, 1, 0))
             res = model.forecasting(decomp_test, y_test, window_size)
@@ -80,6 +80,17 @@ def evaluate_forecasting(teams):
 
 
 def prepare_player_data(player):
+    player_df = df_strip_nans(player.to_dataframe())
+    col_names = player_df.columns
+    X_index = player_df.index
+    X, _ = iterative_imputation(player_df)
+    X = pd.DataFrame(X, columns=col_names, index=X_index)
+    y = X["readiness"]
+    X_train = X.drop(["readiness"], axis=1)
+    return X_train, y
+
+
+def prepare_player_data_for_eval(player):
     player_df = df_strip_nans(player.to_dataframe())
     col_names = player_df.columns
     X_train, X_test = train_test_split(player_df, test_size=0.2, shuffle=False)
