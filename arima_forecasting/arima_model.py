@@ -47,7 +47,8 @@ class ArimaPlayerModel:
         return self.player_name == other.player_name
 
     @classmethod
-    def fit(cls, player_name: str,  X_train: pd.DataFrame, y_train: pd.Series, nr_components, readiness_order, feature_order):
+    def fit(cls, player_name: str,  X_train: pd.DataFrame, y_train: pd.Series,
+            nr_components, readiness_order, feature_order):
         decomposed_features = prepare_dataset(X_train, nr_components)
         first_comp_model = sm.tsa.ARIMA(endog=decomposed_features[:, 1], order=feature_order).fit()
         readiness_model = sm.tsa.ARIMA(endog=y_train, order=readiness_order, exog=decomposed_features[:, 1]).fit()
