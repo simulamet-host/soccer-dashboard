@@ -36,18 +36,23 @@ def get_readiness_quantile_ts(players: List[SoccerPlayer]):
 
 
 def get_average_metric_overview(players: List[SoccerPlayer]):
-
     averages = {
-    "ATL": [player.atl.mean().round(2) for player in players],
-    "ACWR" : [player.acwr.mean().round(2) for player in players],
-    "CTL28" : [player.ctl28.mean().round(2) for player in players],
-    "CTL42" : [player.ctl42.mean().round(2) for player in players],
-    "Strain" : [player.strain.mean().round(2) for player in players],
-    "Monotony" : [player.monotony.mean().round(2) for player in players],
-    "Daily Load" : [player.daily_load.mean().round(2) for player in players],
-    "Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
+    "μ ATL": [player.atl.mean().round(2) for player in players],
+    "μ ACWR" : [player.acwr.mean().round(2) for player in players],
+    "μ CTL28" : [player.ctl28.mean().round(2) for player in players],
+    "μ CTL42" : [player.ctl42.mean().round(2) for player in players],
+    "μ Strain" : [player.strain.mean().round(2) for player in players],
+    "μ Monotony" : [player.monotony.mean().round(2) for player in players],
+    "μ Daily Load" : [player.daily_load.mean().round(2) for player in players],
+    "μ Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
     }
     return pd.DataFrame(averages, index=[player.name[6:] for player in players])
+
+#def get_correlation_matrix(players: List[SoccerPlayer]):
+#    features = ["daily_load", "srpe", "rpe", "duration", "atl", "weekly_load", "monotony", "strain", "acwr", "ctl28",
+#                "ctl42", "fatigue", "mood", "readiness", "sleep_duration", "sleep_quality", "soreness", "stress"]
+
+
 
 #TO DO:
 # Implement readiness graph with range values, least ready most ready

@@ -34,4 +34,4 @@ def team_statistics(teams, models):
     ax2.set_xlim(pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]))
     st.pyplot(fig)
     st.subheader("Table of Averaged Training Load Metrics")
-    st.table(get_average_metric_overview(teams[filter_team[1]].players.values()).style.format("{:.2}"))
+    st.table(get_average_metric_overview(teams[filter_team[1]].players.values()))
