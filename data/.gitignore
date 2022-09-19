@@ -1,4 +1,4 @@
 *
 !.gitignore
-!pickles/
+!pickles/*/
 !.teams.pkl
