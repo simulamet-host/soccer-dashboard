@@ -35,6 +35,19 @@ def get_readiness_quantile_ts(players: List[SoccerPlayer]):
                         index=readiness_df.index)
 
 
+def get_average_metric_overview(players: List[SoccerPlayer]):
+
+    averages = {
+    "ATL": [player.atl.mean().round(2) for player in players],
+    "ACWR" : [player.acwr.mean().round(2) for player in players],
+    "CTL28" : [player.ctl28.mean().round(2) for player in players],
+    "CTL42" : [player.ctl42.mean().round(2) for player in players],
+    "Strain" : [player.strain.mean().round(2) for player in players],
+    "Monotony" : [player.monotony.mean().round(2) for player in players],
+    "Daily Load" : [player.daily_load.mean().round(2) for player in players],
+    "Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
+    }
+    return pd.DataFrame(averages, index=[player.name[6:] for player in players])
 
 #TO DO:
 # Implement readiness graph with range values, least ready most ready
