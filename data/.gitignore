@@ -1,4 +1,5 @@
 *
 !.gitignore
-!pickles/*/
+!data/pickles/*/
+!data/pickles/arima/*/
 !.teams.pkl
