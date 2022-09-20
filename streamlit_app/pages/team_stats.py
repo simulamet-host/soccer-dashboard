@@ -68,6 +68,8 @@ def team_statistics(teams, models):
             alpha=0.5,
         )
         ax1.set_xlim(pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]))
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel("Feature Value")
         st.pyplot(fig_feature)
 
     with tab2:

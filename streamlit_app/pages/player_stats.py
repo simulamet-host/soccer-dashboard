@@ -56,6 +56,8 @@ def player_statistics(teams, models):
         fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         ax1.plot(to_plot)
         ax1.tick_params(axis="x", labelrotation=45)
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel("Readiness")
         if forecast_step > 0:
             ax1.fill_between(
                 conf_interval.index,
