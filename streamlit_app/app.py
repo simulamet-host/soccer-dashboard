@@ -34,15 +34,15 @@ teams = load_in_pickles(path_to_teams)
 
 
 def main_page(teams, models):
-    st.markdown("# Main page")
-    st.markdown("")
+    st.markdown("## Welcome to the Trainer Dashboard")
+    st.markdown(" to do: write description")
 
 
 
 page_names_to_funcs = {
-    "Main Page": main_page,
-    "Team Information": team_statistics,
+    "Homepage": main_page,
     "Player Information": player_statistics,
+    "Team Information": team_statistics,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())

@@ -14,9 +14,9 @@ from team_statistics.get_team_statistics import (
 
 
 def team_statistics(teams, models):
-    st.title("Team Analysis")
+    st.title("Team Information")
     tab1, tab2, tab3 = st.tabs(
-        ["Team Features", "Injury Overview", "Training Load Metrics"]
+        ["Aggregated Metrics", "Injury Overview", "Training Load Overview"]
     )
     with st.sidebar:
         filter_team = st.radio(
@@ -25,8 +25,9 @@ def team_statistics(teams, models):
             format_func=lambda x: x[0],
         )
     with tab1:
+        st.subheader("Aggregated Metrics")
         select_feature = st.selectbox(
-            "Select Feature",
+            "Select Metric",
             [
                 ("Readiness", "readiness"),
                 ("Stress", "stress"),
@@ -47,7 +48,7 @@ def team_statistics(teams, models):
             format_func=lambda x: x[0],
         )
         feature_plot_data = get_feature_quantile_ts(
-            teams["TeamA"].players.values(), select_feature[1]
+            teams[filter_team[1]].players.values(), select_feature[1]
         )
         date_range = st.slider(
             "Select Date Range",
@@ -55,7 +56,7 @@ def team_statistics(teams, models):
                 feature_plot_data.index[0].to_pydatetime(),
                 feature_plot_data.index[-1].to_pydatetime(),
             ),
-            format="MM/DD/YY",
+            format="YYYY/MM/DD",
         )
         fig_feature, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         ax1.plot(
@@ -69,10 +70,11 @@ def team_statistics(teams, models):
         )
         ax1.set_xlim(pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]))
         ax1.set_xlabel("Time")
-        ax1.set_ylabel("Feature Value")
+        ax1.set_ylabel("Metric Value")
         st.pyplot(fig_feature)
 
     with tab2:
+        st.subheader("Injury Overview")
         injuries = get_injury_categories(teams[filter_team[1]].players.values())
         font = {"family": "normal", "weight": "normal", "size": 17}
         sns.set_theme(style="darkgrid")
@@ -83,7 +85,7 @@ def team_statistics(teams, models):
         plt.rc("font", **font)
         st.pyplot(fig_injuries)
     with tab3:
-        st.subheader("Table of Averaged Training Load Metrics")
+        st.subheader("Training Load Overview")
         moment = st.radio("Choose Statistic", ("Mean", "Standard Deviation"))
         if moment == "Mean":
             st.table(

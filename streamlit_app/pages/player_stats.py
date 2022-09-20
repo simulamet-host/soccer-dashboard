@@ -28,9 +28,9 @@ def get_player(teams, player_name):
 
 def player_statistics(teams, models):
 
-    st.title("Player Statistics")
+    st.title("Player Information")
     tab1, tab2, tab3 = st.tabs(
-        ["Readiness Forecast", "Wellness Overview", "High Intensity Days"]
+        ["Readiness Forecast", "Wellness Overview", "Training Load Overview"]
     )
     with st.sidebar:
         filter_team = st.selectbox(
@@ -45,7 +45,7 @@ def player_statistics(teams, models):
             format_func=lambda x: x[0],
         )
     with tab1:
-        st.subheader("Player Readiness Forecasting")
+        st.subheader("Readiness Forecast")
         forecast_step = st.slider("Forecasting Window", min_value=0, max_value=14)
         player_model = models[filter_player[2]]
         to_plot = player_model.y_train[-35:]
@@ -84,13 +84,12 @@ def player_statistics(teams, models):
         )
         spider_plot_df = get_spider_plot_data(player, wellness_parameter_window[1])
         fig_spider = px.line_polar(
-            spider_plot_df, r="r", theta="theta", line_close=True, range_r=[0, 5]
-        )
+            spider_plot_df, r="r", theta="theta", line_close=True, range_r=[0, 5], width=800, height=400)
         fig_spider.update_traces(fill="toself")
         st.plotly_chart(fig_spider)
 
     with tab3:
-        st.subheader("Intensity Training Days")
+        st.subheader("Training Load Overview")
         intensity_time_range = st.radio(
             "Select Time Range",
             (
@@ -108,12 +107,23 @@ def player_statistics(teams, models):
             table_content,
         ) = get_player_training_load_quantiles(player, 650, intensity_time_range[1])
 
+        hide_table_row_index = """
+                    <style>
+                    thead tr th:first-child {display:none}
+                    tbody th {display:none}
+                    </style>
+                    """
+
+        # Inject CSS with Markdown
+        st.markdown(hide_table_row_index, unsafe_allow_html=True)
         st.table(table_content)
         fig_intensity, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         ax1.bar(acwr_visualisation.index, acwr_visualisation, color=quantiles_viz)
         ax1.tick_params(axis="x", labelrotation=45)
-        legend_elements = [Line2D([0], [0], color='indianred', lw=4, label='High Intensity Training'),
-                           Line2D([0], [0], color='skyblue', lw=4, label='Low Intensity Training'),
-                            Line2D([0], [0], color='grey', lw=4, label='Normal Training')]
+        legend_elements = [Line2D([0], [0], color='indianred', lw=4, label='High Training Load Days'),
+                           Line2D([0], [0], color='skyblue', lw=4, label='Low Training Load Days'),
+                            Line2D([0], [0], color='grey', lw=4, label='Normal Training Load Days')]
         ax1.legend(handles=legend_elements)
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel("Acute Chronic Work Load Ratio")
         st.pyplot(fig_intensity)
