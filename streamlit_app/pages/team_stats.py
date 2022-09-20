@@ -82,7 +82,7 @@ def team_statistics(teams, models):
         st.pyplot(fig_injuries)
     with tab3:
         st.subheader("Table of Averaged Training Load Metrics")
-        moment = st.radio("Choose Moment", ("Mean", "Standard Deviation"))
+        moment = st.radio("Choose Statistic", ("Mean", "Standard Deviation"))
         if moment == "Mean":
             st.table(
                 get_average_metric_overview(teams[filter_team[1]].players.values())
