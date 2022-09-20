@@ -35,10 +35,7 @@ teams = load_in_pickles(path_to_teams)
 
 def main_page(teams, models):
     st.markdown("# Main page")
-    st.markdown("## TODO")
-    st.markdown("* Add basic statistics to team and player")
-    st.markdown("* Add high intensity session identification")
-    st.markdown("* Add time dependent Radar Plot to Player Page")
+    st.markdown("")
 
 
 
