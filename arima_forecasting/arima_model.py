@@ -23,8 +23,7 @@ def iterative_imputation(X_nan_train: pd.DataFrame,
                         ):
     imputer = IterativeImputer(max_iter=10, random_state=0)
     X_train = imputer.fit_transform(X_nan_train)
-    if X_test:
-        X_test = imputer.transform(X_test)
+    X_test = imputer.transform(X_test)
     return X_train, X_test
 
 

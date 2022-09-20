@@ -2,6 +2,7 @@ from typing import Dict
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
+from matplotlib.lines import Line2D
 import plotly.express as px
 import streamlit as st
 
@@ -111,4 +112,8 @@ def player_statistics(teams, models):
         fig_intensity, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         ax1.bar(acwr_visualisation.index, acwr_visualisation, color=quantiles_viz)
         ax1.tick_params(axis="x", labelrotation=45)
+        legend_elements = [Line2D([0], [0], color='indianred', lw=4, label='High Intensity Training'),
+                           Line2D([0], [0], color='skyblue', lw=4, label='Low Intensity Training'),
+                            Line2D([0], [0], color='grey', lw=4, label='Normal Training')]
+        ax1.legend(handles=legend_elements)
         st.pyplot(fig_intensity)
