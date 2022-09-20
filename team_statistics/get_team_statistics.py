@@ -22,9 +22,9 @@ def get_injury_categories(players: List[SoccerPlayer]):
             processed_injuries.append((key, value))
     gathered = pd.DataFrame(processed_injuries, columns=["location", "severity"])
     injury_df = gathered.groupby(["location", "severity"]).size().unstack(fill_value=0)
-    injury_df.index = ["Groin Hip", "Head Neck", "Left Foot", "Left Knee", "Left Leg",
-                       "Left Thigh", "Right Foot", "Right Knee", "Right Leg", "Right Thigh",
-                       "Stomach Back"]
+    #injury_df.index = ["Groin Hip", "Head Neck", "Left Foot", "Left Knee", "Left Leg",
+    #                   "Left Thigh", "Right Foot", "Right Knee", "Right Leg", "Right Thigh",
+    #                   "Stomach Back"]
     return injury_df
 
 
