@@ -7,16 +7,17 @@ import datetime
 
 from team_statistics.get_team_statistics import (
     get_average_metric_overview,
-    get_injury_categories,
+    get_correlation_matrix,
     get_feature_quantile_ts,
+    get_injury_categories,
     get_std_metric_overview,
 )
 
 
 def team_statistics(teams, models):
     st.title("Team Information")
-    tab1, tab2, tab3 = st.tabs(
-        ["Aggregated Metrics", "Injury Overview", "Training Load Overview"]
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Aggregated Metrics", "Injury Overview", "Training Load Overview", "Correlation Analysis"]
     )
     with st.sidebar:
         filter_team = st.radio(
@@ -93,3 +94,15 @@ def team_statistics(teams, models):
             )
         else:
             st.table(get_std_metric_overview(teams[filter_team[1]].players.values()))
+
+    with tab4:
+        st.subheader("Correlation Analysis")
+        font_corr = {"family": "normal", "weight": "normal", "size": 9}
+        sns.set_theme(style="darkgrid")
+        correlation_matrix = get_correlation_matrix(teams[filter_team[1]].players.values())
+        fig_corr, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 10))
+        heatmap_corr = sns.heatmap(
+            ax=ax1, data=correlation_matrix, cmap="YlOrBr", annot=True, cbar=True
+        )
+        plt.rc("font", **font_corr)
+        st.pyplot(fig_corr)

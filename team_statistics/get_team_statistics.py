@@ -41,14 +41,14 @@ def get_feature_quantile_ts(players: List[SoccerPlayer], feature):
 
 def get_average_metric_overview(players: List[SoccerPlayer]):
     averages = {
-    "μ ATL": [player.atl.mean().round(2) for player in players],
-    "μ ACWR" : [player.acwr.mean().round(2) for player in players],
-    "μ CTL28" : [player.ctl28.mean().round(2) for player in players],
-    "μ CTL42" : [player.ctl42.mean().round(2) for player in players],
-    "μ Strain" : [player.strain.mean().round(2) for player in players],
-    "μ Monotony" : [player.monotony.mean().round(2) for player in players],
-    "μ Daily Load" : [player.daily_load.mean().round(2) for player in players],
-    "μ Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
+    "Mean ATL": [player.atl.mean().round(2) for player in players],
+    "Mean ACWR" : [player.acwr.mean().round(2) for player in players],
+    "Mean CTL28" : [player.ctl28.mean().round(2) for player in players],
+    "Mean CTL42" : [player.ctl42.mean().round(2) for player in players],
+    "Mean Strain" : [player.strain.mean().round(2) for player in players],
+    "Mean Monotony" : [player.monotony.mean().round(2) for player in players],
+    "Mean Daily Load" : [player.daily_load.mean().round(2) for player in players],
+    "Mean Session RPE" : [np.round(np.nanmean(player.srpe), 2) for player in players]
     }
     return pd.DataFrame(averages, index=[player.name[6:] for player in players])
 
@@ -67,14 +67,13 @@ def get_std_metric_overview(players: List[SoccerPlayer]):
     return pd.DataFrame(stds, index=[player.name[6:] for player in players])
 
 
-#def get_correlation_matrix(players: List[SoccerPlayer]):
-#    features = ["daily_load", "srpe", "rpe", "duration", "atl", "weekly_load", "monotony", "strain", "acwr", "ctl28",
-#                "ctl42", "fatigue", "mood", "readiness", "sleep_duration", "sleep_quality", "soreness", "stress"]
-
-
-
-#TO DO:
-# Implement readiness graph with range values, least ready most ready
-# High exhaustion training days for team: last week and general -- daily load
-# Team Mood: Weighted Average of Mood, Stress, Readiness
-# Team Fatigue: Weighted Average of Sleep duration, Sleep quality, fatigue, ACWR
+def get_correlation_matrix(players: List[SoccerPlayer]):
+    features = {"Daily Load":"daily_load", "sRPE":"srpe","RPE":"rpe", "Duration":"duration",
+                "ATL":"atl", "Weekly Load": "weekly_load", "Monotony": "monotony", "Strain": "strain",
+                "ACWR": "acwr", "CTL28": "ctl28", "CTL42": "ctl42", "Fatigue": "fatigue", "Mood": "mood",
+                "Readiness": "readiness", "Sleep Duration": "sleep_duration", "Sleep Quality": "sleep_quality",
+                "Soreness": "soreness", "Stress": "stress"}
+    averaged_features = {}
+    for feature_name, field_name in features.items():
+        averaged_features[feature_name] = [np.nanmean(getattr(player, field_name)) for player in players]
+    return pd.DataFrame(averaged_features).corr()
