@@ -77,13 +77,11 @@ def team_statistics(teams, models):
     with tab2:
         st.subheader("Injury Overview")
         injuries = get_injury_categories(teams[filter_team[1]].players.values())
-        font = {"family": "normal", "weight": "normal", "size": 17}
         sns.set_theme(style="darkgrid")
         fig_injuries, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         heatmap = sns.heatmap(
-            ax=ax1, data=injuries.T, cmap="YlGnBu", annot=True, cbar=False
+            ax=ax1, data=injuries.T, cmap="YlGnBu", annot=True, cbar=False, annot_kws={"fontsize": 17}
         )
-        plt.rc("font", **font)
         st.pyplot(fig_injuries)
     with tab3:
         st.subheader("Training Load Overview")
@@ -97,12 +95,10 @@ def team_statistics(teams, models):
 
     with tab4:
         st.subheader("Correlation Analysis")
-        font_corr = {"family": "normal", "weight": "normal", "size": 9}
         sns.set_theme(style="darkgrid")
         correlation_matrix = get_correlation_matrix(teams[filter_team[1]].players.values())
         fig_corr, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 10))
         heatmap_corr = sns.heatmap(
-            ax=ax1, data=correlation_matrix, cmap="YlOrBr", annot=True, cbar=True
+            ax=ax1, data=correlation_matrix, cmap="YlOrBr", annot=True, cbar=True, annot_kws={"fontsize": 9}
         )
-        plt.rc("font", **font_corr)
         st.pyplot(fig_corr)
