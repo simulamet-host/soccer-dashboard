@@ -11,6 +11,7 @@ from team_statistics.get_team_statistics import (
     get_feature_quantile_ts,
     get_injury_categories,
     get_std_metric_overview,
+    convert_df
 )
 
 
@@ -86,12 +87,31 @@ def team_statistics(teams, models):
     with tab3:
         st.subheader("Training Load Overview")
         moment = st.radio("Choose Statistic", ("Mean", "Standard Deviation"))
+
+
         if moment == "Mean":
+            df = get_average_metric_overview(teams[filter_team[1]].players.values())
             st.table(
-                get_average_metric_overview(teams[filter_team[1]].players.values())
+                df
             )
+            csv = convert_df(df)
+            st.download_button('📥"Press to Download"',
+                               csv,
+                               "training_load_overview_mean.csv",
+                               "text/csv",
+                               key='download-csv'
+                               )
+
         else:
-            st.table(get_std_metric_overview(teams[filter_team[1]].players.values()))
+            df = get_std_metric_overview(teams[filter_team[1]].players.values())
+            st.table(df)
+            csv = convert_df(df)
+            st.download_button('📥"Press to Download"',
+                               csv,
+                               "training_load_overview_std.csv",
+                               "text/csv",
+                               key='download-csv'
+                               )
 
     with tab4:
         st.subheader("Correlation Analysis")

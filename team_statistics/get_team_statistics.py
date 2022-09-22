@@ -77,3 +77,7 @@ def get_correlation_matrix(players: List[SoccerPlayer]):
     for feature_name, field_name in features.items():
         averaged_features[feature_name] = [np.nanmean(getattr(player, field_name)) for player in players]
     return pd.DataFrame(averaged_features).corr()
+
+
+def convert_df(df):
+   return df.to_csv().encode('utf-8')
