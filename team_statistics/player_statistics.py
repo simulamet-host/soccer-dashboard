@@ -16,8 +16,8 @@ def series_strip_nans(player: SoccerPlayer):
 
 def get_player_training_load_quantiles(player: SoccerPlayer, quantile_time_scale, time_range):
     acwr = series_strip_nans(player)["acwr"]
-    lower_quantile = acwr[:quantile_time_scale].quantile(.3)
-    higher_quantile = acwr[:quantile_time_scale].quantile(.9)
+    lower_quantile = acwr[:quantile_time_scale].quantile(.25)
+    higher_quantile = acwr[:quantile_time_scale].quantile(.75)
     high_intensity = acwr[-time_range:].apply(lambda x: True if x >= higher_quantile else False).sum()
     low_intensity = acwr[-time_range:].apply(lambda x: True if (x <= lower_quantile) and (x > 0) else False).sum()
     viz_series = acwr[-time_range:]
