@@ -34,7 +34,7 @@ teams = load_in_pickles(path_to_teams)
 
 
 def main_page(teams, models):
-    st.markdown("## Welcome to the Trainer Dashboard")
+    st.markdown("## Welcome to the Soccer Dashboard")
 
 
 
