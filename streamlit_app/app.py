@@ -5,8 +5,8 @@ import os
 import pickle
 sys.path.append(str(Path(__file__).parent.parent))
 
-from streamlit_app.pages.team_stats import team_statistics
-from streamlit_app.pages.player_stats import player_statistics
+from streamlit_app.page_functions.team_stats import team_statistics
+from streamlit_app.page_functions.player_stats import player_statistics
 
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
@@ -34,8 +34,7 @@ teams = load_in_pickles(path_to_teams)
 
 
 def main_page(teams, models):
-    st.markdown("## Welcome to the Trainer Dashboard")
-    st.markdown(" to do: write description")
+    st.markdown("## Welcome to the Soccer Dashboard")
 
 
 

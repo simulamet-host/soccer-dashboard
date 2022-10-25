@@ -7,16 +7,18 @@ import datetime
 
 from team_statistics.get_team_statistics import (
     get_average_metric_overview,
-    get_injury_categories,
+    get_correlation_matrix,
     get_feature_quantile_ts,
+    get_injury_categories,
     get_std_metric_overview,
+    convert_df
 )
 
 
 def team_statistics(teams, models):
     st.title("Team Information")
-    tab1, tab2, tab3 = st.tabs(
-        ["Aggregated Metrics", "Injury Overview", "Training Load Overview"]
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Aggregated Metrics", "Injury Overview", "Training Load Overview", "Correlation Analysis"]
     )
     with st.sidebar:
         filter_team = st.radio(
@@ -76,20 +78,47 @@ def team_statistics(teams, models):
     with tab2:
         st.subheader("Injury Overview")
         injuries = get_injury_categories(teams[filter_team[1]].players.values())
-        font = {"family": "normal", "weight": "normal", "size": 17}
         sns.set_theme(style="darkgrid")
         fig_injuries, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 7))
         heatmap = sns.heatmap(
-            ax=ax1, data=injuries.T, cmap="YlGnBu", annot=True, cbar=False
+            ax=ax1, data=injuries.T, cmap="YlGnBu", annot=True, cbar=False, annot_kws={"fontsize": 17}
         )
-        plt.rc("font", **font)
         st.pyplot(fig_injuries)
     with tab3:
         st.subheader("Training Load Overview")
         moment = st.radio("Choose Statistic", ("Mean", "Standard Deviation"))
+
+
         if moment == "Mean":
+            df = get_average_metric_overview(teams[filter_team[1]].players.values())
             st.table(
-                get_average_metric_overview(teams[filter_team[1]].players.values())
+                df
             )
+            csv = convert_df(df)
+            st.download_button('📥"Press to Download"',
+                               csv,
+                               "training_load_overview_mean.csv",
+                               "text/csv",
+                               key='download-csv'
+                               )
+
         else:
-            st.table(get_std_metric_overview(teams[filter_team[1]].players.values()))
+            df = get_std_metric_overview(teams[filter_team[1]].players.values())
+            st.table(df)
+            csv = convert_df(df)
+            st.download_button('📥"Press to Download"',
+                               csv,
+                               "training_load_overview_std.csv",
+                               "text/csv",
+                               key='download-csv'
+                               )
+
+    with tab4:
+        st.subheader("Correlation Analysis")
+        sns.set_theme(style="darkgrid")
+        correlation_matrix = get_correlation_matrix(teams[filter_team[1]].players.values())
+        fig_corr, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(14, 10))
+        heatmap_corr = sns.heatmap(
+            ax=ax1, data=correlation_matrix, cmap="YlOrBr", annot=True, cbar=True, annot_kws={"fontsize": 9}
+        )
+        st.pyplot(fig_corr)
