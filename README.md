@@ -23,7 +23,8 @@ macOS
 Linux
 
     Open the terminal window
-    
+  
+  
 ```
 Display your Python version by running the following command :  python --version OR python -V, on the command line and press Enter. 
 ```
