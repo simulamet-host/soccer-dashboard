@@ -6,7 +6,7 @@ Here's how SoccerMon can play valuable role in developing better analytical mode
 
 ## Requirements
 
-Make sure you have Python version 3 before you start the installation. You can check your Python version on the command line/terminal/shell. 
+Make sure you have, at least, Python version 3.7 before you start the installation.You can check your Python version on the command line/terminal/shell. 
 
 Windows
 
@@ -23,18 +23,39 @@ macOS
 Linux
 
     Open the terminal window
-  
-  
-```
-## Display your Python version by 
+   
 
+### Display your Python version
+```
 Run the following command :  python --version OR python -V, on the command line and press Enter. 
 ```
-### Python installation
+### Softwares update installation
 
 If your version of Python doesn't fit the requirments, update it by downloading the latest version at :  https://www.python.org/downloads/
 
-```
+Update the package-management system used to install and manage software packages, pip, (https://pip.pypa.io/en/stable/installation/) if your version of python hasn't been downloaded from python.org 
+
+### Python virtual environment
+
+We recommend running the commands in a virtual environment. This ensures that the dependencies pulled in for Streamlit don't impact any other Python projects you're working on.
+Exemple of environment management:
+
+  - poetry (https://python-poetry.org/)
+ 
+  - conda (https://www.anaconda.com/products/distribution)
+    
+## Install Streamlit with Anaconda 
+
+Streamlit's officially-supported environment manager on Windows is Anaconda Navigator (https://docs.anaconda.com/navigator/).
+
+If you don't have Anaconda install yet, follow the steps provided on the Anaconda installation page (https://docs.anaconda.com/anaconda/install/windows/).
+
+## Install Streamlit
+
+Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation)
+
+## Cloning the repository
+
 After cloning this repo (by downloading it on github or via a git , the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
 ```
 streamlit= ">=1.13.0"
