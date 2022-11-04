@@ -68,27 +68,27 @@ pip install streamlit
 ```
 pip install pandas
 ```
-- matplotlib: >= 3.6.0 https://pypi.org/project/matplotlib/
+- matplotlib: >= 3.6.0 (https://pypi.org/project/matplotlib/)
 ```
 pip install matplotlib
 ```
-- numpy: >= 1.23.4 https://pypi.org/project/numpy/
+- numpy: >= 1.23.4 (https://pypi.org/project/numpy/)
 ```
 pip install numpy
 ```
-- ploty: >= 5.10.0 https://pypi.org/project/plotly/
+- ploty: >= 5.10.0 (https://pypi.org/project/plotly/)
 ```
 pip install plotly
 ```
-- scikit-learn: >= 1.1.2 https://pypi.org/project/scikit-learn/
+- scikit-learn: >= 1.1.2 (https://pypi.org/project/scikit-learn/)
 ```
 pip install -U scikit-learn
 ```
-- seaborn: >= 0.12.1 https://pypi.org/project/seaborn/
+- seaborn: >= 0.12.1 (https://pypi.org/project/seaborn/)
 ```
 pip install seaborn
 ```
-- statsmodels: >= 0.13.2 https://pypi.org/project/statsmodels/
+- statsmodels: >= 0.13.2 (https://pypi.org/project/statsmodels/)
 ```
 pip install statsmodels
 ``` 
@@ -102,16 +102,25 @@ Another option is to download an install a Git GUI. Exemple of Git GUI:
 - Gitkraken : https://www.gitkraken.com/
 - Sourcetree : https://www.sourcetreeapp.com/
 
-
-
-...
-
 ## Deployment (Local)
 
-To launch the app locally, in the terminal, you can run the following command: `streamlit run app.py`. Please make sure that you need to navigate to the `soccer-dashboard/streamlit_app` directory where the Python script is saved. Otherwise, you’ll have to specify the full path to the file: `streamlit run soccer-dashboard/streamlit_app/app.py`.
-
-Open http://localhost:3000 in the browser. The page will reload if you make edits.
-...
+To launch the app locally, in the terminal, you can run the following command: 
+```
+`streamlit run app.py`. 
+```
+Please make sure that you need to navigate to the 
+```
+`soccer-dashboard/streamlit_app` 
+```
+directory where the Python script is saved. Otherwise, you’ll have to specify the full path to the file: 
+```
+`streamlit run soccer-dashboard/streamlit_app/app.py`.
+```
+Open in the browser :
+```
+http://localhost:3000 . 
+```
+The page will reload if you make edits.
 
 ## Deployment (Cloud)
 
@@ -120,3 +129,8 @@ Open http://localhost:3000 in the browser. The page will reload if you make edit
 - Wait a couple of minutes and your first app will be deployed.
 ![Screenshot from 2022-11-04 11-41-22](https://user-images.githubusercontent.com/84230658/199953952-bb704a85-ce38-42aa-87a1-c4217c34db3b.png)
 - ...
+
+### Demonstration Videos
+Demonstration videos for the HOST-ATS dashboard are available on YouTube:
+•	https://www.youtube.com/watch?v=HHMCdMucorI > to change
+•	https://www.youtube.com/watch?v=VZQaEy2VauQ > to change
