@@ -104,23 +104,23 @@ Another option is to download an install a Git GUI. Exemple of Git GUI:
 
 ## Deployment (Local)
 
-To launch the app locally, in the terminal, you can run the following command: 
+To launch the app locally, in the terminal, you can run the following command : 
 ```
-`streamlit run app.py`. 
+streamlit run app.py
 ```
-Please make sure that you need to navigate to the 
+Please make sure that you need to navigate to the directory where the Python script is saved :
 ```
-`soccer-dashboard/streamlit_app` 
+soccer-dashboard/streamlit_app 
 ```
-directory where the Python script is saved. Otherwise, you’ll have to specify the full path to the file: 
+Otherwise, you’ll have to specify the full path to the file : 
 ```
-`streamlit run soccer-dashboard/streamlit_app/app.py`.
+streamlit run soccer-dashboard/streamlit_app/app.py
 ```
 Open in the browser :
 ```
-http://localhost:3000 . 
+http://localhost:3000 
 ```
-The page will reload if you make edits.
+The page will reload if you make edits :
 
 ## Deployment (Cloud)
 
