@@ -127,10 +127,12 @@ The page will reload if you make edits :
 - Sign into https://share.streamlit.io
 - Create a new app conected to the relevant branch of your repository and specify the main file path (example: `dev` branch in the `simulamet-host/soccer-dashboard` repository, with `streamlit_app/app.py` as the main file)
 - Wait a couple of minutes and your first app will be deployed.
+-
 ![Screenshot from 2022-11-04 11-41-22](https://user-images.githubusercontent.com/84230658/199953952-bb704a85-ce38-42aa-87a1-c4217c34db3b.png)
-- ...
 
 ### Demonstration Videos
+
 Demonstration videos for the HOST-ATS dashboard are available on YouTube:
+
 •	https://www.youtube.com/watch?v=HHMCdMucorI > to change
 •	https://www.youtube.com/watch?v=VZQaEy2VauQ > to change
