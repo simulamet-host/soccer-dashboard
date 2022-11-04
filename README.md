@@ -38,7 +38,7 @@ Update the package-management system used to install and manage software package
 ### Python virtual environment
 
 We recommend running the commands in a virtual environment. This ensures that the dependencies pulled in for Streamlit don't impact any other Python projects you're working on.
-Exemple of environment management:
+Exemple of environment management/dependencies:
 
   - poetry (https://python-poetry.org/)
  
@@ -56,6 +56,43 @@ If you don't have Anaconda install yet, follow the steps provided on the Anacond
 
 Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation)
 
+### Install Python libraries
+
+In order to run the repository locally, a list of Python libraries needed downloaded and installed : 
+
+- streamlit : version >= 1.14.0 (https://pypi.org/project/streamlit/)
+```
+pip install streamlit
+```
+- pandas: version >= 0.18 (https://pypi.org/project/pandas/)
+```
+pip install pandas
+```
+- matplotlib: >= 3.6.0 https://pypi.org/project/matplotlib/
+```
+pip install matplotlib
+```
+- numpy: >= 1.23.4 https://pypi.org/project/numpy/
+```
+pip install numpy
+```
+- ploty: >= 5.10.0 https://pypi.org/project/plotly/
+```
+pip install plotly
+```
+- scikit-learn: >= 1.1.2 https://pypi.org/project/scikit-learn/
+```
+pip install -U scikit-learn
+```
+- seaborn: >= 0.12.1 https://pypi.org/project/seaborn/
+```
+pip install seaborn
+```
+- statsmodels: >= 0.13.2 https://pypi.org/project/statsmodels/
+```
+pip install statsmodels
+``` 
+
 ## Cloning the repository
 
 When a repository is created on GitHub.com, it exists as a remote repository. You can clone your repository to create a local copy on your computer and sync between the two locations (https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository?tool=webui)
@@ -66,17 +103,7 @@ Another option is to download an install a Git GUI. Exemple of Git GUI:
 - Sourcetree : https://www.sourcetreeapp.com/
 
 
-After cloning this repo , the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
-```
-streamlit= ">=1.13.0"
-pandas= ">=0.18"
-matplotlib= ">=3.6.0"
-numpy= ">=1.23.4"
-pandas= ">=1.5.0"
-ploty= ">=5.10.0"
-scikit-learn= ">=1.1.2"
-seaborn= ">=0.12.1"
-statsmodels= ">=0.13.2"
+
 ...
 
 ## Deployment (Local)
