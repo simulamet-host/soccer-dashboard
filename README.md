@@ -43,20 +43,30 @@ Exemple of environment management:
   - poetry (https://python-poetry.org/)
  
   - conda (https://www.anaconda.com/products/distribution)
+
+## Installation
     
-## Install Streamlit with Anaconda 
+### Install Streamlit with Anaconda 
 
 Streamlit's officially-supported environment manager on Windows is Anaconda Navigator (https://docs.anaconda.com/navigator/).
 
 If you don't have Anaconda install yet, follow the steps provided on the Anaconda installation page (https://docs.anaconda.com/anaconda/install/windows/).
 
-## Install Streamlit
+### Install Streamlit
 
 Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation)
 
 ## Cloning the repository
 
-After cloning this repo (by downloading it on github or via a git , the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
+When a repository is created on GitHub.com, it exists as a remote repository. You can clone your repository to create a local copy on your computer and sync between the two locations (https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository?tool=webui)
+
+Another option is to download an install a Git GUI. Exemple of Git GUI:
+
+- Gitkraken : https://www.gitkraken.com/
+- Sourcetree : https://www.sourcetreeapp.com/
+
+
+After cloning this repo , the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
 ```
 streamlit= ">=1.13.0"
 pandas= ">=0.18"
