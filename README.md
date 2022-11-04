@@ -130,7 +130,7 @@ http://localhost:3000
 
 ### Demonstration Videos
 
-Demonstration videos for installing Stremlit via Anaconda are available on YouTube:
+Demonstration videos for installing Streamlit via Anaconda are available on YouTube:
 
 •	https://www.youtube.com/watch?v=Vu5Bw745vXg
 
