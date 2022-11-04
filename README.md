@@ -92,7 +92,6 @@ pip install seaborn
 ```
 pip install statsmodels
 ``` 
-
 ## Cloning the repository
 
 When a repository is created on GitHub.com, it exists as a remote repository. You can clone your repository to create a local copy on your computer and sync between the two locations (https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository?tool=webui)
@@ -120,19 +119,19 @@ Open in the browser :
 ```
 http://localhost:3000 
 ```
-The page will reload if you make edits :
 
 ## Deployment (Cloud)
 
 - Sign into https://share.streamlit.io
 - Create a new app conected to the relevant branch of your repository and specify the main file path (example: `dev` branch in the `simulamet-host/soccer-dashboard` repository, with `streamlit_app/app.py` as the main file)
 - Wait a couple of minutes and your first app will be deployed.
--
+
 ![Screenshot from 2022-11-04 11-41-22](https://user-images.githubusercontent.com/84230658/199953952-bb704a85-ce38-42aa-87a1-c4217c34db3b.png)
 
 ### Demonstration Videos
 
-Demonstration videos for the HOST-ATS dashboard are available on YouTube:
+Demonstration videos for installing Stremlit via Anaconda are available on YouTube:
 
-•	https://www.youtube.com/watch?v=HHMCdMucorI > to change
-•	https://www.youtube.com/watch?v=VZQaEy2VauQ > to change
+•	https://www.youtube.com/watch?v=Vu5Bw745vXg
+
+•	https://www.youtube.com/watch?v=dkvgzL3gJVY
