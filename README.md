@@ -37,7 +37,7 @@ Update the package-management system used to install and manage software package
 
 ### Python virtual environment
 
-We recommend running the commands in a virtual environment. This ensures that the dependencies pulled in for Streamlit don't impact any other Python projects you're working on.
+It is recommend running the commands in a virtual environment. This ensures that the dependencies pulled in for Streamlit don't impact any other Python projects you're working on.
 Exemple of environment management/dependencies:
 
   - poetry (https://python-poetry.org/)
