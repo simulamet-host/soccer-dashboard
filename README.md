@@ -27,7 +27,7 @@ Linux
 
 ### Display your Python version
 ```
-Run the following command :  python --version OR python -V, on the command line and press Enter. 
+python --version OR python -V
 ```
 ### Softwares update installation
 
