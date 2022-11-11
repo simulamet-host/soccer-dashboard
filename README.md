@@ -1,8 +1,10 @@
 # Soccer Dashboard
 
-SoccerMon is the largest data set available today with both subjective and objective data. The data were collected and used by two professional teams during the 2020 and 2021 seasons in the Norwegian women's elite soccer league (“Toppserien”). The teams used the PmSys athlete monitoring system34 to log subjective parameters, including training load, wellness, sickness, and injuries after every session, in addition to wellness once a day and sickness and injuries whenever they occurred. Moreover, during the training sessions, the players used wearable tracking equipment (STATSports APEX) to monitor total distance, high-speed running distance, sprint distance, accelerations and decelerations, and peak speed. 
-In total, the dataset contains 54,485 subjective reports and 10,075 objective measurement sessions and 6,248,770,794 GPS positions measured on the fields.
-Here's how SoccerMon can play valuable role in developing better analytical models not only for sport, but also for other areas of subjective relationships, position information and time data.
+[SoccerMon](https://osf.io/uryz9/) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html). 
+
+Subjective data was collected in the context of _wellness_, _training load_, _game performance_, _injuries_, and _illnesses_, using the PmSys mobile app [PM Reporter Pro](https://play.google.com/store/apps/details?id=com.forzasys.pmsys&hl=en&gl=US&pli=1). Moreover, during training sessions and games, players used the wearable GPS performance tracking equipment [STATSports APEX](https://eu.shop.statsports.com/products/apex-athlete-series) to monitor objective metrics such as __[TODO: replace with raw metrics] total distance, high-speed running distance, sprint distance, accelerations and decelerations, and peak speed.[/TODO]__ 
+
+Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 objective measurement sessions, with 6,248,770,794 GPS positions measured in the field. Initial experiments have shown how different subjective and objective parameters are correlated, and have demonstrated the potential benefits of AI-based athlete performance forecasting applications. SoccerMon can play a valuable role in developing better analytical models, not only for soccer but also for other sports where athlete mobility and subjective wellbeing provide important insights into performance.
 
 ## Requirements
 
