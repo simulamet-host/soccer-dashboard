@@ -6,7 +6,7 @@ import streamlit as st
 import datetime
 
 
-def team_statistics(teams, models):
+def statistics(teams, models):
     st.title("Team Information")
     tab1, tab2, tab3, tab4 = st.tabs(
         ["Aggregated Metrics", "Injury Overview", "Training Load Overview", "Correlation Analysis"]
