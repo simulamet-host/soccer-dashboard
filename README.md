@@ -8,34 +8,46 @@ Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 obj
 
 ## Requirements
 
-Make sure you have, at least, Python version 3.7 before you start the installation.You can check your Python version on the command line/terminal/shell. 
+Make sure you have Python version 3.7 (minimum) before you start the installation. You can check your Python version on the command line/terminal/shell. 
 
-Windows
+### 1. Open the terminal
+
+_Windows_
 
     Press Win+R
     Type powershell
     Press OK or Enter
 
-macOS
+_macOS_
 
     Go to Finder
     Click on Applications
     Choose Utilities -> Terminal
 
-Linux
+_Linux_
 
     Open the terminal window
    
 
-### Display your Python version
-```
-python --version OR python -V
-```
-### Softwares update installation
+### 2. Display your Python version
 
-If your version of Python doesn't fit the requirments, update it by downloading the latest version at :  https://www.python.org/downloads/
+```
+python --version
+```
 
-Update the package-management system used to install and manage software packages, pip, (https://pip.pypa.io/en/stable/installation/) if your version of python hasn't been downloaded from python.org 
+OR 
+
+```
+python -V
+```
+
+
+### 3. Install software updates if necessary
+
+If your version of Python does not fit the requirements, update it by downloading the relevant version [here](https://www.python.org/downloads/).
+
+Update the package management system which can be used to install and manage software packages called [pip](https://pip.pypa.io/en/stable/installation/) if your version of Python has not been downloaded from python.org. 
+
 
 ### Python virtual environment
 
