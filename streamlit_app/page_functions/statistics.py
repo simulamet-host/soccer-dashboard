@@ -5,13 +5,22 @@ import seaborn as sns
 import streamlit as st
 import datetime
 
+from team_statistics.get_team_statistics import (
+    get_average_metric_overview,
+    get_correlation_matrix,
+    get_feature_quantile_ts,
+    get_injury_categories,
+    get_std_metric_overview,
+    convert_df
+)
 
-def statistics(teams, models):
+
+def f_statistics(teams, models):
     st.title("Team Information")
     tab1, tab2, tab3, tab4 = st.tabs(
         ["Aggregated Metrics", "Injury Overview", "Training Load Overview", "Correlation Analysis"]
     )
-     with st.sidebar:
+    with st.sidebar:
         filter_team = st.radio(
             "Select Team",
             [("Team A", "TeamA"), ("Team B", "TeamB")],
