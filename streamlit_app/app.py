@@ -43,6 +43,7 @@ page_names_to_funcs = {
     "Homepage": main_page,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
+    "Statistics": statistics,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
