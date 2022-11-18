@@ -41,9 +41,9 @@ def main_page(teams, models):
 
 page_names_to_funcs = {
     "Homepage": main_page,
+    "Statistics": dataset_statistics,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
-    "Statistics": dataset_statistics,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
