@@ -6,7 +6,7 @@ import streamlit as st
 import datetime
 
 
-def app_data():
+def dataset_statistics():
    
    st.set_page_config(page_title='Dataset Statistics')
    st.markdown("## Dataset Statistics")
