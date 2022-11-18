@@ -7,7 +7,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from streamlit_app.page_functions.team_stats import team_statistics
 from streamlit_app.page_functions.player_stats import player_statistics
-from streamlit_app.page_functions.statistics import Dataset_Statistics
+from streamlit_app.page_functions.dataset_stats import app_data
 
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
@@ -43,7 +43,7 @@ page_names_to_funcs = {
     "Homepage": main_page,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
-    "Statistics": Dataset_Statistics,
+    "Statistics": app_data,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
