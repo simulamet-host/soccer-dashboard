@@ -34,7 +34,7 @@ teams = load_in_pickles(path_to_teams)
 
 
 def main_page(teams, models):
-    with open(os.getcwd()+'/Description.txt', 'r') as file:
+    with open('Description.txt', 'r') as file:
     	descrip = file.read()
     st.markdown("## Welcome to the Soccer Dashboard")
     st.markdown(descrip)
