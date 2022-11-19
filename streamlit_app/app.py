@@ -41,7 +41,7 @@ def main_page(teams, models):
 
 page_names_to_funcs = {
     "Homepage": main_page,
-    "Statistics": dataset_statistics,
+    "Dateset Statistics": dataset_statistics,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
 }
