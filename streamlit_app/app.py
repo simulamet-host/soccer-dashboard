@@ -7,7 +7,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from streamlit_app.page_functions.team_stats import team_statistics
 from streamlit_app.page_functions.player_stats import player_statistics
-from streamlit_app.page_functions.dataset_stats import dataset_statistics
+from streamlit_app.page_functions.dataset_statistics import dataset_statistics
 
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
