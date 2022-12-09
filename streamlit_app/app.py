@@ -47,7 +47,7 @@ page_names_to_funcs = {
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
-if selected_page == dataset_statistics:
+if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information":
     page_names_to_funcs[selected_page]
 else:
     page_names_to_funcs[selected_page](teams, models)
