@@ -8,7 +8,7 @@ import datetime
 
 def dataset_statistics():
    
-   st.set_page_config(page_title='Dataset Statistics')
+   st.title('Dataset Statistics')
    st.markdown("## Dataset Statistics")
 
    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Overview", "Missing Data", "Daily Features", "Game Performance", "GPS", "Illnesses", "Injuries", "Session Features"])
