@@ -5,16 +5,19 @@ import seaborn as sns
 import streamlit as st
 import datetime
 import mysql.connector
-import toml
 
 
-toml_data = st.secrets["mysql"]
-HOST_NAME = toml_data['host']
-DATABASE = toml_data['database']
-PASSWORD = toml_data['password']
-USER = toml_data['user']
-PORT = toml_data['port']
-conn = mysql.connector.connect(host=HOST_NAME, database=DATABASE, user=USER, passwd=PASSWORD, use_pure=True)
+@st.experimental_singleton
+def init_connection():
+    toml_data = st.secrets["mysql"]
+    HOST_NAME = toml_data['host']
+    DATABASE = toml_data['database']
+    PASSWORD = toml_data['password']
+    USER = toml_data['user']
+    PORT = toml_data['port']
+    conn = mysql.connector.connect(host=HOST_NAME, database=DATABASE, user=USER, passwd=PASSWORD, use_pure=True)
+    return conn
+conn = init_connection()
 
 @st.experimental_memo(ttl=600)
 def run_query(query):
