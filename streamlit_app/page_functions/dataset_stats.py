@@ -7,7 +7,7 @@ import datetime
 import mysql.connector
 
 ## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
-## You create once again a file called "secrets.toml" where you put the connection credentials.
+## You create once again, in ".streamlit", a file called "secrets.toml" where you put the connection credentials.
 ## For deployement on the cloud, you add directly the credentials to secrets.
 
 @st.experimental_singleton
