@@ -58,6 +58,16 @@ def dataset_statistics():
       }
       
       df = pd.DataFrame(data)
+        
+      hide_dataframe_row_index = """
+        <style>
+        .row_heading.level0 {display:none}
+        .blank {display:none}
+        </style>
+        """
+    
+      st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
+
       st.table(df)
 
    with tab4:
