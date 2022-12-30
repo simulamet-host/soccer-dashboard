@@ -6,6 +6,9 @@ import streamlit as st
 import datetime
 import mysql.connector
 
+## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
+## You create once again a file called "secrets.toml" where you put the connection credentials.
+## For deployement on the cloud, you add directly the credentials to secrets.
 
 @st.experimental_singleton
 def init_connection():
@@ -45,13 +48,15 @@ def dataset_statistics():
 
    with tab3:
       st.header("Daily Features")
+      
       rowA = run_query("SELECT count(distinct(year(date))) FROM daily_features where player_name like 'TeamA%';")
-      rowB = run_query('''SELECT count(distinct(year(date))) FROM daily_features where player_name like "TeamB%";''')
+      rowB = run_query("SELECT count(distinct(year(date))) FROM daily_features where player_name like 'TeamB%';")
 
       data = {
         "Team Name": ["TeamA", "TeamB"],
         "Number of Years": [int(rowA[0][0]), int(rowB[0][0])]
       }
+      
       df = pd.DataFrame(data)
       st.table(df)
 
