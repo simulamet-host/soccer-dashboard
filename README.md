@@ -20,15 +20,15 @@ python --version
 ```
 After cloning this repo, the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
 ```
-streamlit= ">=1.13.0"
-pandas= ">=0.18"
-matplotlib= ">=3.6.0"
-numpy= ">=1.23.4"
-pandas= ">=1.5.0"
-ploty= ">=5.10.0"
-scikit-learn= ">=1.1.2"
-seaborn= ">=0.12.1"
-statsmodels= ">=0.13.2"
+streamlit==1.13.0
+pandas==0.18
+matplotlib==3.6.0
+numpy==1.23.4
+pandas==1.5.0
+ploty==5.10.0
+scikit-learn==1.1.2
+seaborn==0.12.1
+statsmodels==0.13.2
 ```
 You can use Poetry to help you specify, install, and resolve external packages in your projects. 
 
