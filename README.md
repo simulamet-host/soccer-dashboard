@@ -1,7 +1,7 @@
 # Soccer Dashboard
 
 SoccerMon is the largest data set
-Available today with both subjective and objective data collected over two years from two different elite women's football teams
+Available today with both subjective and objective data collected over two years from two different elite women's football
 teams. Specifically, our dataset contains *54,485* subjective reports and we have *10,075* objective measurement sessions
 where there are *6,248,770,794* GPS positions measured on the fields. Some initial experiments show how different parameters
 correlating and demonstrating the potential benefits of artificial intelligence-based forecasting systems. Here's how SoccerMon can play
