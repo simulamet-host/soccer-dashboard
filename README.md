@@ -16,7 +16,7 @@ Make sure you have Python version 3 before you start the installation.
 
 You can check your Python version by running the following command:
 ```
-python -V
+python --version
 ```
 After cloning this repo, the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
 ```
