@@ -1,7 +1,7 @@
 # Soccer Dashboard
 
 SoccerMon is the largest data set
-Available today with both subjective and objective data collected over two years from two different elite women's football teams
+Available today with both subjective and objective data collected over two years from two different elite women's football
 teams. Specifically, our dataset contains *54,485* subjective reports and we have *10,075* objective measurement sessions
 where there are *6,248,770,794* GPS positions measured on the fields. Some initial experiments show how different parameters
 correlating and demonstrating the potential benefits of artificial intelligence-based forecasting systems. Here's how SoccerMon can play
@@ -16,19 +16,19 @@ Make sure you have Python version 3 before you start the installation.
 
 You can check your Python version by running the following command:
 ```
-python -V
+python --version
 ```
 After cloning this repo, the packages and Python libraries needed for running the app locally can be installed by running the following commands (*Versions specified in `requirements.txt`.*):
 ```
-streamlit= ">=1.13.0"
-pandas= ">=0.18"
-matplotlib= ">=3.6.0"
-numpy= ">=1.23.4"
-pandas= ">=1.5.0"
-ploty= ">=5.10.0"
-scikit-learn= ">=1.1.2"
-seaborn= ">=0.12.1"
-statsmodels= ">=0.13.2"
+streamlit==1.13.0
+pandas==0.18
+matplotlib==3.6.0
+numpy==1.23.4
+pandas==1.5.0
+ploty==5.10.0
+scikit-learn==1.1.2
+seaborn==0.12.1
+statsmodels==0.13.2
 ```
 You can use Poetry to help you specify, install, and resolve external packages in your projects. 
 
