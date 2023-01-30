@@ -7,6 +7,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from streamlit_app.page_functions.team_stats import team_statistics
 from streamlit_app.page_functions.player_stats import player_statistics
+from streamlit_app.page_functions.dataset_stats import dataset_statistics
 
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
@@ -34,15 +35,25 @@ teams = load_in_pickles(path_to_teams)
 
 
 def main_page(teams, models):
+    with open('README.md', 'r') as file:
+    	descrip = file.read()
+    descrip = str(descrip)
+    index_1 = descrip.index('# Soccer Dashboard')
+    index_2 = descrip.index('## ')
     st.markdown("## Welcome to the Soccer Dashboard")
+    st.markdown(descrip[index_1:index_2])
 
 
 
 page_names_to_funcs = {
     "Homepage": main_page,
+    "Dateset Statistics": dataset_statistics,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
 }
 
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
-page_names_to_funcs[selected_page](teams, models)
+if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information":
+    page_names_to_funcs[selected_page](teams, models)
+else:
+    page_names_to_funcs[selected_page]()
