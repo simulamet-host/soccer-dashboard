@@ -5,6 +5,7 @@ import seaborn as sns
 import streamlit as st
 import datetime
 import mysql.connector
+import queries as qu
 
 ## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
 ## You create once again, in ".streamlit", a file called "secrets.toml" where you put the connection credentials.
@@ -28,7 +29,7 @@ def run_query(query):
         cur.execute(query)
         return cur.fetchall()
 
-
+conn = qu.conn
 def dataset_statistics():
    
    st.title('Dataset Statistics')
@@ -49,8 +50,8 @@ def dataset_statistics():
    with tab3:
       st.header("Daily Features")
       
-      rowA = run_query("SELECT count(distinct(year(date))) FROM daily_features where player_name like 'TeamA%';")
-      rowB = run_query("SELECT count(distinct(year(date))) FROM daily_features where player_name like 'TeamB%';")
+      rowA = run_query(qu.rowA)
+      rowB = run_query(qu.rowB)
 
       data = {
         "Team Name": ["TeamA", "TeamB"],
@@ -86,10 +87,12 @@ def dataset_statistics():
       st.table(df)
    with tab7:
       st.header("Injuries")
-      df = pd.DataFrame(columns=['Injuries'])
+      #df = pd.DataFrame(columns=['Injuries'])
+      df = pd.read_sql(qu.inj, conn)
       st.table(df)      
 
    with tab8:
       st.header("Session Features")
-      df = pd.DataFrame(columns=['Session Features'])
+      #df = pd.DataFrame(columns=['Session Features'])
+      df = pd.read_sql(qu.ses.fet, conn)
       st.table(df)                                                            
