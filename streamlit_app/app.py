@@ -27,11 +27,11 @@ from streamlit_app.page_functions.gps_stats import gps_statistics
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 
-@st.cache
+@st.cache_data
 def load_in_pickles(path_to_data: Path):
     return pickle.load(open(path_to_data, "rb"))
 
-@st.cache(allow_output_mutation=True)
+@st.cache_data
 def load_in_arima_models(path_to_arima: Path):
     all_files = os.listdir(path_to_arima)
     models = {}
@@ -39,7 +39,7 @@ def load_in_arima_models(path_to_arima: Path):
         models[file] = pickle.load(open(path_to_arima/file, "rb"))
     return models
 
-#@st.cache
+#@st.cache_data
 #def load_in_gps(path_to_gps: Path):
     #gps = 
     #return gps.load(open(path_to_gps))
