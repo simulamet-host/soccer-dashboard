@@ -7,3 +7,4 @@ scikit-learn==1.1.2
 seaborn==0.12.1
 statsmodels==0.13.2
 mysql-connector-python==8.0.31
+missingno == 0.5.2
