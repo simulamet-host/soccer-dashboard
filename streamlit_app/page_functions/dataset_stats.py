@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 import datetime
 import mysql.connector
-import queries as qu
+import streamlit_app.page_functions.queries as qu
 
 ## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
 ## You create once again, in ".streamlit", a file called "secrets.toml" where you put the connection credentials.
