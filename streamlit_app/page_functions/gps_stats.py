@@ -18,16 +18,16 @@ import numpy as np
 #path_to_gps = Path(__file__).parent.parent / "data" / "gps" / "2020-06-01-TeamA-2d44f941.parquet"
 
 # Load full dataset with a max sample size of 50
-df_A_20 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-06-01-TeamA-2d44f941.parquet").sample(50).sort_values(by="time")
-df_B_20 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-07-03-TeamB-4405bb1f.parquet").sample(50).sort_values(by='time')
-df_A_21 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-03-22-TeamA-af719df9.parquet").sample(50).sort_values(by='time')
-df_B_21 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-07-07-TeamB-29c5271b.parquet").sample(50).sort_values(by='time')
+#df_A_20 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-06-01-TeamA-2d44f941.parquet").sample(50).sort_values(by="time")
+#df_B_20 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-07-03-TeamB-4405bb1f.parquet").sample(50).sort_values(by='time')
+#df_A_21 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-03-22-TeamA-af719df9.parquet").sample(50).sort_values(by='time')
+#df_B_21 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-07-07-TeamB-29c5271b.parquet").sample(50).sort_values(by='time')
 
 # Load only one column of the full dataset for counting purposes and lower memory use
-df_1 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-06-01-TeamA-2d44f941.parquet", columns=['player_name'])
-df_2 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-07-03-TeamB-4405bb1f.parquet", columns=['player_name'])
-df_3 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-03-22-TeamA-af719df9.parquet", columns=['player_name'])
-df_4 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-07-07-TeamB-29c5271b.parquet", columns=['player_name'])
+#df_1 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-06-01-TeamA-2d44f941.parquet", columns=['player_name'])
+#df_2 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2020-07-03-TeamB-4405bb1f.parquet", columns=['player_name'])
+#df_3 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-03-22-TeamA-af719df9.parquet", columns=['player_name'])
+#df_4 = pd.read_parquet(r"D:\Simula\Git 2022\soccer-dashboard\data\gps\2021-07-07-TeamB-29c5271b.parquet", columns=['player_name'])
 
 #df_A_20 = df_A1_20.sample(slider_number1).sort_values(by="time")
 #df_B_20 = df_B2_20.sample(slider_number2).sort_values(by="time")
