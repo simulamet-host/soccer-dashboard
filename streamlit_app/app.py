@@ -31,7 +31,7 @@ path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 def load_in_pickles(path_to_data: Path):
     return pickle.load(open(path_to_data, "rb"))
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_in_arima_models(path_to_arima: Path):
     all_files = os.listdir(path_to_arima)
     models = {}
