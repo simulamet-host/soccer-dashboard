@@ -259,13 +259,13 @@ def gps_statistics():
 
       st.write("")
 
-      multi = st.multiselect('Choose your columns for your report (NOT FULLY WORKING YET)',
+      multi = st.multiselect('Choose your columns for your report',
                              ['Name','Team','Day','Training Duration (min)','Distance Traveled (m)','Average Speed (m/sec)', 'Number of stop'],
                              ['Name','Team'])
       st.write("")
 
       #Editable dataframe
-      st.markdown ('Editable dataset : Modify or add cells by clicking on it (WORKING)')
+      st.markdown ('Editable dataset : Modify or add cells by clicking on it')
       data_report = {'Name': ['Player_1', 'Player_2'],
                      'Team': ['Team_A', 'Team_B'],
                      'Day': ["01.06.2019", '02.06.2020'],
@@ -276,7 +276,11 @@ def gps_statistics():
       #data_report = multi
       df_report = pd.DataFrame (data_report)
       st.experimental_data_editor (df_report,num_rows="dynamic")
-
+      
+       # Select only the columns selected with multiselect
+      if multi:
+        df_report = df_report.loc[:, multi]
+    
       #Download button
       #Cache the conversion to prevent computation on every rerun
       @st.cache_resource
@@ -286,7 +290,7 @@ def gps_statistics():
       csv = convert_df(df_report)
       
       st.write("")
-      st.markdown ("Download report as '.csv' file: (WORKING)")
+      st.markdown ("Download report as '.csv' file:")
       st.write("")
       st.download_button(
           label="Click to download",
