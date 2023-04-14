@@ -5,31 +5,15 @@ import seaborn as sns
 import streamlit as st
 import datetime
 import mysql.connector
-import queries as qu
+import page_functions.queries as qu
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 ## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
 ## You create once again, in ".streamlit", a file called "secrets.toml" where you put the connection credentials.
 ## For deployement on the cloud, you add directly the credentials to secrets.
 
-@st.experimental_singleton
-def init_connection():
-    toml_data = st.secrets["mysql"]
-    HOST_NAME = toml_data['host']
-    DATABASE = toml_data['database']
-    PASSWORD = toml_data['password']
-    USER = toml_data['user']
-    PORT = toml_data['port']
-    conn = mysql.connector.connect(host=HOST_NAME, database=DATABASE, user=USER, passwd=PASSWORD, use_pure=True)
-    return conn
-conn = init_connection()
-
-@st.experimental_memo(ttl=600)
-def run_query(query):
-    with conn.cursor() as cur:
-        cur.execute(query)
-        return cur.fetchall()
-
 conn = qu.conn
+
 def dataset_statistics():
    
    st.title('Dataset Statistics')
@@ -49,16 +33,38 @@ def dataset_statistics():
 
    with tab3:
       st.header("Daily Features")
-      
-      rowA = run_query(qu.rowA)
-      rowB = run_query(qu.rowB)
+      df = pd.read_sql(qu.daily_features, conn)
+      gb = GridOptionsBuilder.from_dataframe(df)
+      gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+      gb.configure_side_bar() #Add a sidebar
+      gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+      gridOptions = gb.build()
 
-      data = {
-        "Team Name": ["TeamA", "TeamB"],
-        "Number of Years": [int(rowA[0][0]), int(rowB[0][0])]
-      }
+      grid_response = AgGrid(
+         df,
+         gridOptions=gridOptions,
+         data_return_mode='AS_INPUT', 
+         update_mode='MODEL_CHANGED', 
+         fit_columns_on_grid_load=True,
+         theme='streamlit',
+         enable_enterprise_modules=True,
+         height=350, 
+         width='100%',
+         reload_data=True
+      )
+
+      data = grid_response['data']
+      selected = grid_response['selected_rows'] 
+      df = pd.DataFrame(selected)
+      #rowA = qu.run_query(qu.rowA)
+      #rowB = qu.run_query(qu.rowB)
+
+      #data = {
+      #  "Team Name": ["TeamA", "TeamB"],
+      #  "Number of Years": [int(rowA[0][0]), int(rowB[0][0])]
+      #}
       
-      df = pd.DataFrame(data)
+      #df = pd.DataFrame(data)
         
       hide_dataframe_row_index = """
         <style>
@@ -69,7 +75,7 @@ def dataset_statistics():
     
       st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
 
-      st.table(df)
+      #st.table(df)
 
    with tab4:
       st.header("Game Performance")
@@ -78,8 +84,31 @@ def dataset_statistics():
 
    with tab5:
       st.header("GPS")
-      df = pd.DataFrame(columns=['GPS'])
-      st.table(df)
+      df = pd.read_sql(qu.gps, conn)
+      gb = GridOptionsBuilder.from_dataframe(df)
+      gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+      gb.configure_side_bar() #Add a sidebar
+      gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+      gridOptions = gb.build()
+
+      grid_response = AgGrid(
+         df,
+         gridOptions=gridOptions,
+         data_return_mode='AS_INPUT', 
+         update_mode='MODEL_CHANGED', 
+         fit_columns_on_grid_load=True,
+         theme='streamlit',
+         enable_enterprise_modules=True,
+         height=350, 
+         width='100%',
+         reload_data=True
+      )
+
+      data = grid_response['data']
+      selected = grid_response['selected_rows'] 
+      df = pd.DataFrame(selected)
+      #df = pd.DataFrame(columns=['GPS'])
+      #st.table(df)
 
    with tab6:
       st.header("Illnesses")
@@ -89,10 +118,56 @@ def dataset_statistics():
       st.header("Injuries")
       #df = pd.DataFrame(columns=['Injuries'])
       df = pd.read_sql(qu.inj, conn)
-      st.table(df)      
+      gb = GridOptionsBuilder.from_dataframe(df)
+      gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+      gb.configure_side_bar() #Add a sidebar
+      gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+      gridOptions = gb.build()
+
+      grid_response = AgGrid(
+         df,
+         gridOptions=gridOptions,
+         data_return_mode='AS_INPUT', 
+         update_mode='MODEL_CHANGED', 
+         fit_columns_on_grid_load=False,
+         columns_auto_size_mode='FIT_CONTENTS',
+         theme='streamlit',
+         enable_enterprise_modules=True,
+         height=350, 
+         width='100%',
+         reload_data=True
+      )
+
+      data = grid_response['data']
+      selected = grid_response['selected_rows'] 
+      df = pd.DataFrame(selected)
+      #st.table(df)      
 
    with tab8:
       st.header("Session Features")
       #df = pd.DataFrame(columns=['Session Features'])
-      df = pd.read_sql(qu.ses.fet, conn)
-      st.table(df)                                                            
+      df = pd.read_sql(qu.ses_fet, conn)
+      #st.table(df)                                                            
+
+      gb = GridOptionsBuilder.from_dataframe(df)
+      gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+      gb.configure_side_bar() #Add a sidebar
+      gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+      gridOptions = gb.build()
+
+      grid_response = AgGrid(
+         df,
+         gridOptions=gridOptions,
+         data_return_mode='AS_INPUT', 
+         update_mode='MODEL_CHANGED', 
+         fit_columns_on_grid_load=False,
+         theme='streamlit',
+         enable_enterprise_modules=True,
+         height=350, 
+         width='100%',
+         reload_data=True
+      )
+
+      data = grid_response['data']
+      selected = grid_response['selected_rows'] 
+      df = pd.DataFrame(selected)

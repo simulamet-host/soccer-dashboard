@@ -7,7 +7,7 @@ import plotly.express as px
 import streamlit as st
 
 from backend_functions.arima_model import ArimaPlayerModel
-from backend_functions.player_statistics import (
+from page_functions.player_statistics import (
     get_player_training_load_quantiles,
     get_spider_plot_data,
 )
