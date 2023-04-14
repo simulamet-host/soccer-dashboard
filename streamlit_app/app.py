@@ -23,11 +23,11 @@ st.set_page_config(
 sys.path.append(str(Path(__file__).parent.parent))
 
 # Import functions from other files
-from streamlit_app.page_functions.team_stats import team_statistics
-from streamlit_app.page_functions.player_stats import player_statistics
+from streamlit_app.page_functions.team_information import team_statistics
+from streamlit_app.page_functions.player_information import player_statistics
 from streamlit_app.page_functions.dataset_stats import dataset_statistics
-from streamlit_app.page_functions.gps_stats import gps_statistics
-from streamlit_app.page_functions.player_gps_report import player_gps_statistics
+from backend_functions.gps_stats import gps_statistics
+from backend_functions.player_gps_report import player_gps_statistics
 
 # Set the paths to the pickled data
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
