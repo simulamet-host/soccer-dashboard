@@ -23,30 +23,35 @@ st.set_page_config(
 sys.path.append(str(Path(__file__).parent.parent))
 
 # Import functions from other files
-from streamlit_app.page_functions.team_information import team_statistics
-from streamlit_app.page_functions.player_information import player_statistics
-from streamlit_app.page_functions.dataset_stats import dataset_statistics
-from backend_functions.gps_stats import gps_statistics
-from backend_functions.player_gps_report import player_gps_statistics
+from page_functions.team_information import team_statistics
+from page_functions.player_information import player_statistics
+from page_functions.dataset_stats import dataset_statistics
+from page_functions.gps_stats import gps_statistics
+from page_functions.player_gps_report import player_gps_statistics
 
 # Set the paths to the pickled data
 path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 #path_to_gps = Path(__file__).parent.parent / "data" / "gps" / "2020-06-01-TeamA-2d44f941.parquet"
 
+
+
 # Define a function to load pickled data from a file
-@st.cache_data
-def load_in_pickles(path_to_data: Path):
-    return pickle.load(open(path_to_data, "rb"))
+#@st.experimental_memo
+#def load_in_pickles(path_to_data: Path):
+#    print(path_to_data)
+#    return pickle.load(open(path_to_data, "rb"))
+
 
 # Define a function to load in all the ARIMA models from a directory of pickled models
-@st.cache_data
-def load_in_arima_models(path_to_arima: Path):
+@st.experimental_memo
+def load_in_arima_models(path_to_arima = r'/backend_functions/'):
     all_files = os.listdir(path_to_arima)
     models = {}
     for file in all_files:
-        #models[file] = pickle.load(open(path_to_arima/file, "rb")) #2.9282 sec
-        models[file] = pickle.load(open(os.path.join(path_to_arima, file), "rb")) #1.2565 sec#
+        if 'arima' in file:
+            #models[file] = pickle.load(open(path_to_arima/file, "rb")) #2.9282 sec
+            models[file] = pickle.load(open(os.path.join(path_to_arima, file), "rb")) #1.2565 sec#
     return models
 
 #@st.cache_data
@@ -71,7 +76,7 @@ def main_page(teams, models):
 
 # Load in the pickled data and models
 models = load_in_arima_models(path_to_models)
-teams = load_in_pickles(path_to_teams)
+##teams = load_in_pickles(path_to_teams)
 #statistics = load_in_pickles(path_to_stats)
 #gps = load_in_gps(path_to_gps)
 
