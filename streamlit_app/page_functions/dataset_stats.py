@@ -130,7 +130,6 @@ def dataset_statistics():
          data_return_mode='AS_INPUT', 
          update_mode='MODEL_CHANGED', 
          fit_columns_on_grid_load=False,
-         columns_auto_size_mode='FIT_CONTENTS',
          theme='streamlit',
          enable_enterprise_modules=True,
          height=350, 
