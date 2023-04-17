@@ -9,4 +9,3 @@ statsmodels==0.13.2
 mysql-connector-python==8.0.31
 streamlit-aggrid
 haversine
-contextlib
