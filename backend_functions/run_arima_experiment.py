@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from statsmodels.tsa.stattools import kpss
 import matplotlib.pyplot as plt
 
-from backend_functions.arima_model import ArimaPlayerModel, iterative_imputation, decompose_features
+from arima_model import ArimaPlayerModel, iterative_imputation, decompose_features
 
 
 def save_as_pickle(path_to_save: Path, file_name: str, model: ArimaPlayerModel):
@@ -107,7 +107,7 @@ def prepare_player_data_for_eval(player):
     return X_train, X_train["readiness"], X_test_done,  y_test
 
 if __name__ == "__main__":
-    path_to_data = Path(__file__).parent / "data" / "pickles" / "teams.pkl"
+    path_to_data = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
     teams = pickle.load(open(path_to_data, "rb"))
     player = list(teams["TeamA"].players.values())[5]
     params = {"nr_components": [3, 3, 3, 3, 3, 3, 3],
@@ -115,5 +115,5 @@ if __name__ == "__main__":
             "feature_order": [(1,1,0), (1,0,1), (1,1,1), (2,0,0), (2,0,1), (2,1,1), (2,1,2)]}
     #eval_results = pd.DataFrame(evaluate_model(X_train, y_train, params))
     players = {**teams["TeamA"].players, **teams["TeamB"].players}
-    train_models(players, Path(__file__).parent / "data" / "pickles"/ "arima")
-
+    print(players)
+    train_models(players, Path(__file__).parent.parent / "data" / "pickles"/ "arima")

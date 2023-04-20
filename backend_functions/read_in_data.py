@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 
-from backend_functions.data_loader import Illness, Injury, Performance, SoccerPlayer, Team
+from data_loader import Illness, Injury, Performance, SoccerPlayer, Team
 
 
 def flatten_list(any_list: List[List[Any]]) -> List[Any]:
@@ -89,6 +89,7 @@ def read_in_variable_files(path_to_variable_folder: Path) -> Dict[str, Dict[str,
         for file in file_names
         if file.endswith(".csv")
     }
+    print(csv_files)
     names = get_player_ids(csv_files["stress"])
     csv_files["performance"] = initialise_performance(csv_files["performance"], names)
     csv_files["illness"] = initialise_illness(csv_files["illness"], names)

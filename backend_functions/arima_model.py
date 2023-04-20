@@ -21,9 +21,11 @@ def prepare_dataset(X_train, nr_comp):
 def iterative_imputation(X_nan_train: pd.DataFrame,
                          X_test: pd.DataFrame = None,
                         ):
+    X_nan_train = X_nan_train.to_numpy()
+
     imputer = IterativeImputer(max_iter=10, random_state=0)
     X_train = imputer.fit_transform(X_nan_train)
-    X_test = imputer.transform(X_test)
+    #X_test = imputer.transform(X_test.reshape(-1, 1))
     return X_train, X_test
 
 
