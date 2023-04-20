@@ -21,6 +21,7 @@ st.set_page_config(
 )
 # Add the parent directory to the sys.path to import from other files in the project
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent / "backend_functions"))
 
 # Import functions from other files
 from page_functions.team_information import team_statistics
@@ -37,10 +38,10 @@ path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 
 
 # Define a function to load pickled data from a file
-#@st.experimental_memo
-#def load_in_pickles(path_to_data: Path):
-#    print(path_to_data)
-#    return pickle.load(open(path_to_data, "rb"))
+@st.experimental_memo
+def load_in_pickles(path_to_data: Path):
+    print(path_to_data)
+    return pickle.load(open(path_to_data, "rb"))
 
 
 # Define a function to load in all the ARIMA models from a directory of pickled models
@@ -49,9 +50,8 @@ def load_in_arima_models(path_to_arima = r'/backend_functions/'):
     all_files = os.listdir(path_to_arima)
     models = {}
     for file in all_files:
-        if 'arima' in file:
-            #models[file] = pickle.load(open(path_to_arima/file, "rb")) #2.9282 sec
-            models[file] = pickle.load(open(os.path.join(path_to_arima, file), "rb")) #1.2565 sec#
+        #models[file] = pickle.load(open(path_to_arima/file, "rb")) #2.9282 sec
+        models[file] = pickle.load(open(os.path.join(path_to_arima, file), "rb")) #1.2565 sec#
     return models
 
 #@st.cache_data
@@ -76,7 +76,7 @@ def main_page(teams, models):
 
 # Load in the pickled data and models
 models = load_in_arima_models(path_to_models)
-##teams = load_in_pickles(path_to_teams)
+teams = load_in_pickles(path_to_teams)
 #statistics = load_in_pickles(path_to_stats)
 #gps = load_in_gps(path_to_gps)
 
