@@ -20,6 +20,7 @@ st.set_page_config(
     }
 )
 # Add the parent directory to the sys.path to import from other files in the project
+
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "backend_functions"))
 
@@ -35,10 +36,9 @@ path_to_teams = Path(__file__).parent.parent / "data" / "pickles" / "teams.pkl"
 path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 #path_to_gps = Path(__file__).parent.parent / "data" / "gps" / "2020-06-01-TeamA-2d44f941.parquet"
 
-
-
 # Define a function to load pickled data from a file
 @st.experimental_memo
+
 def load_in_pickles(path_to_data: Path):
     print(path_to_data)
     return pickle.load(open(path_to_data, "rb"))
@@ -74,12 +74,17 @@ def main_page(teams, models):
     st.markdown("## Welcome to the Soccer Dashboard")
     st.markdown(descrip[index_1:index_2])
 
+
 # Load in the pickled data and models
 models = load_in_arima_models(path_to_models)
 teams = load_in_pickles(path_to_teams)
 #statistics = load_in_pickles(path_to_stats)
 #gps = load_in_gps(path_to_gps)
 
+models = load_in_arima_models(path_to_models)
+teams = load_in_pickles(path_to_teams)
+#statistics = load_in_pickles(path_to_stats)
+#gps = load_in_gps(path_to_gps)
 
 # Define a dictionary of page names and associated functions
 page_names_to_funcs = {
