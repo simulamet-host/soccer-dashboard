@@ -21,6 +21,9 @@ hmmlearn = "^0.2.7"
 plotly = "^5.10.0"
 joblib = "^1.2.0"
 protobuf = ">=3.20.0,<3.20.2"
+mysql-connector-python= "^8.0.31"
+streamlit-aggrid = "^0.3.4.post3"
+haversine = ">=2.7.0"
 
 
 
