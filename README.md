@@ -126,3 +126,8 @@ http://localhost:3000
 
 ![Screenshot from 2022-11-04 11-41-22](https://user-images.githubusercontent.com/84230658/199953952-bb704a85-ce38-42aa-87a1-c4217c34db3b.png)
 
+
+# Internal Only
+
+- `main` branch: production branch, alias https://soccer-dashboard.simula.no
+- `dev` branch: default branch for development
