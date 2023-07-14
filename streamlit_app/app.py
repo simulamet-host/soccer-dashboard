@@ -38,15 +38,14 @@ path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 #path_to_gps = Path(__file__).parent.parent / "data" / "gps" / "2020-06-01-TeamA-2d44f941.parquet"
 
 # Define a function to load pickled data from a file
-@st.experimental_memo
-
+@st.cache_data(ttl=600)
 def load_in_pickles(path_to_data: Path):
     print(path_to_data)
     return pickle.load(open(path_to_data, "rb"))
 
 
 # Define a function to load in all the ARIMA models from a directory of pickled models
-@st.experimental_memo
+@st.cache_data(ttl=600)
 def load_in_arima_models(path_to_arima = r'/backend_functions/'):
     all_files = os.listdir(path_to_arima)
     models = {}

@@ -14,7 +14,7 @@ def closing(connection):
     finally:
         connection.close()
 
-@st.experimental_singleton
+@st.cache_resource
 def init_connection():
     toml_data = st.secrets["mysql"]
     HOST_NAME = toml_data['host']
