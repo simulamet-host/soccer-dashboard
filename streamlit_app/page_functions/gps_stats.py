@@ -215,31 +215,34 @@ def gps_statistics():
 
 
    with tab2: # --- MAP VISUALIZATION ---
-      
+
+##### OLDER MAP VERSION #####     
       # # Map
       # st.subheader("Dataset selection")
-      # gps = pd.DataFrame(dataset[['lat', 'lon']])
-      # st.map(gps, zoom=11)
+      gps = pd.DataFrame(dataset[['lat', 'lon']])
+      st.map(gps, zoom=11)
 
-      # Static Map
-      # Define the map's initial coordinates and zoom level
-      map_center = (dataset['lat'].mean(), dataset['lon'].mean())
+##### BELOW CODE WORKS LOCALLY BUT NOT ON STREAMLIT CLOUD, REPLACED WITH OLDER MAP VERSION ABOVE #####
+      # # Static Map
+      # # Define the map's initial coordinates and zoom level
+      # map_center = (dataset['lat'].mean(), dataset['lon'].mean())
 
-      # Create a base map
-      m = folium.Map(location=map_center, zoom_start=17)
+      # # Create a base map
+      # m = folium.Map(location=map_center, zoom_start=17)
 
-      # Function to add a marker to the map
-      def add_marker(row):
-          folium.Marker(location=(row['lat'], row['lon'])).add_to(m)
+      # # Function to add a marker to the map
+      # def add_marker(row):
+      #     folium.Marker(location=(row['lat'], row['lon'])).add_to(m)
 
-      # Connect the markers with a PolyLine
-      coordinates = dataset[['lat', 'lon']].values.tolist()
-      folium.PolyLine(locations=coordinates, color='blue', weight=1, opacity=1).add_to(m)
+      # # Connect the markers with a PolyLine
+      # coordinates = dataset[['lat', 'lon']].values.tolist()
+      # folium.PolyLine(locations=coordinates, color='blue', weight=1, opacity=1).add_to(m)
 
-      # Display the map in Streamlit
-      st.subheader("Dataset GPS Coordinates Map")
-      st_folium(m, height=500, width=700, returned_objects=[])
-      st.divider()
+      # # Display the map in Streamlit
+      # st.subheader("Dataset GPS Coordinates Map")
+      # st_folium(m, height=500, width=700, returned_objects=[])
+      # st.divider()
+##################################################
 
       # Animated Map
       # from folium.plugins import TimestampedGeoJson
