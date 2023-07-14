@@ -236,7 +236,7 @@ def gps_statistics():
       fig.update_traces(marker=dict(size=9,line=dict(width=2,color='black')),selector=dict(mode='markers'))
       #Set a local image as a background
       import base64
-      image_filename = 'D:/Simula/Git 2023/soccer-dashboard/data/gps/Football.png' #'Football.png' in cloud
+      image_filename = './src/assets/soccer-field.png'
       plotly_logo = base64.b64encode(open(image_filename, 'rb').read())
 
       #Add picture in background
