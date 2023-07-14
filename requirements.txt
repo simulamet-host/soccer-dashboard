@@ -10,3 +10,7 @@ mysql-connector-python==8.0.31
 streamlit-aggrid
 haversine
 missingno==0.5.2
+folium == 0.14.0 
+streamlit-folium == 0.11.1
+haversine == 2.8.0 
+streamlit-pandas-profiling == 0.1.3
