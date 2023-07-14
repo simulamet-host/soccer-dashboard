@@ -81,11 +81,6 @@ teams = load_in_pickles(path_to_teams)
 #statistics = load_in_pickles(path_to_stats)
 #gps = load_in_gps(path_to_gps)
 
-models = load_in_arima_models(path_to_models)
-teams = load_in_pickles(path_to_teams)
-#statistics = load_in_pickles(path_to_stats)
-#gps = load_in_gps(path_to_gps)
-
 # Define a dictionary of page names and associated functions
 page_names_to_funcs = {
     "Homepage": main_page,
