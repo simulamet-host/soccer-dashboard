@@ -48,7 +48,7 @@ from streamlit_folium import st_folium
 def gps_statistics():
    
    st.title("GPS Information")
-   tab1, tab2, tab3, tab4, tab5= st.tabs(["Raw Data ", "Maps", "Session Analysis", "Performance Metrics","Player GPS Report" ])  
+   tab1, tab2, tab3, tab4, tab5, tab6= st.tabs(["Raw Data ", "Maps", "Session Analysis", "Performance Metrics","Player GPS Report", "Streamlit Pandas Profiling" ])
    
    # # Connection to DB
    # dataset = pd.read_sql("SELECT * FROM gps ORDER BY date, time ASC",cnx)
@@ -564,3 +564,13 @@ def gps_statistics():
 # # Evaluate code time
 # end_time = time.time()
 # GPSpage = st.write("Time taken charging page:", end_time - start_time, "seconds")
+
+   with tab6:
+
+      import pandas_profiling
+      from streamlit_pandas_profiling import st_profile_report
+
+      df = dataset#pd.read_csv("https://storage.googleapis.com/tf-datasets/titanic/train.csv")
+      pr = df.profile_report()
+
+      st_profile_report(pr)
