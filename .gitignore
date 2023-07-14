@@ -187,3 +187,4 @@ fabric.properties
 # Others
 .DS_Store
 data/
+.streamlit/secrets.toml
