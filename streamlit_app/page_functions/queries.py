@@ -27,6 +27,7 @@ def init_connection():
 
 conn = init_connection()
 
+@st.cache_data(ttl=600)
 def run_query(query):
     with closing(conn.cursor()) as cur:
         cur.execute(query)

@@ -2,14 +2,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 #import mysql.connector
 import streamlit as st
-import pyarrow as pa
+#import pyarrow as pa
 import plotly.express as px
-import datetime
 import numpy as np
-import glob
+#import glob
 import datetime
-import time
+#import time
 from haversine import haversine, Unit
+import folium # pip install streamlit-folium
+from folium.plugins import MarkerCluster
+from streamlit_folium import st_folium
 
 #start_time = time.time()
 # # Connect to MySQL server
@@ -214,10 +216,86 @@ def gps_statistics():
 
    with tab2: # --- MAP VISUALIZATION ---
       
-      # Map
-      st.subheader("Dataset selection")
-      gps = pd.DataFrame(dataset[['lat', 'lon']])
-      st.map(gps, zoom=11)
+      # # Map
+      # st.subheader("Dataset selection")
+      # gps = pd.DataFrame(dataset[['lat', 'lon']])
+      # st.map(gps, zoom=11)
+
+      # Static Map
+      # Define the map's initial coordinates and zoom level
+      map_center = (dataset['lat'].mean(), dataset['lon'].mean())
+
+      # Create a base map
+      m = folium.Map(location=map_center, zoom_start=17)
+
+      # Function to add a marker to the map
+      def add_marker(row):
+          folium.Marker(location=(row['lat'], row['lon'])).add_to(m)
+
+      # Connect the markers with a PolyLine
+      coordinates = dataset[['lat', 'lon']].values.tolist()
+      folium.PolyLine(locations=coordinates, color='blue', weight=1, opacity=1).add_to(m)
+
+      # Display the map in Streamlit
+      st.subheader("Dataset GPS Coordinates Map")
+      st_folium(m, height=500, width=700, returned_objects=[])
+      st.divider()
+
+      # Animated Map
+      # from folium.plugins import TimestampedGeoJson
+      # # Define the map's initial coordinates and zoom level
+      # map_center = (dataset['lat'].mean(), dataset['lon'].mean())
+
+     # # Create a base map
+      # m = folium.Map(location=map_center, zoom_start=17, control_scale=True)
+
+      # # Create a GeoJSON object with the coordinates and timestamps
+      # geo_json_data = {
+      #     'type': 'FeatureCollection',
+      #     'features': [
+      #         {
+      #             'type': 'Feature',
+      #             'geometry': {
+      #                 'type': 'Point',
+      #                 'coordinates': [row['lon'], row['lat']]
+      #             },
+      #             'properties': {
+      #                 'time': row['time'].strftime('%Y-%m-%dT%H:%M:%S'),  # Convert time to string format
+      #                 'style': {'color': 'blue'}
+      #             }
+      #         }
+      #         for _, row in dataset.iterrows()
+      #     ]
+      # }
+
+      # # Add the TimestampedGeoJson plugin to the map
+      # TimestampedGeoJson(
+      #     geo_json_data,
+      #     period='PT30S',  # Display one marker per 30 sec
+      #     add_last_point=True,
+      #     auto_play=True,
+      #     loop=True,
+      #     max_speed=1,
+      #     loop_button=True,
+      #     date_options='YYYY-MM-DDTHH:mm:ss',
+      #     time_slider_drag_update=True
+      # ).add_to(m)
+
+      # # Connect the markers with a PolyLine
+      # coordinates = dataset[['lat', 'lon']].values.tolist()
+      # folium.PolyLine(locations=coordinates, color='blue', weight=1, opacity=1).add_to(m)
+
+      # # Display the map in Streamlit
+      # st.subheader("Dataset GPS Coordinates Map with Animation")
+      # st_folium(m, height=500, width=700, returned_objects=[])
+
+
+      # # Add MarkerCluster for better visualization of markers
+      # marker_cluster = MarkerCluster().add_to(m)
+
+      # # Add markers for each GPS coordinate
+      # for lat, lon in zip(dataset['lat'], dataset['lon']):
+      #      folium.Marker(location=[lat, lon]).add_to(marker_cluster)
 
       #2d plot with slider
       st.header("")
