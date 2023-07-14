@@ -26,6 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent / "backend_functions"))
 
 # Import functions from other files
 from page_functions.team_information import team_statistics
+from page_functions.team_statistics_db import team_statistics_db
 from page_functions.player_information import player_statistics
 from page_functions.dataset_stats import dataset_statistics
 from page_functions.gps_stats import gps_statistics
@@ -92,14 +93,15 @@ page_names_to_funcs = {
     "Dataset Statistics": dataset_statistics,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
+    "Team Information - DB": team_statistics_db,
     "GPS Information": gps_statistics,
-    "Player GPS Report" : player_gps_statistics,
+    "Player GPS Report" : player_gps_statistics
 }
 # Display a dropdown in the sidebar to select a page
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
 
 # Call the selected function with the teams and models
-if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information":
+if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information" or selected_page == "Team Information - DB":
     page_names_to_funcs[selected_page](teams, models)
 else:
     page_names_to_funcs[selected_page]()
