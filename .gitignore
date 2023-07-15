@@ -184,4 +184,7 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 .idea
 
+# Others
 .DS_Store
+data/
+.streamlit/secrets.toml

@@ -2,11 +2,13 @@
 
 [SoccerMon](https://osf.io/uryz9/) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html). 
 
-Subjective data was collected in the context of _wellness_, _training load_, _game performance_, _injuries_, and _illnesses_, using the PmSys mobile app [PM Reporter Pro](https://play.google.com/store/apps/details?id=com.forzasys.pmsys&hl=en&gl=US&pli=1). Moreover, during training sessions and games, players used the wearable GPS performance tracking equipment [STATSports APEX](https://eu.shop.statsports.com/products/apex-athlete-series) to monitor objective metrics such as __[TODO: replace with raw metrics] total distance, high-speed running distance, sprint distance, accelerations and decelerations, and peak speed.[/TODO]__ 
+Subjective data was collected in the context of _wellness_, _training load_,_game performance_, _injuries_, and _illnesses_, using the PmSys mobile app [PM Reporter Pro](https://play.google.com/store/apps/details?id=com.forzasys.pmsys&hl=en&gl=US&pli=1). Moreover, during training sessions and games, players used the wearable GPS performance tracking equipment [STATSports APEX](https://eu.shop.statsports.com/products/apex-athlete-series) to monitor objective metrics such as location, heart rate, speed, and acceleration. Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 objective report, the latter including 6,248,770,794 GPS positions. 
+<!--- TODO: replace with raw metrics] total distance, high-speed running distance, sprint distance, accelerations and decelerations, and peak speed.-->
 
-Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 objective measurement sessions, with 6,248,770,794 GPS positions measured in the field. Initial experiments have shown how different subjective and objective parameters are correlated, and have demonstrated the potential benefits of AI-based athlete performance forecasting applications. SoccerMon can play a valuable role in developing better analytical models, not only for soccer but also for other sports where athlete mobility and subjective wellbeing provide important insights into performance.
+We present SoccerDashboard, a user-friendly, interactive, modularly designed and extendable dashboard for the analysis of the SoccerMon dataset in particular, and health and performance data from soccer athletes in general. SoccerDashboard is open-source and publicly accessible over the Internet for coaches, players and researchers from fields such as sports science and medicine. SoccerDashboard can simplify the analysis of soccer datasets with complex data structures, and serve as a reference implementation for multidisciplinary studies spanning various fields, as well as increase the level of scientific dialogue between professional soccer institutions and researchers.
 
-## Requirements
+
+## Installation
 
 ### Python
 
@@ -43,17 +45,37 @@ OR
 python -V
 ```
 
-
 3. Install software updates if necessary:
 
 If your version of Python does not fit the requirements, update it by downloading the relevant version [here](https://www.python.org/downloads/).
 
 Update the package management system which can be used to install and manage software packages called [pip](https://pip.pypa.io/en/stable/installation/) if your version of Python has not been downloaded from python.org. 
 
+
+### Installing Streamlit 
+
+Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation).
+
+Streamlit's officially-supported environment manager on Windows is Anaconda Navigator (https://docs.anaconda.com/navigator/). If you don't have Anaconda, follow the steps provided on the Anaconda installation page (https://docs.anaconda.com/anaconda/install/windows/). Demonstration videos for installing Streamlit via Anaconda are available on YouTube:
+
+- https://www.youtube.com/watch?v=Vu5Bw745vXg
+- https://www.youtube.com/watch?v=dkvgzL3gJVY
+
+
+### Cloning the Repository
+
+When a repository is created on GitHub.com, it exists as a remote repository. You can clone a repository to create a local copy on your computer and sync between the two locations (https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository?tool=webui).
+
+You can clone the repository from the command line, or use a Git GUI such as:
+
+- Gitkraken : https://www.gitkraken.com/
+- Sourcetree : https://www.sourcetreeapp.com/
+
+
 ### Libraries
 
-In order to run the dashboard, a list of Python libraries need to be downloaded and installed : 
-
+In order to run SoccerDashboard, a number of Python libraries need to be installed. 
+<!--- 
 - streamlit : version >= 1.14.0 (https://pypi.org/project/streamlit/)
 - pandas: version >= 0.18 (https://pypi.org/project/pandas/)
 - matplotlib: >= 3.6.0 (https://pypi.org/project/matplotlib/)
@@ -62,6 +84,7 @@ In order to run the dashboard, a list of Python libraries need to be downloaded 
 - scikit-learn: >= 1.1.2 (https://pypi.org/project/scikit-learn/)
 - seaborn: >= 0.12.1 (https://pypi.org/project/seaborn/)
 - statsmodels: >= 0.13.2 (https://pypi.org/project/statsmodels/)
+-->
 
 ```
 pip install -r requirements.txt
@@ -74,34 +97,14 @@ Example environment/dependency management tools:
   - poetry (https://python-poetry.org/)
   - conda (https://www.anaconda.com/products/distribution)
 -->
-
-## Installation
     
-### Installing Streamlit with Anaconda 
-
-Streamlit's officially-supported environment manager on Windows is Anaconda Navigator (https://docs.anaconda.com/navigator/). If you don't have Anaconda install yet, follow the steps provided on the Anaconda installation page (https://docs.anaconda.com/anaconda/install/windows/). Demonstration videos for installing Streamlit via Anaconda are available on YouTube:
-
-- https://www.youtube.com/watch?v=Vu5Bw745vXg
-- https://www.youtube.com/watch?v=dkvgzL3gJVY
-
-### Installing Streamlit
-
-Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation)
-
-### Cloning the Repository
-
-When a repository is created on GitHub.com, it exists as a remote repository. You can clone your repository to create a local copy on your computer and sync between the two locations (https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository?tool=webui)
-
-Another option is to download an install a Git GUI. Exemple of Git GUI:
-
-- Gitkraken : https://www.gitkraken.com/
-- Sourcetree : https://www.sourcetreeapp.com/
 
 ## Deployment
 
 ### Deployment (Local)
 
-To launch the app locally, in the terminal, you can run the following command : 
+To launch the app locally, you can run the following command : 
+<!---
 ```
 streamlit run app.py
 ```
@@ -110,10 +113,11 @@ Please make sure that you need to navigate to the directory where the Python scr
 soccer-dashboard/streamlit_app 
 ```
 Otherwise, you’ll have to specify the full path to the file : 
+-->
 ```
 streamlit run soccer-dashboard/streamlit_app/app.py
 ```
-Open in the browser :
+Open dashboard in the browser :
 ```
 http://localhost:3000 
 ```
@@ -122,7 +126,23 @@ http://localhost:3000
 
 - Sign into https://share.streamlit.io
 - Create a new app conected to the relevant branch of your repository and specify the main file path (example: `dev` branch in the `simulamet-host/soccer-dashboard` repository, with `streamlit_app/app.py` as the main file)
-- Wait a couple of minutes and your first app will be deployed.
+- Under `Advanced settings` --> `Secrets`, add the database connection credentials:
+
+```
+[mysql]
+host = <hostname>
+port = <port number>
+user = <username>
+password = <password>
+database = <database name>
+``````
+
+- Click "Deploy!" and wait until the app is live on Streamlit cloud.
 
 ![Screenshot from 2022-11-04 11-41-22](https://user-images.githubusercontent.com/84230658/199953952-bb704a85-ce38-42aa-87a1-c4217c34db3b.png)
 
+
+# INTERNAL NOTES
+
+- `main` branch: production branch, alias https://soccer-dashboard.simula.no
+- `dev` branch: default branch for development, https://soccer-dashboard.streamlit.app

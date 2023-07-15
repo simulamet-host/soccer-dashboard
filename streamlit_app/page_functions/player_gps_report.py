@@ -48,52 +48,59 @@ def player_gps_statistics():
    dataset = pd.read_sql(qu.dataset, conn)
    df_team_A = pd.read_sql(qu.df_team_A, conn)
    df_team_B = pd.read_sql(qu.df_team_B, conn)
+   Players_list = dataset
    # names = pd.read_sql("SELECT DISTINCT player_name FROM gps",conn)
 
    # KPI
    # Calculate distance btw gps coordinates and create new column ['distance']
-   dataset['distance'] = dataset.apply(lambda row: haversine((row['lat'], row['lon']), (row['lat'], row['lon']), unit=Unit.METERS), axis=1)
-   
+   # dataset['distance'] = dataset.apply(lambda row: haversine((row['lat'], row['lon']), (row['lat'], row['lon']), unit=Unit.METERS), axis=1)
    # Error: Unrecognized type: "Duration" (18)
-
 
    st.write("")
    st.write("Select players to be compared:")
+
+   ### BOX 1 (TEAM) ###
+   # Define "Teams" for the second selectbox, based on the value of the first selectbox
+   def A_B_teams ():
+      if selected_teams == "Team_A":
+          Teams = df_team_A
+      elif selected_teams == "Team_B":
+          Teams = df_team_B   
+
+   # Define the options for the first selectbox
+   Teams = ["Select a team",'Team_A', 'Team_B']
+   selected_teams = st.selectbox("Team", Teams, key="Teams1")
+
+   def A_B_players ():
+       if selected_teams == "Team_A":
+           Players_list = df_team_A['player_name'].tolist()
+       elif selected_teams == "Team_B":
+           Players_list= df_team_B['player_name'].tolist() 
+      
+   # Define the options for the first selectbox (Players)
+   Players = ["Select a player",Players_list]
+   selected_players = st.selectbox("Players", Players, key="Players1")
+
+
    col1, col2 = st.columns(2)
 
    with col1:
 
-      ### BOX 1 (TEAM) ###
-
-      # Define the options for the first selectbox
-      Teams = ["Select a team",'Team_A', 'Team_B']
-      selected_teams = st.selectbox("Team", Teams, key="Teams1")
-
-      # Define "Teams" for the second selectbox, based on the value of the first selectbox
-      def A_B_teams ():
-         if selected_teams == "Team_A":
-             Teams = df_team_A
-         elif selected_teams == "Team_B":
-             Teams = df_team_B
-      
       ### BOX 2 (PLAYERS) ###
-
-      # Define the options for the first selectbox (Players)
-      Players = ["Select a player",'Player_1', 'Player_2']
-      selected_players = st.selectbox("Players", Players, key="Players1")
-
       # Define "Players"
-      def A_player ():
-         if selected_players == "Player_1":
-             Players = df_player_A1
-         elif selected_players == "Player_2":
-             Players = df_player_A2
+      # def A_player ():
+      #    if selected_players == "Player_1":
+      #        Players = df_player_A1
+      #    elif selected_players == "Player_2":
+      #        Players = df_player_A2
 
-      def B_player ():
-         if selected_players == "Player_1":
-             Players = df_player_B1
-         elif selected_players == "Player_2":
-             Players = df_player_B2
+      # def B_player ():
+      #    if selected_players == "Player_1":
+      #        Players = df_player_B1
+      #    elif selected_players == "Player_2":
+      #        Players = df_player_B2
+
+
 
       ### BOX 3 (DATE) ### TO CONNECT
 
@@ -149,7 +156,7 @@ def player_gps_statistics():
          df_1 = df_1.loc[:, multi1]
 
       st.dataframe (df_1)
-      st.subheader("")
+      st.divider()
 
       # Plot selected columns
       x = 'time'
@@ -162,50 +169,27 @@ def player_gps_statistics():
           st.write("Please select at least one KPI to plot.") 
 
       # Plot KPI
-      st.subheader("")
+      import plotly.graph_objects as go
+      st.divider()
       st.subheader('Mixed Subplots')
       fig = make_subplots(rows=2, cols=2,subplot_titles=("Bars", "Covered Area", "Pie", "3d accl"),
                           specs=[[{"type": "xy"}, {"type": "polar"}],[{"type": "domain"}, {"type": "scene"}]],)
-      fig.add_trace(go.Bar(y=[2, 3, 1]), row=1, col=1)
+      fig.add_trace(go.Bar(name='time', x=[2, 3, 1], y=[20, 14, 23]))
       fig.add_trace(go.Barpolar(theta=[0, 45, 90], r=[2, 3, 1]),  row=1, col=2)
       fig.add_trace(go.Pie(values=[2, 3, 1]), row=2, col=1)
       fig.add_trace(go.Scatter3d(x=dataset['accl_x'], y=dataset['accl_y'],z=dataset['accl_z'], mode="lines"),row=2, col=2)
       fig.update_layout(height=700, showlegend=False)
       st.plotly_chart(fig, use_container_width=True) 
+      #The 'type' property specifies the trace type One of: 
+      #['bar', 'barpolar', 'box', 'candlestick', 'carpet', 'choropleth', 'choroplethmapbox', 'cone', 'contour', 'contourcarpet', 'densitymapbox', 
+      #'funnel', 'funnelarea', 'heatmap', 'heatmapgl', 'histogram', 'histogram2d', 'histogram2dcontour', 'icicle', 'image', 'indicator', 'isosurface',
+      #'mesh3d', 'ohlc', 'parcats', 'parcoords', 'pie', 'pointcloud', 'sankey', 'scatter', 'scatter3d', 'scattercarpet', 'scattergeo', 'scattergl', 
+      #'scattermapbox', 'scatterpolar', 'scatterpolargl', 'scattersmith', 'scatterternary', 'splom', 'streamtube', 'sunburst', 'surface', 'table',
+      # 'treemap', 'violin', 'volume', 'waterfall'] 
+      #- All remaining properties are passed to the constructor of the specified trace type (e.g. [{'type': 'scatter', ...}, {'type': 'bar, ...}])
+      st.divider()
 
-   with col2:
-      
-      ### BOX 1 (TEAM) ###
-
-      # Define the options for the first selectbox
-      Teams = ["Select a team",'Team_A', 'Team_B']
-      selected_teams = st.selectbox("Team", Teams, key="Teams2")
-
-      # Define "Teams" for the second selectbox, based on the value of the first selectbox
-      def A_B_teams ():
-         if selected_teams == "Team_A":
-             Teams = df_team_A
-         elif selected_teams == "Team_B":
-             Teams = df_team_B
-      
-      ### BOX 2 (PLAYERS) ###
-
-      # Define the options for the first selectbox (Players)
-      Players = ["Select a player",'Player_1', 'Player_2']
-      selected_players = st.selectbox("Players", Players, key="Players2")
-
-      # Define "Players"
-      def A_player ():
-         if selected_players == "Player_1":
-             Players = df_player_A1
-         elif selected_players == "Player_2":
-             Players = df_player_A2
-
-      def B_player ():
-         if selected_players == "Player_1":
-             Players = df_player_B1
-         elif selected_players == "Player_2":
-             Players = df_player_B2
+   with col2:     
 
       ### BOX 3 (DATE) ###
 
@@ -253,7 +237,7 @@ def player_gps_statistics():
       
       # Display selected columns in a dataframe
       st.dataframe (df_2)  
-      st.subheader("")
+      st.divider()
 
       # Plot selected columns
       x = 'time'
@@ -267,7 +251,7 @@ def player_gps_statistics():
 
       # Plot KPI
 
-      st.subheader("")
+      st.divider()
       st.subheader('Mixed Subplots')
       fig = make_subplots(rows=2, cols=2,subplot_titles=("Bars", "Covered Area", "Pie", "3d gyro"),
                           specs=[[{"type": "xy"}, {"type": "polar"}],[{"type": "domain"}, {"type": "scene"}]],)
@@ -276,7 +260,8 @@ def player_gps_statistics():
       fig.add_trace(go.Pie(values=[2, 3, 1]), row=2, col=1)
       fig.add_trace(go.Scatter3d(x=dataset['gyro_x'], y=dataset['gyro_y'],z=dataset['gyro_z'], mode="lines"),row=2, col=2)
       fig.update_layout(height=700, showlegend=False)
-      st.plotly_chart(fig, use_container_width=True) 
+      st.plotly_chart(fig, use_container_width=True)
+      st.divider() 
 
    # Plot differences final
    st.subheader ("Comparing Subplots")
@@ -291,7 +276,8 @@ def player_gps_statistics():
       # y = ', '.join(multi2)
       # st.subheader(f"Comparaison of {y} over {x}")
       # fig = px.line(df_1, x=x, y=multi2*len(multi2))
-      # st.plotly_chart(fig, use_container_width=True)  
+      # st.plotly_chart(fig, use_container_width=True) 
+ 
 
 # # Evaluate code time
 # end_time = time.time()

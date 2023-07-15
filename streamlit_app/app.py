@@ -26,6 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent / "backend_functions"))
 
 # Import functions from other files
 from page_functions.team_information import team_statistics
+from page_functions.team_statistics_db import team_statistics_db
 from page_functions.player_information import player_statistics
 from page_functions.dataset_stats import dataset_statistics
 from page_functions.gps_stats import gps_statistics
@@ -37,15 +38,14 @@ path_to_models = Path(__file__).parent.parent / "data" / "pickles" / "arima"
 #path_to_gps = Path(__file__).parent.parent / "data" / "gps" / "2020-06-01-TeamA-2d44f941.parquet"
 
 # Define a function to load pickled data from a file
-@st.experimental_memo
-
+@st.cache_data(ttl=600)
 def load_in_pickles(path_to_data: Path):
     print(path_to_data)
     return pickle.load(open(path_to_data, "rb"))
 
 
 # Define a function to load in all the ARIMA models from a directory of pickled models
-@st.experimental_memo
+@st.cache_data(ttl=600)
 def load_in_arima_models(path_to_arima = r'/backend_functions/'):
     all_files = os.listdir(path_to_arima)
     models = {}
@@ -81,25 +81,21 @@ teams = load_in_pickles(path_to_teams)
 #statistics = load_in_pickles(path_to_stats)
 #gps = load_in_gps(path_to_gps)
 
-models = load_in_arima_models(path_to_models)
-teams = load_in_pickles(path_to_teams)
-#statistics = load_in_pickles(path_to_stats)
-#gps = load_in_gps(path_to_gps)
-
 # Define a dictionary of page names and associated functions
 page_names_to_funcs = {
     "Homepage": main_page,
     "Dataset Statistics": dataset_statistics,
     "Player Information": player_statistics,
     "Team Information": team_statistics,
+    "Team Information - DB": team_statistics_db,
     "GPS Information": gps_statistics,
-    "Player GPS Report" : player_gps_statistics,
+    "Player GPS Report" : player_gps_statistics
 }
 # Display a dropdown in the sidebar to select a page
 selected_page = st.sidebar.selectbox("Select a page", page_names_to_funcs.keys())
 
 # Call the selected function with the teams and models
-if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information":
+if selected_page == "Homepage" or selected_page == "Player Information" or selected_page == "Team Information" or selected_page == "Team Information - DB":
     page_names_to_funcs[selected_page](teams, models)
 else:
     page_names_to_funcs[selected_page]()
