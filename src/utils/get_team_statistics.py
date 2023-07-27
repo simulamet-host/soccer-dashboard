@@ -4,14 +4,12 @@ import json
 import pandas as pd
 import numpy as np
 
-from backend_functions.data_loader import SoccerPlayer
-
+from src.utils.data_loader import SoccerPlayer
 
 def df_strip_nans(df: pd.DataFrame):
     first_idx = df.first_valid_index()
     last_idx = df.last_valid_index()
     return df.loc[first_idx:last_idx]
-
 
 def get_injury_categories(players: List[SoccerPlayer]):
     injuries = [json.loads(item.type) for sublist in [player.injuries for player in players]
@@ -27,7 +25,6 @@ def get_injury_categories(players: List[SoccerPlayer]):
     #                   "Stomach Back"]
     return injury_df
 
-
 def get_feature_quantile_ts(players: List[SoccerPlayer], feature):
     time_idx = list(players)[0].readiness.index
     nan_df = pd.DataFrame(np.array([getattr(player, feature) for player in players]).T, index=time_idx)
@@ -37,7 +34,6 @@ def get_feature_quantile_ts(players: List[SoccerPlayer], feature):
     higher_quantile = feature_df.apply(lambda x: np.nanquantile(x, 0.75), axis=1)
     return pd.DataFrame({"median": median, "lower_quantile": lower_quantile, "higher_quantile": higher_quantile},
                         index=feature_df.index)
-
 
 def get_average_metric_overview(players: List[SoccerPlayer]):
     averages = {
@@ -52,7 +48,6 @@ def get_average_metric_overview(players: List[SoccerPlayer]):
     }
     return pd.DataFrame(averages, index=[player.name[6:] for player in players])
 
-
 def get_std_metric_overview(players: List[SoccerPlayer]):
     stds = {
     "STD ATL": [player.atl.std().round(2) for player in players],
@@ -66,7 +61,6 @@ def get_std_metric_overview(players: List[SoccerPlayer]):
     }
     return pd.DataFrame(stds, index=[player.name[6:] for player in players])
 
-
 def get_correlation_matrix(players: List[SoccerPlayer]):
     features = {"Daily Load":"daily_load", "sRPE":"srpe","RPE":"rpe", "Duration":"duration",
                 "ATL":"atl", "Weekly Load": "weekly_load", "Monotony": "monotony", "Strain": "strain",
@@ -77,7 +71,6 @@ def get_correlation_matrix(players: List[SoccerPlayer]):
     for feature_name, field_name in features.items():
         averaged_features[feature_name] = [np.nanmean(getattr(player, field_name)) for player in players]
     return pd.DataFrame(averaged_features).corr()
-
 
 def convert_df(df):
    return df.to_csv().encode('utf-8')

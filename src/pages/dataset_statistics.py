@@ -4,13 +4,8 @@ import matplotlib.font_manager
 import seaborn as sns
 import streamlit as st
 import datetime
-import mysql.connector
-import page_functions.queries as qu
+import src.utils.queries as qu
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
-
-## For deployement locally, you create a folder called ".streamlit" inside the "streamlit_app" folder,
-## You create once again, in ".streamlit", a file called "secrets.toml" where you put the connection credentials.
-## For deployement on the cloud, you add directly the credentials to secrets.
 
 conn = qu.conn
 
@@ -114,6 +109,7 @@ def dataset_statistics():
       st.header("Illnesses")
       df = pd.DataFrame(columns=['Illnesses'])
       st.table(df)
+      
    with tab7:
       st.header("Injuries")
       #df = pd.DataFrame(columns=['Injuries'])

@@ -1,21 +1,11 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.font_manager
-import seaborn as sns
 import streamlit as st
-import datetime
-
-from src.utils.team_statistics_db import (
+from src.utils.get_team_statistics_db import (
     get_average_metric_overview,
-    get_correlation_matrix,
-    get_feature_quantile_ts,
-    get_injury_categories,
     get_std_metric_overview,
     convert_df
 )
 
-
-def team_statistics_db(teams, models):
+def team_information_db():
     st.title("Team Information")
     tab1, = st.tabs(
         ["Training Load Overview"]
@@ -34,9 +24,8 @@ def team_statistics_db(teams, models):
 
         if moment == "Mean":
             df = get_average_metric_overview(filter_team[1])
-            st.table(
-                df
-            )
+            st.table(df)
+            #st.dataframe(df, hide_index=True)
             csv = convert_df(df)
             st.download_button('📥"Press to Download"',
                                csv,
@@ -44,13 +33,12 @@ def team_statistics_db(teams, models):
                                "text/csv",
                                key='download-csv'
                                )
-
         else:
             df = get_std_metric_overview(filter_team[1])
             st.table(df)
+            #st.dataframe(df, hide_index=True)
             csv = convert_df(df)
-            st.download_button('📥"Press to Download"',
-                               csv,
+            st.download_button('📥"Press to Download"',                               csv,
                                "training_load_overview_std.csv",
                                "text/csv",
                                key='download-csv'

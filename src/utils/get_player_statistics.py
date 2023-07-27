@@ -1,6 +1,6 @@
 import pandas as pd
 
-from backend_functions.data_loader import SoccerPlayer
+from src.utils.data_loader import SoccerPlayer
 
 
 def series_strip_nans(player: SoccerPlayer):

@@ -6,12 +6,11 @@ from matplotlib.lines import Line2D
 import plotly.express as px
 import streamlit as st
 
-from backend_functions.arima_model import ArimaPlayerModel
-from page_functions.player_statistics import (
+from src.utils.arima_model import ArimaPlayerModel
+from src.utils.get_player_statistics import (
     get_player_training_load_quantiles,
     get_spider_plot_data,
 )
-
 
 def get_player_names(models: Dict[str, ArimaPlayerModel], team):
     return [
@@ -26,7 +25,7 @@ def get_player(teams, player_name):
     return all_players[player_name]
 
 
-def player_statistics(teams, models):
+def player_information(teams, models):
 
     st.title("Player Information")
     tab1, tab2, tab3 = st.tabs(
