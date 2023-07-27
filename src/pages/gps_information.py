@@ -45,7 +45,7 @@ from streamlit_folium import st_folium
 #     st.warning("Failed to connect to MySQL server.", icon="🚨") 
 
 # Page configuration      
-def gps_statistics():
+def gps_information():
    
    st.title("GPS Information")
    tab1, tab2, tab3, tab4, tab5, tab6= st.tabs(["Raw Data ", "Maps", "Session Analysis", "Performance Metrics","Player GPS Report", "Streamlit Pandas Profiling" ])

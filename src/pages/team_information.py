@@ -5,7 +5,7 @@ import seaborn as sns
 import streamlit as st
 import datetime
 
-from backend_functions.get_team_statistics import (
+from src.utils.get_team_statistics import (
     get_average_metric_overview,
     get_correlation_matrix,
     get_feature_quantile_ts,
@@ -15,7 +15,7 @@ from backend_functions.get_team_statistics import (
 )
 
 
-def team_statistics(teams, models):
+def team_information(teams, models):
     st.title("Team Information")
     tab1, tab2, tab3, tab4 = st.tabs(
         ["Aggregated Metrics", "Injury Overview", "Training Load Overview", "Correlation Analysis"]

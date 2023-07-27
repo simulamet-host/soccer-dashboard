@@ -11,7 +11,7 @@ def save_as_pickle(path_to_save: Path, teams_obj: Dict[str, Team]):
 
 
 if __name__ == "__main__":
-    path_to_folder = Path(__file__).parent.parent / "data" / "features"
-    path_to_save_folder = Path(__file__).parent.parent / "data" / "pickles"
+    path_to_folder = Path(__file__).parent.parent.parent / "data" / "features"
+    path_to_save_folder = Path(__file__).parent.parent.parent / "data" / "pickles"
     teams = generate_teams(path_to_folder)
     save_as_pickle(path_to_save_folder, teams)

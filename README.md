@@ -114,7 +114,7 @@ soccer-dashboard/streamlit_app
 Otherwise, you’ll have to specify the full path to the file : 
 -->
 ```
-streamlit run soccer-dashboard/streamlit_app/app.py
+streamlit run soccer-dashboard/streamlit_app.py
 ```
 Open dashboard in the browser :
 ```

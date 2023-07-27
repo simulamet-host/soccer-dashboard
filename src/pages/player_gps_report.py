@@ -8,7 +8,7 @@ import time
 from haversine import haversine, Unit
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import page_functions.queries as qu
+import src.utils.queries as qu
 #start_time = time.time()
 
 # Connect to MySQL server
@@ -39,7 +39,7 @@ else:
     st.warning("Failed to connect to MySQL server.", icon="🚨") 
 
 # Page configuration      
-def player_gps_statistics():
+def player_gps_report():
    
    st.title("Player GPS Report")
    #tab1= st.tabs(["Player GPS Report" ])  
