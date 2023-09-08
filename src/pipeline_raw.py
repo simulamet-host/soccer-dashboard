@@ -103,6 +103,8 @@ def raw_plot_data(df, plot_attributes):
     """
     start = timeit.default_timer()
     print('Start plotting data...')
+    if not os.path.exists('../plots'):
+        os.makedirs('../plots')
 
     fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(9, 9))
     axes = axes.flatten()
