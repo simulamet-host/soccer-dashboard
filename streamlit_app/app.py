@@ -3,9 +3,6 @@ import streamlit as st
 import sys
 import os
 import pickle
-import time
-
-# start_time = time.time()
 
 # configuration of the page
 st.set_page_config(
@@ -20,10 +17,10 @@ st.set_page_config(
     }
 )
 
-# Add the parent directory to the sys.path to import from other files in the project
-#sys.path.append(str(Path(__file__).parent / "src" / "pages"))
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Import functions from other files
+# Import modules using relative imports
 from src.pages.homepage import homepage
 from src.pages.dataset_statistics import dataset_statistics
 from src.pages.player_information import player_information
