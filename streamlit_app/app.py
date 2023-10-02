@@ -21,7 +21,7 @@ st.set_page_config(
 )
 
 # Add the parent directory to the sys.path to import from other files in the project
-sys.path.append(str(Path(__file__).parent / "src" / "pages"))
+#sys.path.append(str(Path(__file__).parent / "src" / "pages"))
 
 # Import functions from other files
 from src.pages.homepage import homepage
