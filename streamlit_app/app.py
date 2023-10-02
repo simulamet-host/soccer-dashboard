@@ -20,6 +20,7 @@ st.set_page_config(
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+
 # Import modules using relative imports
 from src.pages.homepage import homepage
 from src.pages.dataset_statistics import dataset_statistics
