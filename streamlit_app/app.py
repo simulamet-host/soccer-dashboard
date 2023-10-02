@@ -24,10 +24,10 @@ st.set_page_config(
 sys.path.append(str(Path(__file__).parent / "src" / "utils"))
 
 # Import functions from other files
-from .src.pages.homepage import homepage
-from .src.pages.dataset_statistics import dataset_statistics
-from .src.pages.player_information import player_information
-from .src.pages.team_information import team_information
+from src.pages.homepage import homepage
+from src.pages.dataset_statistics import dataset_statistics
+from src.pages.player_information import player_information
+from src.pages.team_information import team_information
 from src.pages.team_information_db import team_information_db
 from src.pages.gps_information import gps_information
 from src.pages.player_gps_report import player_gps_report
