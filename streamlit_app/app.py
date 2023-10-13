@@ -5,8 +5,6 @@ import os
 import pickle
 import time
 
-# start_time = time.time()
-
 # configuration of the page
 st.set_page_config(
     page_title="Soccer Dashboard",# Title of the tab
@@ -20,10 +18,10 @@ st.set_page_config(
     }
 )
 
-# Add the parent directory to the sys.path to import from other files in the project
-sys.path.append(str(Path(__file__).parent / "src" / "utils"))
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Import functions from other files
+# Import modules using relative imports
 from src.pages.homepage import homepage
 from src.pages.dataset_statistics import dataset_statistics
 from src.pages.player_information import player_information
@@ -32,24 +30,33 @@ from src.pages.team_information_db import team_information_db
 from src.pages.gps_information import gps_information
 from src.pages.player_gps_report import player_gps_report
 
+
 # Set the paths to the pickled data
-path_to_teams = Path(__file__).parent / "data" / "pickles" / "teams.pkl"
-path_to_models = Path(__file__).parent / "data" / "pickles" / "arima"
+path_to_teams = Path("data/pickles/teams.pkl")
+path_to_models = Path("src/utils")
 
 # Define a function to load pickled data from a file
 @st.cache_data(ttl=600)
-def load_in_pickles(path_to_data: Path):
-    print(path_to_data)
-    return pickle.load(open(path_to_data, "rb"))
+def load_in_pickles(path_to_data):
+    try:
+        with open(path_to_data, 'rb') as file:
+            return pickle.load(file)
+    except Exception as e:
+        st.error(f"Error loading {path_to_data}: {e}")
 
 # Define a function to load in all the ARIMA models from a directory of pickled models
 @st.cache_data(ttl=600)
-def load_in_arima_models(path_to_arima = r'/backend_functions/'):
+def load_in_arima_models(path_to_arima='/backend_functions/'):
     all_files = os.listdir(path_to_arima)
     models = {}
     for file in all_files:
-        #models[file] = pickle.load(open(path_to_arima/file, "rb")) #2.9282 sec
-        models[file] = pickle.load(open(os.path.join(path_to_arima, file), "rb")) #1.2565 sec#
+        file_path = os.path.join(path_to_arima, file)
+        try:
+            with open(file_path, 'rb') as f:
+                models[file] = pickle.load(f)
+        except Exception as e:
+            print(f"Error loading {file}: {e}")
+
     return models
 
 # Define a function to get a player by name from the teams dictionary
@@ -80,7 +87,3 @@ if selected_page == "Player Information" or selected_page == "Team Information":
     page_names_to_funcs[selected_page](teams, models)
 else:
     page_names_to_funcs[selected_page]()
-
-# Evaluate code time
-# end_time = time.time()
-# Homepage = st.write("Time taken:", end_time - start_time, "seconds")
