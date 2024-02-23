@@ -1,17 +1,24 @@
 # Soccer Dashboard
 
-[SoccerMon](https://osf.io/uryz9/) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html). 
+[SoccerMon](https://zenodo.org/records/10033832) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html).
 
 Subjective data was collected in the context of _wellness_, _training load_,_game performance_, _injuries_, and _illnesses_, using the PmSys mobile app [PM Reporter Pro](https://play.google.com/store/apps/details?id=com.forzasys.pmsys&hl=en&gl=US&pli=1). Moreover, during training sessions and games, players used the wearable GPS performance tracking equipment [STATSports APEX](https://eu.shop.statsports.com/products/apex-athlete-series) to monitor objective metrics such as location, heart rate, speed, and acceleration. Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 objective report, the latter including 6,248,770,794 GPS positions.
 
 We present SoccerDashboard, a user-friendly, interactive, modularly designed and extendable dashboard for the analysis of the SoccerMon dataset in particular, and health and performance data from soccer athletes in general. SoccerDashboard is open-source and publicly accessible over the Internet for coaches, players and researchers from fields such as sports science and medicine. SoccerDashboard can simplify the analysis of soccer datasets with complex data structures, and serve as a reference implementation for multidisciplinary studies spanning various fields, as well as increase the level of scientific dialogue between professional soccer institutions and researchers.
 
+## Quick Start
 
-## Installation
+- Install Python 3.8 or higher
+- Clone the repository
+- Run `pip install -r requirements.txt`
+- Create a `secrets.toml` file in the `soccer-dashboard/.streamlit` directory with database connection credentials (see [Deployment (Local)](#deployment-local) for details)
+- Run `streamlit run soccer-dashboard/streamlit_app.py`
+
+## Installation - The Long Version
 
 ### Python
 
-Make sure you have Python version 3.7 (minimum) before you start the installation. You can check your Python version on the command line/terminal/shell. 
+Make sure you have Python version 3.8 (minimum) before you start the installation. You can check your Python version on the command line/terminal/shell.
 
 1. Open the terminal:
 
@@ -30,7 +37,7 @@ _macOS_
 _Linux_
 
     Open the terminal window
-   
+
 
 2. Display your Python version:
 
@@ -38,7 +45,7 @@ _Linux_
 python --version
 ```
 
-OR 
+OR
 
 ```
 python -V
@@ -48,10 +55,10 @@ python -V
 
 If your version of Python does not fit the requirements, update it by downloading the relevant version [here](https://www.python.org/downloads/).
 
-Update the package management system which can be used to install and manage software packages called [pip](https://pip.pypa.io/en/stable/installation/) if your version of Python has not been downloaded from python.org. 
+Update the package management system which can be used to install and manage software packages called [pip](https://pip.pypa.io/en/stable/installation/) if your version of Python has not been downloaded from python.org.
 
 
-### Installing Streamlit 
+### Installing Streamlit
 
 Install Streamlit on on Windows/macOS/Linux (https://docs.streamlit.io/library/get-started/installation).
 
@@ -73,8 +80,8 @@ You can clone the repository from the command line, or use a Git GUI such as:
 
 ### Libraries
 
-In order to run SoccerDashboard, a number of Python libraries need to be installed. 
-<!--- 
+In order to run SoccerDashboard, a number of Python libraries need to be installed.
+<!---
 - streamlit : version >= 1.14.0 (https://pypi.org/project/streamlit/)
 - pandas: version >= 0.18 (https://pypi.org/project/pandas/)
 - matplotlib: >= 3.6.0 (https://pypi.org/project/matplotlib/)
@@ -96,29 +103,40 @@ Example environment/dependency management tools:
   - poetry (https://python-poetry.org/)
   - conda (https://www.anaconda.com/products/distribution)
 -->
-    
+
 
 ## Deployment
 
 ### Deployment (Local)
 
-To launch the app locally, you can run the following command : 
+Create a file named `secrets.toml` in the `soccer-dashboard/.streamlit` directory with the following content:
+
+```toml
+[mysql]
+host = <hostname>
+port = <port number>
+user = <username>
+password = <password>
+database = <database name>
+```
+
+To launch the app locally, you can run the following command :
 <!---
 ```
 streamlit run app.py
 ```
 Please make sure that you need to navigate to the directory where the Python script is saved :
 ```
-soccer-dashboard/streamlit_app 
+soccer-dashboard/streamlit_app
 ```
-Otherwise, you’ll have to specify the full path to the file : 
+Otherwise, you’ll have to specify the full path to the file :
 -->
 ```
 streamlit run soccer-dashboard/streamlit_app.py
 ```
 Open dashboard in the browser :
 ```
-http://localhost:3000 
+http://localhost:3000
 ```
 
 ### Deployment (Cloud)
