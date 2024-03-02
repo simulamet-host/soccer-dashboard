@@ -4,9 +4,9 @@ from utils import Data_fetcher
 
 def overview_injuries():
     # fetch the data from the database
-    table_name = 'injuries'
+    table = 'injuries'
     columns = ['player_name', 'location', 'severity']
-    df = Data_fetcher.fetch_from_mysql(table_name, columns)
+    df = Data_fetcher.fetch_data(table, columns)
 
     # bar chart for location
     st.header('Location of injuries')
