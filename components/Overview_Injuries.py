@@ -17,6 +17,9 @@ def overview_injuries():
     st.header('First 5 rows of the dataset')
     st.write(df.head())
 
+    bar_chart(df)
+
+def bar_chart(df):
     # a horizontal stacked bar chart of location and severity
     st.header('Location and severity of injuries')
 

@@ -6,7 +6,7 @@ Subjective data was collected in the context of _wellness_, _training load_,_gam
 
 We present SoccerDashboard, a user-friendly, interactive, modularly designed and extendable dashboard for the analysis of the SoccerMon dataset in particular, and health and performance data from soccer athletes in general. SoccerDashboard is open-source and publicly accessible over the Internet for coaches, players and researchers from fields such as sports science and medicine. SoccerDashboard can simplify the analysis of soccer datasets with complex data structures, and serve as a reference implementation for multidisciplinary studies spanning various fields, as well as increase the level of scientific dialogue between professional soccer institutions and researchers.
 
-## Quick Start
+## Quick Start Locally
 
 - Install Python 3.8 or higher
 - Clone the repo and run `cd soccer-dashboard`
@@ -14,9 +14,15 @@ We present SoccerDashboard, a user-friendly, interactive, modularly designed and
 - Create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source (see [Secrets Management](#secrets-management) for details)
 - Run `streamlit run Homepage.py`
 
-## Deployment
+## Deployment to Streamlit Cloud
 
-### Secrets Management
+- Fork the repo to your GitHub account
+- Sign in to [Streamlit](https://share.streamlit.io/) with your GitHub account
+- Click "New app" and enter the repo, branch, and file path (e.g., `your-account/soccer-dashboard`, `main`, `Homepage.py`)
+- Under "Advanced settings", add the connection credentials as secrets (see [Secrets Management](#secrets-management) for details)
+- Click "Deploy!"
+
+## Secrets Management
 
 To run the app locally, create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source. The file should look like this:
 
@@ -34,13 +40,13 @@ Replace `xxx` with the actual connection credentials.
 
 For security reasons, never commit the `secrets.toml` file!
 
-To deploy the app to [Streamlit Sharing](https://share.streamlit.io/), you can add the connection credentials as secrets in the app settings from the admin panel. See the [Streamlit documentation](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management) for more details.
+To deploy the app to [Streamlit](https://share.streamlit.io/), paste the contents of the `secrets.toml` file as secrets in the app settings from the admin panel. See the [Streamlit documentation](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management) for more details.
 
 # INTERNAL NOTES
 
 - `main` branch: production branch, alias https://soccer-dashboard.simula.no
 - `dev` branch: default branch for development, https://soccer-dashboard.streamlit.app
-- `v2` branch: development branch for version 2
+- `v2` branch: development branch for version 2, https://soccer-dashboard-v2.streamlit.app/
 
 ## Development
 
