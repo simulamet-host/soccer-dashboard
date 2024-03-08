@@ -6,8 +6,54 @@ Subjective data was collected in the context of _wellness_, _training load_,_gam
 
 We present SoccerDashboard, a user-friendly, interactive, modularly designed and extendable dashboard for the analysis of the SoccerMon dataset in particular, and health and performance data from soccer athletes in general. SoccerDashboard is open-source and publicly accessible over the Internet for coaches, players and researchers from fields such as sports science and medicine. SoccerDashboard can simplify the analysis of soccer datasets with complex data structures, and serve as a reference implementation for multidisciplinary studies spanning various fields, as well as increase the level of scientific dialogue between professional soccer institutions and researchers.
 
+## Quick Start
+
+- Install Python 3.8 or higher
+- Clone the repo and run `cd soccer-dashboard`
+- Run `pip install -r requirements.txt`
+- Create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source (see [Secrets Management](#secrets-management) for details)
+- Run `streamlit run Homepage.py`
+
+## Deployment
+
+### Secrets Management
+
+To run the app locally, create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source. The file should look like this:
+
+```toml
+[connections.mysql]
+dialect = 'mysql'
+host = 'xxx'
+port = 3306
+database = 'xxx'
+username = 'xxx'
+password = 'xxx'
+```
+
+Replace `xxx` with the actual connection credentials.
+
+For security reasons, never commit the `secrets.toml` file!
+
+To deploy the app to [Streamlit Sharing](https://share.streamlit.io/), you can add the connection credentials as secrets in the app settings from the admin panel. See the [Streamlit documentation](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management) for more details.
+
 # INTERNAL NOTES
 
 - `main` branch: production branch, alias https://soccer-dashboard.simula.no
 - `dev` branch: default branch for development, https://soccer-dashboard.streamlit.app
 - `v2` branch: development branch for version 2
+
+## Development
+
+### Package Management
+
+We recommend using virtual environments to manage the dependencies of the project. The standard library `venv` can be used to create a virtual environment.
+
+To create a virtual environment, run `python -m venv myenv` in the project root directory.
+
+Then, activate the virtual environment with `source myenv/bin/activate` on Unix or `myenv\Scripts\activate` on Windows.
+
+Follow the [official tutorial](https://docs.python.org/3/tutorial/venv.html) for more information.
+
+After creating and activating the virtual environment, install the required packages with `pip install -r requirements.txt`.
+
+If you add new packages to the project, do not edit the `requirements.txt` file manually. Instead, make sure you have all the necessary packages and no unnecessary ones installed in your virtual environment, and then run `pip freeze > requirements.txt` to update the file.
