@@ -23,20 +23,20 @@ def player_injuries():
     filtered_df = df[df['player_name'] == player]
 
     # show the filtered data
-    bar_chart(filtered_df)
+    st.header(f'Injuries for player *{player}*')
+    st.write(filtered_df)
 
-def bar_chart(df):
-    # a horizontal stacked bar chart of location and severity
-    st.header('Location and severity of injuries')
+    time_series_chart(filtered_df)
 
-    chart = alt.Chart(df).mark_bar().encode(
-        x='count()',
+def time_series_chart(df):
+    # location of injuries over time
+    st.header('Location of injuries over time')
+
+    chart = alt.Chart(df).mark_circle().encode(
+        x='yearmonth(date):T',
         y='location',
-        color='severity',
-        order=alt.Order(
-            'severity',
-            sort='descending'
-        )
+        size=alt.value(100),
+        tooltip=['yearmonth(date)', 'location', 'severity']
     ).transform_filter(
         # remove null values
         (alt.datum.location != 'null') & (alt.datum.severity != 'null')
