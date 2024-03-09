@@ -1,6 +1,6 @@
 import streamlit as st
 
-from components import Overview_Injuries
+from components.Dataset_Overview import Overview_Injuries
 
 def dataset_overview():
     st.set_page_config(
