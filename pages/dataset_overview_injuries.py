@@ -54,3 +54,5 @@ def time_series_chart(df):
     )
 
     st.altair_chart(chart, use_container_width=True)
+
+overview_injuries()
