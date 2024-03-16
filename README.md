@@ -12,13 +12,13 @@ We present SoccerDashboard, a user-friendly, interactive, modularly designed and
 - Clone the repo and run `cd soccer-dashboard`
 - Run `pip install -r requirements.txt`
 - Create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source (see [Secrets Management](#secrets-management) for details)
-- Run `streamlit run Homepage.py`
+- Run `streamlit run homepage.py`
 
 ## Deployment to Streamlit Cloud
 
 - Fork the repo to your GitHub account
 - Sign in to [Streamlit](https://share.streamlit.io/) with your GitHub account
-- Click "New app" and enter the repo, branch, and file path (e.g., `your-account/soccer-dashboard`, `main`, `Homepage.py`)
+- Click "New app" and enter the repo, branch, and file path (e.g., `your-account/soccer-dashboard`, `v2`, `homepage.py`)
 - Under "Advanced settings", add the connection credentials as secrets (see [Secrets Management](#secrets-management) for details)
 - Click "Deploy!"
 

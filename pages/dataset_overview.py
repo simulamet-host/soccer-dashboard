@@ -11,7 +11,11 @@ def dataset_overview():
         initial_sidebar_state="auto",
     )
 
-    menu.menu()
+    # sidebar menu
+    sub_pages = {
+        "Injuries": "pages/dataset_overview_injuries.py",
+    }
+    menu.menu(sub_pages)
 
     st.title('Dataset Overview')
 
