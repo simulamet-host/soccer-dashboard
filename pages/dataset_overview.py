@@ -1,25 +1,10 @@
 import streamlit as st
 
-from components.common import menu
+from components.dataset_overview import overview_common
 
-def dataset_overview():
-    st.set_page_config(
-        page_title="Dataset Overview - Soccer Dashboard",
-        page_icon="⚽",
-        layout="wide",
-        initial_sidebar_state="auto",
-    )
-
-    # sidebar menu
-    sub_pages = {
-        'Game Performance': "pages/dataset_overview_game_performance.py",
-        'Illnesses': "pages/dataset_overview_illnesses.py",
-        "Injuries": "pages/dataset_overview_injuries.py",
-        'Training Load': "pages/dataset_overview_training_load.py",
-        'Wellness': "pages/dataset_overview_wellness.py",
-    }
-    menu.menu(sub_pages, position=2)
+def page_content():
+    overview_common.page_setup()
 
     st.title('Dataset Overview - General Overview')
 
-dataset_overview()
+page_content()
