@@ -19,6 +19,8 @@ def overview_injuries():
 
     bar_chart(df)
 
+    time_series_chart(df)
+
 def bar_chart(df):
     # a horizontal stacked bar chart of location and severity
     st.header('Location and severity of injuries')
@@ -31,6 +33,21 @@ def bar_chart(df):
             'severity',
             sort='descending'
         )
+    ).transform_filter(
+        # remove null values
+        (alt.datum.location != 'null') & (alt.datum.severity != 'null')
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+def time_series_chart(df):
+    # location of injuries over time
+    st.header('Location of injuries over time')
+
+    chart = alt.Chart(df).mark_circle().encode(
+        x='yearmonth(date):T',
+        y='location',
+        size='count()'
     ).transform_filter(
         # remove null values
         (alt.datum.location != 'null') & (alt.datum.severity != 'null')
