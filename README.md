@@ -9,6 +9,7 @@ We present SoccerDashboard, a user-friendly, interactive, modularly designed and
 ## Quick Start Locally
 
 - Install Python 3.8 or higher
+- Install `mysqlclient` (see https://pypi.org/project/mysqlclient/)
 - Clone the repo and run `cd soccer-dashboard`
 - Run `pip install -r requirements.txt`
 - Create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source (see [Secrets Management](#secrets-management) for details)
