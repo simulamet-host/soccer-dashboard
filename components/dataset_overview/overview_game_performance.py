@@ -23,9 +23,11 @@ def overview():
     # the distribution of the 3 metrics
     st.header('Distribution of the 3 metrics')
     metric_columns = df.columns[2:5]
+    # use the same scale range for all 3 metrics, which is the min and max of team_performance
+    scale_range = [df['team_performance'].min(), df['team_performance'].max()]
     for metric in metric_columns:
         chart = alt.Chart(df).mark_bar().encode(
-            x=alt.X(metric, bin=True),
+            x=alt.X(metric, bin=True, scale=alt.Scale(domain=scale_range)),
             y='count()'
         )
         st.subheader(metric)
