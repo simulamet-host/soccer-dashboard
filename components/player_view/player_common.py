@@ -17,5 +17,6 @@ def page_setup():
         "Injuries": "pages/player_view_injuries.py",
         'Training Load': "pages/player_view_training_load.py",
         'Wellness': "pages/player_view_wellness.py",
+        'GPS': "pages/player_view_gps.py",
     }
     menu.menu(sub_pages, position=3)
