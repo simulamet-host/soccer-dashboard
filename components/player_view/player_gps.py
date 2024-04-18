@@ -1,7 +1,9 @@
 import altair as alt
+import pandas as pd
 import streamlit as st
 
 from utils import data_fetcher
+from utils import gps
 
 def view():
     # fetch the data from the database
@@ -56,6 +58,25 @@ def gps_chart(df):
         x2='Lon_end',
         y2='Lat_end',
         color='Average_speed'
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+    # plot on football pitch
+    st.header('Football pitch')
+    # image of football pitch
+    image_path = 'assets/pitch.png'
+    # altair can only show images in base64 format
+    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
+    source = pd.DataFrame({'url': [image_base64]})
+
+    # show the image in the chart
+    # rotate the image by 90 degrees
+    chart = alt.Chart(source).mark_image(
+    ).encode(
+        url='url',
+    ).properties(
+        height=500,
     )
 
     st.altair_chart(chart, use_container_width=True)
