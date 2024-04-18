@@ -1,9 +1,8 @@
 import altair as alt
-import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 from utils import data_fetcher
-from utils import gps
 
 def view():
     # fetch the data from the database
@@ -64,19 +63,30 @@ def gps_chart(df):
 
     # plot on football pitch
     st.header('Football pitch')
-    # image of football pitch
-    image_path = 'assets/pitch.png'
-    # altair can only show images in base64 format
-    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
-    source = pd.DataFrame({'url': [image_base64]})
 
-    # show the image in the chart
-    # rotate the image by 90 degrees
-    chart = alt.Chart(source).mark_image(
-    ).encode(
-        url='url',
-    ).properties(
-        height=500,
+    # coordinates of the football pitches
+    pitch_coordinates = {
+        'lat': [63.444589, 63.445152, 63.445640, 63.445077],
+        'lon': [10.452373, 10.450687, 10.451500, 10.453186]
+    }
+
+    # convert the coordinates to list of lists for pydeck, with each list containing lon and lat
+    pitch_points = [[lon, lat] for lat, lon in zip(pitch_coordinates['lat'], pitch_coordinates['lon'])]
+
+    pdk_layer = pdk.Layer(
+        'PolygonLayer',
+        data=pitch_points,
+        get_polygon='-',
+        get_fill_color=[255, 0, 0],
+        get_line_color=[0, 0, 0],
+        get_line_width=5,
     )
+    # use compute_view to set the zoom level
+    view_state = pdk.data_utils.compute_view(pitch_points)
+    st.write(view_state)
+    st.pydeck_chart(pdk.Deck(
+        map_style='mapbox://styles/mapbox/satellite-v9',
+        initial_view_state=view_state,
+        # layers=[pdk_layer],
+    ))
 
-    st.altair_chart(chart, use_container_width=True)
