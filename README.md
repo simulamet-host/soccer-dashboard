@@ -1,6 +1,6 @@
 # Soccer Dashboard
 
-[SoccerMon](https://osf.io/uryz9/) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html).
+[SoccerMon](https://zenodo.org/records/10033832) is the largest elite soccer athlete health and performance monitoring dataset available today, including both subjective and objective metrics. The dataset was collected during 2020 and 2021 by two professional teams in the Norwegian women's elite soccer league (“Toppserien”) using the [PmSys athlete monitoring system](https://forzasys.com/pmSys.html).
 
 Subjective data was collected in the context of _wellness_, _training load_,_game performance_, _injuries_, and _illnesses_, using the PmSys mobile app [PM Reporter Pro](https://play.google.com/store/apps/details?id=com.forzasys.pmsys&hl=en&gl=US&pli=1). Moreover, during training sessions and games, players used the wearable GPS performance tracking equipment [STATSports APEX](https://eu.shop.statsports.com/products/apex-athlete-series) to monitor objective metrics such as location, heart rate, speed, and acceleration. Overall, the SoccerMon dataset contains 54,485 subjective reports and 10,075 objective report, the latter including 6,248,770,794 GPS positions.
 
@@ -9,16 +9,17 @@ We present SoccerDashboard, a user-friendly, interactive, modularly designed and
 ## Quick Start Locally
 
 - Install Python 3.8 or higher
+- Install `mysqlclient` (see https://pypi.org/project/mysqlclient/)
 - Clone the repo and run `cd soccer-dashboard`
 - Run `pip install -r requirements.txt`
 - Create a `secrets.toml` file in the `.streamlit` directory with connection credentials for the data source (see [Secrets Management](#secrets-management) for details)
-- Run `streamlit run Homepage.py`
+- Run `streamlit run homepage.py`
 
 ## Deployment to Streamlit Cloud
 
 - Fork the repo to your GitHub account
 - Sign in to [Streamlit](https://share.streamlit.io/) with your GitHub account
-- Click "New app" and enter the repo, branch, and file path (e.g., `your-account/soccer-dashboard`, `main`, `Homepage.py`)
+- Click "New app" and enter the repo, branch, and file path (e.g., `your-account/soccer-dashboard`, `v2`, `homepage.py`)
 - Under "Advanced settings", add the connection credentials as secrets (see [Secrets Management](#secrets-management) for details)
 - Click "Deploy!"
 
@@ -63,3 +64,13 @@ Follow the [official tutorial](https://docs.python.org/3/tutorial/venv.html) for
 After creating and activating the virtual environment, install the required packages with `pip install -r requirements.txt`.
 
 If you add new packages to the project, do not edit the `requirements.txt` file manually. Instead, make sure you have all the necessary packages and no unnecessary ones installed in your virtual environment, and then run `pip freeze > requirements.txt` to update the file.
+
+### Multi-Page Setup
+
+The entry point of the app is `homepage.py`.
+
+The app is organized into multiple pages, each in a separate Python file, all placed in the `pages` directory. No subdirectories are allowed, due to Streamlit's limitations.
+
+The navigation menu on the left sidebar is dynamically generated based on the titles and corresponding pages defined in the `main_pages` in `components/common/menu.py`.
+
+The subpages under each main page are defined in each main page's directory in the `components` directory. For example, the subpages under the "Overview" page are defined in `components/dataset_overview/overview_common.py`. The position of the subpages (e.g., which main page these subpages should appear under) is also defined there.

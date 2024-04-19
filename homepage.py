@@ -1,5 +1,7 @@
 import streamlit as st
 
+from components.common import menu
+
 def homepage():
     st.set_page_config(
         page_title="Soccer Dashboard",
@@ -7,6 +9,8 @@ def homepage():
         layout="wide",
         initial_sidebar_state="auto",
     )
+
+    menu.menu()
 
     with open('README.md', 'r',encoding='utf-8') as file:
         descrip = file.read()

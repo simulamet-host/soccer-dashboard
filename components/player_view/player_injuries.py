@@ -1,13 +1,13 @@
 import altair as alt
 import streamlit as st
 
-from utils import Data_fetcher
+from utils import data_fetcher
 
 def player_injuries():
     # fetch the data from the database
     table = 'injuries'
     columns = ['player_name', 'location', 'severity', 'date']
-    df = Data_fetcher.fetch_data(table, columns)
+    df = data_fetcher.fetch_data(table, columns)
 
     # add team column
     # team is the first part of the player_name
