@@ -23,7 +23,7 @@ def view():
     filtered_df = df[(df['Player_name'] == player) & (df['Session_Id'] == session)]
 
     # chart for the GPS data
-    gps_chart(filtered_df)
+    gps_chart(filtered_df.copy())
 
     # show the filtered data
     st.header(f'GPS data for player *{player}* in session *{session}*')
@@ -51,8 +51,6 @@ def gps_chart(df):
     altair_chart(df)
 
 def altair_chart(df):
-    st.subheader('Plot with notations')
-
     # plot lines with starting Lat and Long and ending Lat and Long
     # range of Lat and Long should be the range of the football pitch
     range_lon = (10.45, 10.454)
@@ -69,9 +67,6 @@ def altair_chart(df):
     st.altair_chart(chart, use_container_width=True)
 
 def pydeck_chart(df):
-    # plot on football pitch
-    st.subheader('Plot on football pitch')
-
     # coordinates of the football pitches
     pitch_coordinates = {
         'lat': [63.444589, 63.445152, 63.445640, 63.445077],
@@ -85,29 +80,28 @@ def pydeck_chart(df):
     view_state = pdk.data_utils.compute_view(pitch_points)
     # st.write('The view state is', view_state)
 
-    # a line for each sprint
-    line_layer = pdk.Layer(
-        'LineLayer',
+    # path for each sprint
+    df['path'] = df.apply(lambda row: [[row['Lon_start'], row['Lat_start']], [row['Lon_end'], row['Lat_end']]], axis=1)
+    # timestamps for each sprint. should be 32-bit floating numbers
+    # todo: for now, set to 0 and 100; will be updated to actual timestamps later
+    df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
+
+    trips_layer = pdk.Layer(
+        'TripsLayer',
         data=df,
-        get_source_position=['Lon_start', 'Lat_start'],
-        get_target_position=['Lon_end', 'Lat_end'],
-        # RGBA colors (red, green, blue, alpha); each value should be between 0 and 255
-        get_color=[255, 0, 0, 180],
-        get_width=2,
+        get_path='path',
+        get_timestamps='timestamps',
+        get_color=[253, 128, 93],
+        opacity=0.8,
+        width_min_pixels=2,
+        current_time=100,
+        trail_length=150,
     )
 
-    # circle for the end of each sprint
-    scatter_layer = pdk.Layer(
-        'ScatterplotLayer',
-        data=df,
-        get_position=['Lon_end', 'Lat_end'],
-        get_fill_color=[255, 0, 0],
-        get_radius=1,
-    )
-    st.write('The points are the end of each sprint')
+    st.write('Fading trails indicate the direction')
 
     st.pydeck_chart(pdk.Deck(
         map_style='mapbox://styles/mapbox/satellite-v9',
         initial_view_state=view_state,
-        layers=[line_layer, scatter_layer],
+        layers=[trips_layer],
     ))
