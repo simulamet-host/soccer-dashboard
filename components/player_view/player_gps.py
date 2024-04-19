@@ -35,7 +35,7 @@ def view():
     min_lon = df[['Lon_start', 'Lon_end']].min().min()
     max_lon = df[['Lon_start', 'Lon_end']].max().max()
 
-    st.write('GPS data range')
+    st.write('GPS data range of all records')
     st.write(f'Min Lat: {min_lat}, Max Lat: {max_lat}, Min Lon: {min_lon}, Max Lon: {max_lon}')
 
     # show the rows with the min and max values
@@ -45,6 +45,13 @@ def view():
 
 def gps_chart(df):
     st.header('Sprints in the session')
+
+    pydeck_chart(df)
+
+    altair_chart(df)
+
+def altair_chart(df):
+    st.subheader('Plot with notations')
 
     # plot lines with starting Lat and Long and ending Lat and Long
     # range of Lat and Long should be the range of the football pitch
@@ -61,8 +68,9 @@ def gps_chart(df):
 
     st.altair_chart(chart, use_container_width=True)
 
+def pydeck_chart(df):
     # plot on football pitch
-    st.header('Football pitch')
+    st.subheader('Plot on football pitch')
 
     # coordinates of the football pitches
     pitch_coordinates = {
@@ -73,20 +81,33 @@ def gps_chart(df):
     # convert the coordinates to list of lists for pydeck, with each list containing lon and lat
     pitch_points = [[lon, lat] for lat, lon in zip(pitch_coordinates['lat'], pitch_coordinates['lon'])]
 
-    pdk_layer = pdk.Layer(
-        'PolygonLayer',
-        data=pitch_points,
-        get_polygon='-',
-        get_fill_color=[255, 0, 0],
-        get_line_color=[0, 0, 0],
-        get_line_width=5,
-    )
     # use compute_view to set the zoom level
     view_state = pdk.data_utils.compute_view(pitch_points)
-    st.write(view_state)
+    # st.write('The view state is', view_state)
+
+    # a line for each sprint
+    line_layer = pdk.Layer(
+        'LineLayer',
+        data=df,
+        get_source_position=['Lon_start', 'Lat_start'],
+        get_target_position=['Lon_end', 'Lat_end'],
+        # RGBA colors (red, green, blue, alpha); each value should be between 0 and 255
+        get_color=[255, 0, 0, 180],
+        get_width=2,
+    )
+
+    # circle for the end of each sprint
+    scatter_layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=df,
+        get_position=['Lon_end', 'Lat_end'],
+        get_fill_color=[255, 0, 0],
+        get_radius=1,
+    )
+    st.write('The points are the end of each sprint')
+
     st.pydeck_chart(pdk.Deck(
         map_style='mapbox://styles/mapbox/satellite-v9',
         initial_view_state=view_state,
-        # layers=[pdk_layer],
+        layers=[line_layer, scatter_layer],
     ))
-
