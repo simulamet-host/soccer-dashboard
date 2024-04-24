@@ -8,6 +8,15 @@ def page_content():
 
     st.title('Analysis - GPS')
 
-    analysis_gps.view()
+    tab1, tab2, tab3 = st.tabs(['Sprint', 'Mobility', 'Formation'])
+
+    with tab1:
+        analysis_gps.view()
+
+    with tab2:
+        st.subheader('Mobility')
+
+    with tab3:
+        st.subheader('Formation')
 
 page_content()
