@@ -4,13 +4,11 @@ def menu(sub_pages: dict = None, position: int = -1):
     main_pages = {
         "Homepage": "homepage.py",
         "Dataset Overview": "pages/dataset_overview.py",
-        "Player View": "pages/player_view.py",
-        "Team View": "pages/team_view.py",
-        "Researcher View": "pages/researcher_view.py"
+        "Analysis": "pages/analysis.py",
     }
 
     # if sub_pages is not provided, or position is not valid, display all the main pages
-    if not sub_pages or position < 0 or position >= len(main_pages):
+    if not sub_pages or position < 0 or position > len(main_pages):
         for page in main_pages:
             st.sidebar.page_link(main_pages[page], label=page)
     else:
