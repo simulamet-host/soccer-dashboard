@@ -86,23 +86,10 @@ def altair_chart(df):
     st.altair_chart(chart, use_container_width=True)
 
 def pydeck_chart(df):
-    # coordinates of the football pitches
-    pitch_coordinates = {
-        'lat': [63.444589, 63.445152, 63.445640, 63.445077],
-        'lon': [10.452373, 10.450687, 10.451500, 10.453186]
-    }
-
-    # convert the coordinates to list of lists for pydeck, with each list containing lon and lat
-    pitch_points = [[lon, lat] for lat, lon in zip(pitch_coordinates['lat'], pitch_coordinates['lon'])]
-
-    # use compute_view to set the zoom level
-    view_state = pdk.data_utils.compute_view(pitch_points)
-    # st.write('The view state is', view_state)
-
     # path for each sprint
     df['path'] = df.apply(lambda row: [[row['Lon_start'], row['Lat_start']], [row['Lon_end'], row['Lat_end']]], axis=1)
     # timestamps for each sprint. should be 32-bit floating numbers
-    # todo: for now, set to 0 and 100; will be updated to actual timestamps later
+    # set to 0 and 100 because we only care about the start and end of the sprint
     df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
 
     trips_layer = pdk.Layer(
@@ -118,6 +105,15 @@ def pydeck_chart(df):
     )
 
     st.write('Fading trails indicate the direction')
+
+    # use the center of the Lat and Lon values as the initial view state
+    mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
+    mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
+    view_state = pdk.ViewState(
+        latitude=mean_lat,
+        longitude=mean_lon,
+        zoom=17,
+    )
 
     st.pydeck_chart(pdk.Deck(
         map_style='mapbox://styles/mapbox/satellite-v9',
