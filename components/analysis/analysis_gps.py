@@ -57,16 +57,16 @@ def gps_chart(df):
 
 def altair_chart(df):
     # plot lines with starting Lat and Long and ending Lat and Long
-    # range of Lat and Long should be the range of the football pitch
-    range_lon = (10.45, 10.454)
-    range_lat = (63.444, 63.446)
+    # use the center of the Lat and Lon values plus a small range as the domain
+    range_lat = [df['Lat_start'].mean() - 0.0005, df['Lat_end'].mean() + 0.0005]
+    range_lon = [df['Lon_start'].mean() - 0.001, df['Lon_end'].mean() + 0.001]
 
     chart = alt.Chart(df).mark_line().encode(
         x=alt.X('Lon_start', scale=alt.Scale(domain=range_lon)),
         y=alt.Y('Lat_start', scale=alt.Scale(domain=range_lat)),
         x2='Lon_end',
         y2='Lat_end',
-        color='Average_speed'
+        color=alt.Color('Average_speed', scale=alt.Scale(scheme='turbo')),
     )
 
     st.altair_chart(chart, use_container_width=True)
