@@ -31,6 +31,7 @@ def view():
     st.header(f'GPS data for player *{player}* in session *{session}*')
     st.write(filtered_df)
 
+    st.header('Overview of GPS data')
     # the min and max values of the GPS data
     min_lat = df[['Lat_start', 'Lat_end']].min().min()
     max_lat = df[['Lat_start', 'Lat_end']].max().max()
@@ -44,6 +45,8 @@ def view():
     st.write('Rows with min and max values')
     st.write(df[(df['Lat_start'] == min_lat) | (df['Lat_end'] == min_lat) | (df['Lon_start'] == min_lon) | (df['Lon_end'] == min_lon)])
     st.write(df[(df['Lat_start'] == max_lat) | (df['Lat_end'] == max_lat) | (df['Lon_start'] == max_lon) | (df['Lon_end'] == max_lon)])
+
+    check_range(df)
 
 def gps_chart(df):
     st.header('Sprints in the session')
@@ -120,3 +123,23 @@ def pydeck_chart(df):
         initial_view_state=view_state,
         layers=[trips_layer],
     ))
+
+def check_range(df):
+    # show the rows with GPS data outside football pitches
+    st.write('Rows with GPS data outside known football pitches')
+    df['in_pitch'] = df.apply(lambda x: gps.in_pitch(x['Lat_start'], x['Lon_start']) and gps.in_pitch(x['Lat_end'], x['Lon_end']), axis=1)
+    # add a link to google maps for the coordinates, in satellite view
+    # insert the column after the Lon_end column
+    df.insert(10, 'Google_maps_start', df.apply(lambda x: f'https://www.google.com/maps?t=k&q=loc:{x["Lat_start"]},{x["Lon_start"]}', axis=1))
+    df.insert(11, 'Google_maps_end', df.apply(lambda x: f'https://www.google.com/maps?t=k&q=loc:{x["Lat_end"]},{x["Lon_end"]}', axis=1))
+    st.dataframe(
+        df[~df['in_pitch']],
+        column_config={
+            'Google_maps_start': st.column_config.LinkColumn(
+                "Start", display_text="Map"
+            ),
+            'Google_maps_end': st.column_config.LinkColumn(
+                "End", display_text="Map"
+            )
+        }
+    )
