@@ -3,7 +3,7 @@ import streamlit as st
 
 from utils import data_fetcher
 
-def player_injuries():
+def view():
     # fetch the data from the database
     table = 'injuries'
     columns = ['player_name', 'location', 'severity', 'date']

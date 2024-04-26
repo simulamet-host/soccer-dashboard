@@ -1,0 +1,116 @@
+import base64
+from io import BytesIO
+from PIL import Image
+
+def image_to_base64(image_path, image_format):
+    '''
+    Convert an image to base64 format.
+
+    Parameters:
+    image_path (str): The path to the image.
+    image_format (str): The format of the image.
+
+    Returns:
+    str: The image in base64 format.
+    '''
+    pil_image = Image.open(image_path)
+    image_file = BytesIO()
+    pil_image.save(image_file, format=image_format)
+    image_base64 = base64.b64encode(image_file.getvalue()).decode()
+
+    return f'data:image/{image_format};base64,{image_base64}'
+
+def in_pitch(lat, long):
+    '''
+    Check if the latitude and longitude are inside any football pitch.
+
+    Parameters:
+    lat (float): The latitude.
+    long (float): The longitude.
+
+    Returns:
+    bool: True if the coordinates are inside any football pitch, False otherwise.
+    '''
+
+    # coordinates of the football pitches
+    pitch_coordinates = [
+        {
+            'lat': [63.444589, 63.445152, 63.445640, 63.445077],
+            'lon': [10.452373, 10.450687, 10.451500, 10.453186]
+        },
+        {
+            'lat': [38.709955, 38.709013, 38.709006, 38.709948],
+            'lon': [-9.264591, -9.264576, -9.265357, -9.265371]
+        },
+        {
+            'lat': [59.965881, 59.964977, 59.964963, 59.965872],
+            'lon': [10.727593, 10.727629, 10.726449, 10.726415]
+        },
+        {
+            'lat': [59.921578, 59.920727, 59.920978, 59.921829],
+            'lon': [10.582160, 10.581354, 10.580300, 10.581107]
+        },
+        {
+            'lat': [60.425951, 60.425341, 60.425449, 60.426058],
+            'lon': [5.472725, 5.472585, 5.470686, 5.470826]
+        },
+        {
+            'lat': [60.425952, 60.425342, 60.425342, 60.426059],
+            'lon': [5.472727, 5.472581, 5.470827, 5.470827]
+        },
+        {
+            'lat': [60.426304, 60.425514, 60.425223, 60.426013],
+            'lon': [5.305454, 5.306391, 5.305386, 5.304449]
+        },
+        {
+            'lat': [59.918148, 59.917296, 59.917558, 59.918411],
+            'lon': [10.807680, 10.806868, 10.805771, 10.806579]
+        },
+        {
+            'lat': [58.776009, 58.775089, 58.774953, 58.775876],
+            'lon': [5.633550, 5.633943, 5.632799, 5.632397]
+        },
+        {
+            'lat': [60.159541, 60.158628, 60.158465, 60.159378],
+            'lon': [10.266314, 10.266817, 10.265632, 10.265129]
+        },
+        {
+            'lat': [59.068927, 59.068083, 59.067886, 59.068731],
+            'lon': [10.037055, 10.037652, 10.036601, 10.036004]
+        },
+        {
+            'lat': [63.412718, 63.412112, 63.411963, 63.412569],
+            'lon': [10.405404, 10.405620, 10.403541, 10.403325]
+        },
+        {
+            'lat': [59.920812, 59.920321, 59.920830, 59.921322],
+            'lon': [10.584996, 10.584336, 10.582837, 10.583499]
+        },
+        {
+            'lat': [60.425952, 60.425341, 60.425446, 60.426059],
+            'lon': [5.472728, 5.472587, 5.470685, 5.470827]
+        },
+        {
+            'lat': [59.921436, 59.920977, 59.921600, 59.922060],
+            'lon': [10.805464, 10.804661, 10.803248, 10.804051]
+        },
+        {
+            'lat': [59.942162, 59.941299, 59.941457, 59.942321],
+            'lon': [10.635737, 10.635261, 10.634157, 10.634633]
+        },
+        {
+            'lat': [63.445078, 63.444588, 63.445150, 63.445641],
+            'lon': [10.453189, 10.452374, 10.450683, 10.451499]
+        },
+        # pitches without clear boundaries
+        {
+            'lat': [37.189091, 37.188148, 37.188007, 37.188958],
+            'lon': [-7.418629, -7.418332, -7.419032, -7.419331]
+        }
+    ]
+
+    for pitch in pitch_coordinates:
+        if (lat >= min(pitch['lat']) and lat <= max(pitch['lat'])) and (long >= min(pitch['lon']) and long <= max(pitch['lon'])):
+            return True
+
+    return False
