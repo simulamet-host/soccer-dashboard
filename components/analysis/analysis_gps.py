@@ -105,6 +105,9 @@ def pydeck_chart(df):
         width_min_pixels=2,
         current_time=100,
         trail_length=150,
+        pickable=True,
+        auto_highlight=True,
+        highlight_color=[255, 255, 0],
     )
 
     st.write('Fading trails indicate the direction')
@@ -122,6 +125,12 @@ def pydeck_chart(df):
         map_style='mapbox://styles/mapbox/satellite-v9',
         initial_view_state=view_state,
         layers=[trips_layer],
+        tooltip={
+            'html': 'Start: {Lat_start}, {Lon_start} <br> End: {Lat_end}, {Lon_end} <br> Average speed: {Average_speed} <br> Top speed: {Top_speed}',
+            'style': {
+                'color': 'white'
+            }
+        }
     ))
 
 def check_range(df):
