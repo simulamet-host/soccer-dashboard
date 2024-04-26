@@ -46,6 +46,15 @@ def view():
     st.write(df[(df['Lat_start'] == min_lat) | (df['Lat_end'] == min_lat) | (df['Lon_start'] == min_lon) | (df['Lon_end'] == min_lon)])
     st.write(df[(df['Lat_start'] == max_lat) | (df['Lat_end'] == max_lat) | (df['Lon_start'] == max_lon) | (df['Lon_end'] == max_lon)])
 
+    # highest and lowest average speed
+    st.write('Highest and lowest average speed')
+    st.write(df[df['Average_speed'] == df['Average_speed'].max()])
+    st.write(df[df['Average_speed'] == df['Average_speed'].min()])
+    # highest and lowest top speed
+    st.write('Highest and lowest top speed')
+    st.write(df[df['Top_speed'] == df['Top_speed'].max()])
+    st.write(df[df['Top_speed'] == df['Top_speed'].min()])
+
     check_range(df)
 
 def gps_chart(df):
@@ -95,12 +104,27 @@ def pydeck_chart(df):
     # set to 0 and 100 because we only care about the start and end of the sprint
     df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
 
+    # color the paths based on the average speed
+    colors = [
+        # colors are from https://carto.com/carto-colors/ OrYel
+        #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
+        [236, 218, 154],
+        [239, 196, 126],
+        [243, 173, 106],
+        [247, 148, 93],
+        [249, 123, 87],
+        [246, 99, 86],
+        [238, 77, 90],
+    ]
+    # speed should be above 5.2
+    df['color'] = df['Average_speed'].apply(lambda x: colors[int(x - 5.2) * 3 ] if x < 7.2 else colors[-1])
+
     trips_layer = pdk.Layer(
         'TripsLayer',
         data=df,
         get_path='path',
         get_timestamps='timestamps',
-        get_color=[253, 128, 93],
+        get_color='color',
         opacity=0.8,
         width_min_pixels=2,
         current_time=100,
@@ -133,6 +157,7 @@ def pydeck_chart(df):
         }
     ))
 
+@st.cache_data()
 def check_range(df):
     # show the rows with GPS data outside football pitches
     st.write('Rows with GPS data outside known football pitches')
