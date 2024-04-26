@@ -63,7 +63,7 @@ Follow the [official tutorial](https://docs.python.org/3/tutorial/venv.html) for
 
 After creating and activating the virtual environment, install the required packages with `pip install -r requirements.txt`.
 
-If you add new packages to the project, do not edit the `requirements.txt` file manually. Instead, make sure you have all the necessary packages and no unnecessary ones installed in your virtual environment, and then run `pip freeze > requirements.txt` to update the file.
+If you add new packages to the project, do not edit the `requirements.txt` file manually. Instead, make sure you have all the necessary packages and no unnecessary ones installed in your virtual environment, and then run `pip freeze > requirements.txt` to update the file. (Note that Windows may mess with encoding, so you may need to run `pip freeze | Out-File -Encoding UTF8 requirements.txt` instead.)
 
 ### Multi-Page Setup
 
