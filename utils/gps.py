@@ -20,6 +20,66 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
+def get_colors():
+    colors = [
+        # colors are from https://carto.com/carto-colors/ OrYel
+        #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
+        [236, 218, 154],
+        [239, 196, 126],
+        [243, 173, 106],
+        [247, 148, 93],
+        [249, 123, 87],
+        [246, 99, 86],
+        [238, 77, 90],
+    ]
+    return colors
+
+def get_color_from_speed(speed):
+    '''
+    Get the color based on the speed.
+
+    Parameters:
+    speed (float): The speed.
+
+    Returns:
+    list: The RGB color.
+    '''
+    colors = get_colors()
+
+    min_speed = 5.3
+    step = 0.3
+    max_speed = min_speed + step * (len(colors) - 1)
+
+    if speed < min_speed:
+        color = colors[0]
+    elif speed > max_speed:
+        color = colors[-1]
+    else:
+        color = colors[int((speed - min_speed )/ step)]
+
+    return color
+
+def get_color_legend():
+    '''
+    Returns:
+    str: The color legend in HTML format.
+    '''
+    colors = get_colors()
+
+    html = ''
+    html += '<div>'
+    for i, color in enumerate(colors):
+        html += f'<div style="display: inline-block; width: 36px;">{(i * 0.3) + 5.2}</div>'
+    html += '</div>'
+
+    html += '<div style="margin: 0 0 20px 10px">'
+    for color in colors:
+        color_str = f'rgb({color[0]}, {color[1]}, {color[2]})'
+        html += f'<div style="display: inline-block; background-color: {color_str}; height: 20px; width: 36px;"></div>'
+    html += '</div>'
+
+    return html
+
 def in_pitch(lat, long):
     '''
     Check if the latitude and longitude are inside any football pitch.
