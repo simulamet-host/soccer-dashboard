@@ -20,7 +20,7 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
-def get_colors():
+def get_color_settings():
     colors = [
         # colors are from https://carto.com/carto-colors/ OrYel
         #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
@@ -32,7 +32,11 @@ def get_colors():
         [246, 99, 86],
         [238, 77, 90],
     ]
-    return colors
+
+    min_speed = 5.4
+    step = 0.4
+
+    return colors, min_speed, step
 
 def get_color_from_speed(speed):
     '''
@@ -44,10 +48,8 @@ def get_color_from_speed(speed):
     Returns:
     list: The RGB color.
     '''
-    colors = get_colors()
+    colors, min_speed, step = get_color_settings()
 
-    min_speed = 5.3
-    step = 0.3
     max_speed = min_speed + step * (len(colors) - 1)
 
     if speed < min_speed:
@@ -55,7 +57,7 @@ def get_color_from_speed(speed):
     elif speed > max_speed:
         color = colors[-1]
     else:
-        color = colors[int((speed - min_speed )/ step)]
+        color = colors[int((speed - min_speed) / step) + 1]
 
     return color
 
@@ -64,15 +66,16 @@ def get_color_legend():
     Returns:
     str: The color legend in HTML format.
     '''
-    colors = get_colors()
+    colors, min_speed, step = get_color_settings()
 
     html = ''
-    html += '<div>'
+    html += '<div style="margin: 0 0 0 24px">'
     for i, color in enumerate(colors):
-        html += f'<div style="display: inline-block; width: 36px;">{(i * 0.3) + 5.2}</div>'
+        num_str = f'{(i * step) + min_speed:.1f}'
+        html += f'<div style="display: inline-block; width: 36px;">{num_str}</div>' if i < len(colors) - 1 else ''
     html += '</div>'
 
-    html += '<div style="margin: 0 0 20px 10px">'
+    html += '<div style="margin: 0 0 20px 0">'
     for color in colors:
         color_str = f'rgb({color[0]}, {color[1]}, {color[2]})'
         html += f'<div style="display: inline-block; background-color: {color_str}; height: 20px; width: 36px;"></div>'

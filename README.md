@@ -87,15 +87,17 @@ The test files are located in the `tests` directory.
 
 ```
 soccer-dashboard/
-├── .streamlit/
-├── pages/
 ├── homepage.py
+├── pages/
+│   └── foo.py
 └── tests/
-    └── test_foo.py
+    └── test_homepage.py
+    └── page/
+        └── test_foo.py
 ```
 
-Prefix test files with `test_` and test functions with `test_` inside the test files, e.g., `test_foo.py` and `test_bar()`, so that pytest can automatically discover and run the tests.
+Prefix test files with `test_` and test functions with `test_` inside the test files, e.g., `test_foo.py` and `test_bar()`, so that pytest can automatically discover and run the tests. The structure of the test files should mirror the structure of the source files.
 
 To run the tests, execute `pytest` in the project root directory.
 
-Imports and paths within a test file should be relative to the directory where pytest is called.
+Imports and paths within a test file should be relative to the project root directory, where pytest is called.
