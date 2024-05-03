@@ -1,6 +1,9 @@
 import base64
 from io import BytesIO
+import math
 from PIL import Image
+
+from pygeodesy.sphericalNvector import LatLon
 
 def image_to_base64(image_path, image_format):
     '''
@@ -177,3 +180,42 @@ def in_pitch(lat, long):
             return True
 
     return False
+
+def distance_and_bearing(lat1, lon1, lat2, lon2):
+    '''
+    Given the latitude and longitude of two points, calculate the distance and initial bearing from the first point to the second point.
+
+    Parameters:
+    lat1 (float): The latitude of the first point.
+    lon1 (float): The longitude of the first point.
+    lat2 (float): The latitude of the second point.
+    lon2 (float): The longitude of the second point.
+    All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
+
+    Returns:
+    tuple: The distance and bearing between the two points.
+    Distance is in meters.
+    Bearing is in degrees, measured clockwise from true north (0-360, 0 is true north). Example: 306.7583
+    '''
+    p1 = LatLon(lat1, lon1)
+    p2 = LatLon(lat2, lon2)
+    d = p1.distanceTo(p2)
+    b = p1.initialBearingTo(p2)
+
+    return d, b
+
+def local_coordinates(distance, bearing):
+    '''
+    Given the distance and bearing, calculate the local coordinates of a point relative to the base point (0, 0).
+    Parameters:
+    distance (float): The distance from the base point, in meters.
+    bearing (float): The bearing from the base point, in degrees (0-360, 0 is true north)
+
+    Returns:
+    tuple: The local coordinates (x, y) of the point from the base point, in meters.
+    '''
+    # use basic trigonometry to calculate the local coordinates
+    x = distance * math.sin(math.radians(bearing))
+    y = distance * math.cos(math.radians(bearing))
+
+    return x, y
