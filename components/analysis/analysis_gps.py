@@ -1,4 +1,4 @@
-import altair as alt
+import matplotlib.pyplot as plt
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
@@ -62,99 +62,7 @@ def gps_chart(df):
 
     pydeck_chart(df)
 
-    altair_chart(df)
-
-def altair_chart(df):
-    # show sprints on a uniform football pitch
-    st.header('Sprints on a uniform football pitch')
-
-    # get the local coordinates for the start and end points
-    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
-
-    # use pitch width and length as the scale domain for the y and x axes
-    pitch_length = df['Pitch_length'].max()
-    pitch_width = df['Pitch_width'].max()
-    scaling_factor = 5
-
-    # image of football pitch
-    image_path = 'assets/pitch.png'
-    # altair can only show images in base64 format
-    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
-    source = pd.DataFrame({
-        # 'x': length,
-        # 'y': width,
-        'url': [image_base64]
-        })
-
-    # show the image in the chart
-    x_proportion, y_proportion, x_offset_p, y_offset_p = gps.image_proportion()
-    pitch = alt.Chart(source).mark_image(
-        # align='right',
-        # baseline='top',
-        height=50,
-        width=50
-    ).encode(
-        x=alt.value(0),
-        y=alt.value(0),
-        url='url',
-        # don't show tooltips about the image
-        tooltip=alt.value(None)
-    ).properties(
-        # set matching width and height as scale domain so that the aspect ratio is correct
-        # width=pitch_length * scaling_factor * x_proportion,
-        # height=pitch_width * scaling_factor * y_proportion
-    )
-
-    # line connecting the start and end points
-    lines = alt.Chart(df).mark_line(
-    ).encode(
-        x=alt.X('Lon_start_local', scale=alt.Scale(domain=(0, pitch_length))),
-        y=alt.Y('Lat_start_local', scale=alt.Scale(domain=(0, pitch_width))),
-        x2='Lon_end_local',
-        y2='Lat_end_local',
-    )
-
-    st.altair_chart(pitch)
-    # st.altair_chart(pitch + lines)
-
-    # example test
-    source = pd.DataFrame.from_records(
-        [
-            # {
-            #     "x": 2.5,
-            #     "y": 0.5,
-            #     "img": "https://vega.github.io/vega-datasets/data/ffox.png",
-            # },
-            {
-                "x": -60/4,
-                "y": -29/4,
-                "img": image_base64,
-            },
-            # {
-            #     "x": 2.5,
-            #     "y": 2.5,
-            #     "img": "https://vega.github.io/vega-datasets/data/7zip.png",
-            # },
-        ]
-    )
-
-    pitch = alt.Chart(source).mark_image(
-        width=1920/4,
-        height=1218/4,
-        aspect=False,
-        align="left",
-        baseline="bottom",
-    ).encode(
-        x=alt.X("x", scale=alt.Scale(domain=(-60/4, 1860/4)), axis=None),
-        y=alt.Y("y", scale=alt.Scale(domain=(-29/4, 1189/4)), axis=None),
-        url="img",
-    ).properties(
-        width=1920/4,
-        height=1218/4
-    )
-
-    st.altair_chart(pitch)
-
+    plt_chart(df)
 
 def pydeck_chart(df):
     # path for each sprint
@@ -208,6 +116,28 @@ def pydeck_chart(df):
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)
+
+def plt_chart(df):
+    # show sprints on a uniform football pitch
+    st.header('Sprints on a uniform football pitch')
+
+    fig, ax = plt.subplots()
+
+    # local coordinates for the start and end points
+    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+
+    # image of football pitch, with offset
+    image_path = 'assets/pitch.png'
+    image = plt.imread(image_path)
+    extent = gps.pitch_image_extent(df['Pitch_length'].max(), df['Pitch_width'].max())
+    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    ax.imshow(image, extent=extent)
+
+    # plot the sprints
+    for index, row in df.iterrows():
+        ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3)
+
+    st.pyplot(fig)
 
 @st.cache_data()
 def check_range(df):

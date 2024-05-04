@@ -2,6 +2,9 @@ import pytest
 
 from utils import gps
 
+def test_pitch_image_offset():
+    assert gps.pitch_image_offset() == (-60, 1860, -29, 1189)
+
 def test_get_color_from_speed():
     assert gps.get_color_from_speed(5.2) == [236, 218, 154]
     assert gps.get_color_from_speed(5.41) == [239, 196, 126]

@@ -23,28 +23,51 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
-def image_proportion():
+def pitch_image_offset():
     '''
-    The image of the football pitch is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1820x1160 pixels, centered in the image.
+    The image of the football pitch (assets/pitch.png) is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1800x1160 pixels, centered in the image.
             image start,    pitch start,    pitch end,  image end
     width   0,              60,             1860,       1920
     height  0,              29,             1189,       1218
 
     Returns:
-    tuple: The proportion of the image width and height to the pitch width and height, and the proportion of the offsets to the pitch width and height (x_proportion, y_proportion, x_offset_p, y_offset_p).
+    tuple: The offset of the pitch image to the full image (x1, x2, y1, y2).
     '''
     image_width = 1920
     image_height = 1218
-    pitch_width = 1860
-    pitch_height = 1189
+    pitch_width = 1800
+    pitch_height = 1160
 
-    x_proportion = image_width / pitch_width
-    y_proportion = image_height / pitch_height
+    x1 = - (image_width - pitch_width) // 2
+    x2 = x1 + image_width
+    y1 = - (image_height - pitch_height) // 2
+    y2 = y1 + image_height
 
-    x_offset_p = (image_width - pitch_width) / pitch_width
-    y_offset_p = (image_height - pitch_height) / pitch_height
+    return x1, x2, y1, y2
 
-    return x_proportion, y_proportion, x_offset_p, y_offset_p
+def pitch_image_extent(length, width):
+    '''
+    Consider the pitch image offset in pixels and the actual pitch length and width in meters, calculate the extent of the pitch image in meters.
+
+    Pitches may have different lengths and widths, so the pitch image may be stretched or compressed to fit the actual pitch size.
+
+    Parameters:
+    length (float): The length of the pitch in meters.
+    width (float): The width of the pitch in meters.
+
+    Returns:
+    tuple: The extent of the pitch image in meters (x1, x2, y1, y2).
+    '''
+    x1, x2, y1, y2 = pitch_image_offset()
+
+    x_ratio = (x1 + x2) / length
+    x1_m = x1 / x_ratio
+    x2_m = x2 / x_ratio
+    y_ratio = (y1 + y2) / width
+    y1_m = y1 / y_ratio
+    y2_m = y2 / y_ratio
+
+    return x1_m, x2_m, y1_m, y2_m
 
 def get_color_settings():
     colors = [
