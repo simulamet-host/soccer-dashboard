@@ -62,49 +62,99 @@ def gps_chart(df):
 
     pydeck_chart(df)
 
-    # altair_chart(df)
+    altair_chart(df)
 
 def altair_chart(df):
-    st.header('Football pitch with sprints')
+    # show sprints on a uniform football pitch
+    st.header('Sprints on a uniform football pitch')
+
+    # get the local coordinates for the start and end points
+    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+
+    # use pitch width and length as the scale domain for the y and x axes
+    pitch_length = df['Pitch_length'].max()
+    pitch_width = df['Pitch_width'].max()
+    scaling_factor = 5
 
     # image of football pitch
     image_path = 'assets/pitch.png'
     # altair can only show images in base64 format
     image_base64 = gps.image_to_base64(image_path, image_format='PNG')
-    source = pd.DataFrame({'url': [image_base64]})
+    source = pd.DataFrame({
+        # 'x': length,
+        # 'y': width,
+        'url': [image_base64]
+        })
 
     # show the image in the chart
-    # rotate the image by 90 degrees
+    x_proportion, y_proportion, x_offset_p, y_offset_p = gps.image_proportion()
     pitch = alt.Chart(source).mark_image(
+        # align='right',
+        # baseline='top',
+        height=50,
+        width=50
     ).encode(
+        x=alt.value(0),
+        y=alt.value(0),
         url='url',
         # don't show tooltips about the image
         tooltip=alt.value(None)
     ).properties(
-        height=500,
+        # set matching width and height as scale domain so that the aspect ratio is correct
+        # width=pitch_length * scaling_factor * x_proportion,
+        # height=pitch_width * scaling_factor * y_proportion
     )
 
-    # get the local coordinates for the start and end points
-    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'] = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
-
-    # use pitch width and length as the domain for the y and x axes
-    range_x = (0, df['Pitch_length'].max())
-    range_y = (0, df['Pitch_width'].max())
-
-    # show the sprints on the football pitch
     # line connecting the start and end points
     lines = alt.Chart(df).mark_line(
-        color='black'
     ).encode(
-        x=alt.X('Lon_start_local', scale=alt.Scale(domain=range_x)),
-        y=alt.Y('Lat_start_local', scale=alt.Scale(domain=range_y)),
+        x=alt.X('Lon_start_local', scale=alt.Scale(domain=(0, pitch_length))),
+        y=alt.Y('Lat_start_local', scale=alt.Scale(domain=(0, pitch_width))),
         x2='Lon_end_local',
         y2='Lat_end_local',
-    ).properties(
-        height=500
     )
 
-    st.altair_chart(pitch + lines, use_container_width=True)
+    st.altair_chart(pitch)
+    # st.altair_chart(pitch + lines)
+
+    # example test
+    source = pd.DataFrame.from_records(
+        [
+            # {
+            #     "x": 2.5,
+            #     "y": 0.5,
+            #     "img": "https://vega.github.io/vega-datasets/data/ffox.png",
+            # },
+            {
+                "x": -60/4,
+                "y": -29/4,
+                "img": image_base64,
+            },
+            # {
+            #     "x": 2.5,
+            #     "y": 2.5,
+            #     "img": "https://vega.github.io/vega-datasets/data/7zip.png",
+            # },
+        ]
+    )
+
+    pitch = alt.Chart(source).mark_image(
+        width=1920/4,
+        height=1218/4,
+        aspect=False,
+        align="left",
+        baseline="bottom",
+    ).encode(
+        x=alt.X("x", scale=alt.Scale(domain=(-60/4, 1860/4)), axis=None),
+        y=alt.Y("y", scale=alt.Scale(domain=(-29/4, 1189/4)), axis=None),
+        url="img",
+    ).properties(
+        width=1920/4,
+        height=1218/4
+    )
+
+    st.altair_chart(pitch)
+
 
 def pydeck_chart(df):
     # path for each sprint
@@ -158,54 +208,6 @@ def pydeck_chart(df):
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)
-
-    # show sprints on a uniform football pitch
-    st.header('Sprints in the session on a uniform football pitch')
-
-    # get the local coordinates for the start and end points
-    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], df['Pitch_bearing'] = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
-    # use the first pitch bearing as the initial bearing
-    pitch_bearing = df['Pitch_bearing'].iloc[0]
-
-    df['local_path'] = df.apply(lambda row: [[row['Lon_start_local'], row['Lat_start_local']], [row['Lon_end_local'], row['Lat_end_local']]], axis=1)
-
-    view_state_2 = pdk.ViewState(
-        latitude=25,
-        longitude=50,
-        zoom=1,
-    )
-
-    trips_layer_2 = pdk.Layer(
-        'TripsLayer',
-        data=df,
-        get_path='local_path',
-        get_timestamps='timestamps',
-        get_color='color',
-        width_min_pixels=5,
-        current_time=100,
-        trail_length=200,
-        pickable=True,
-        auto_highlight=True,
-        highlight_color=[255, 255, 0],
-    )
-
-    # image of football pitch
-    image_path = 'assets/pitch.png'
-    # local image can only be accessed in base64 format
-    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
-    bitmap_layer = pdk.Layer(
-        'BitmapLayer',
-        data=None,
-        image= '"' + image_base64 + '"',
-        bounds=[-5, -10, df['Pitch_length'].max(), df['Pitch_width'].max()],
-    )
-    st.write(df['Pitch_length'].max(), df['Pitch_width'].max())
-
-    st.pydeck_chart(pdk.Deck(
-        map_provider=None,
-        initial_view_state=view_state_2,
-        layers=[bitmap_layer, trips_layer_2],
-    ))
 
 @st.cache_data()
 def check_range(df):

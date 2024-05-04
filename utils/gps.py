@@ -23,6 +23,29 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
+def image_proportion():
+    '''
+    The image of the football pitch is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1820x1160 pixels, centered in the image.
+            image start,    pitch start,    pitch end,  image end
+    width   0,              60,             1860,       1920
+    height  0,              29,             1189,       1218
+
+    Returns:
+    tuple: The proportion of the image width and height to the pitch width and height, and the proportion of the offsets to the pitch width and height (x_proportion, y_proportion, x_offset_p, y_offset_p).
+    '''
+    image_width = 1920
+    image_height = 1218
+    pitch_width = 1860
+    pitch_height = 1189
+
+    x_proportion = image_width / pitch_width
+    y_proportion = image_height / pitch_height
+
+    x_offset_p = (image_width - pitch_width) / pitch_width
+    y_offset_p = (image_height - pitch_height) / pitch_height
+
+    return x_proportion, y_proportion, x_offset_p, y_offset_p
+
 def get_color_settings():
     colors = [
         # colors are from https://carto.com/carto-colors/ OrYel
