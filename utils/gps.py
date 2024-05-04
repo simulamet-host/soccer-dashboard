@@ -238,7 +238,7 @@ def local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2):
     All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
 
     Returns:
-    tuple: The local coordinates of the points from the base point, and the length and width of the pitch in meters (x1, y1, x2, y2, width, length).
+    tuple: The local coordinates of the points from the base point, the length and width of the pitch in meters, and the bearing of the pitch from the base point to the top left corner (x1, y1, x2, y2, width, length, bearing).
     '''
     # find the corresponding pitch
     pitch_coordinates = get_pitches()
@@ -260,4 +260,4 @@ def local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2):
     x1, y1 = local_coordinates(d1, b1 - b)
     x2, y2 = local_coordinates(d2, b2 - b)
 
-    return x1, y1, x2, y2, width, length
+    return x1, y1, x2, y2, width, length, b

@@ -62,7 +62,7 @@ def gps_chart(df):
 
     pydeck_chart(df)
 
-    altair_chart(df)
+    # altair_chart(df)
 
 def altair_chart(df):
     st.header('Football pitch with sprints')
@@ -158,6 +158,54 @@ def pydeck_chart(df):
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)
+
+    # show sprints on a uniform football pitch
+    st.header('Sprints in the session on a uniform football pitch')
+
+    # get the local coordinates for the start and end points
+    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], df['Pitch_bearing'] = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+    # use the first pitch bearing as the initial bearing
+    pitch_bearing = df['Pitch_bearing'].iloc[0]
+
+    df['local_path'] = df.apply(lambda row: [[row['Lon_start_local'], row['Lat_start_local']], [row['Lon_end_local'], row['Lat_end_local']]], axis=1)
+
+    view_state_2 = pdk.ViewState(
+        latitude=25,
+        longitude=50,
+        zoom=1,
+    )
+
+    trips_layer_2 = pdk.Layer(
+        'TripsLayer',
+        data=df,
+        get_path='local_path',
+        get_timestamps='timestamps',
+        get_color='color',
+        width_min_pixels=5,
+        current_time=100,
+        trail_length=200,
+        pickable=True,
+        auto_highlight=True,
+        highlight_color=[255, 255, 0],
+    )
+
+    # image of football pitch
+    image_path = 'assets/pitch.png'
+    # local image can only be accessed in base64 format
+    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
+    bitmap_layer = pdk.Layer(
+        'BitmapLayer',
+        data=None,
+        image= '"' + image_base64 + '"',
+        bounds=[-5, -10, df['Pitch_length'].max(), df['Pitch_width'].max()],
+    )
+    st.write(df['Pitch_length'].max(), df['Pitch_width'].max())
+
+    st.pydeck_chart(pdk.Deck(
+        map_provider=None,
+        initial_view_state=view_state_2,
+        layers=[bitmap_layer, trips_layer_2],
+    ))
 
 @st.cache_data()
 def check_range(df):
