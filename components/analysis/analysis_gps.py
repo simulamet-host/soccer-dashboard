@@ -75,14 +75,36 @@ def altair_chart(df):
 
     # show the image in the chart
     # rotate the image by 90 degrees
-    chart = alt.Chart(source).mark_image(
+    pitch = alt.Chart(source).mark_image(
     ).encode(
         url='url',
+        # don't show tooltips about the image
+        tooltip=alt.value(None)
     ).properties(
         height=500,
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    # get the local coordinates for the start and end points
+    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'] = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+
+    # use pitch width and length as the domain for the y and x axes
+    range_x = (0, df['Pitch_length'].max())
+    range_y = (0, df['Pitch_width'].max())
+
+    # show the sprints on the football pitch
+    # line connecting the start and end points
+    lines = alt.Chart(df).mark_line(
+        color='black'
+    ).encode(
+        x=alt.X('Lon_start_local', scale=alt.Scale(domain=range_x)),
+        y=alt.Y('Lat_start_local', scale=alt.Scale(domain=range_y)),
+        x2='Lon_end_local',
+        y2='Lat_end_local',
+    ).properties(
+        height=500
+    )
+
+    st.altair_chart(pitch + lines, use_container_width=True)
 
 def pydeck_chart(df):
     # path for each sprint
