@@ -58,9 +58,10 @@ def view():
     check_range(df)
 
 def gps_chart(df):
-    st.header('Sprints in the session')
 
-    pydeck_chart(df)
+    with st.expander('Sprints on map'):
+        st.header('Sprints in the session')
+        pydeck_chart(df)
 
     plt_chart(df)
 
@@ -133,11 +134,24 @@ def plt_chart(df):
     extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
     ax.imshow(image, extent=extent)
 
+    # color the sprints based on the average speed
+    colors = df['Average_speed'].apply(gps.get_color_from_speed)
+    # convert from [236, 218, 154] to hex RGB string, for matplotlib
+    colors = colors.apply(lambda x: f'#{x[0]:02x}{x[1]:02x}{x[2]:02x}')
+
     # plot the sprints
     for index, row in df.iterrows():
-        ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3)
+        ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3, color=colors[index])
+
+        # show an arrow at the end of the sprint
+        ax.arrow(row['Lon_start_local'], row['Lat_start_local'], row['Lon_end_local'] - row['Lon_start_local'], row['Lat_end_local'] - row['Lat_start_local'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
 
     st.pyplot(fig)
+
+    # show the color legend
+    st.write('Average speed color legend:')
+    html = gps.get_color_legend()
+    st.write(html, unsafe_allow_html=True)
 
 @st.cache_data()
 def check_range(df):
