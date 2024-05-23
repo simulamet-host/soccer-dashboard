@@ -22,8 +22,8 @@ def view():
 
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
-
-        chart(new_df)
+        raw_chart(new_df)
+        pitch_chart(new_df)
 
     # show the first row of each unique time value
     st.write('First row of each unique time value')
@@ -32,10 +32,10 @@ def view():
         'lon': st.column_config.NumberColumn(format='%.7f')
     })
 
-def chart(new_df):
+def raw_chart(df):
     # plot the raw lat and lon data
     fig, ax = plt.subplots()
-    ax.plot(new_df['lon'], new_df['lat'], 'o-')
+    ax.plot(df['lon'], df['lat'], 'o-', color='red')
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     # disable scientific notation
@@ -44,4 +44,22 @@ def chart(new_df):
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
+def pitch_chart(df):
     # plot on a football pitch
+    fig, ax = plt.subplots()
+
+    # local coordinates
+    df['x'], df['y'], df['Pitch_length'], df['Pitch_width'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_point(row['lat'], row['lon']), axis=1))
+
+    # image of football pitch, with offset
+    image_path = 'assets/pitch.png'
+    image = plt.imread(image_path)
+    # todo: get the correct extent
+    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    ax.imshow(image, extent=extent)
+
+    # plot the points
+    ax.plot(df['x'], df['y'], 'o-', color='red')
+
+    st.pyplot(fig)
+

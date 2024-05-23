@@ -130,6 +130,7 @@ def plt_chart(df):
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
     image = plt.imread(image_path)
+    # todo: get the correct extent
     extent = gps.pitch_image_extent(df['Pitch_length'].max(), df['Pitch_width'].max())
     extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
     ax.imshow(image, extent=extent)
