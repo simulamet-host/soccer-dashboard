@@ -23,15 +23,7 @@ def view():
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
 
-        fig, ax = plt.subplots()
-        ax.plot(new_df['lon'], new_df['lat'], 'o-')
-        ax.set_xlabel('Longitude')
-        ax.set_ylabel('Latitude')
-        # disable scientific notation
-        ax.ticklabel_format(useOffset=False)
-        # rotate the x-axis labels
-        plt.xticks(rotation=45)
-        st.pyplot(fig)
+        chart(new_df)
 
     # show the first row of each unique time value
     st.write('First row of each unique time value')
@@ -40,3 +32,16 @@ def view():
         'lon': st.column_config.NumberColumn(format='%.7f')
     })
 
+def chart(new_df):
+    # plot the raw lat and lon data
+    fig, ax = plt.subplots()
+    ax.plot(new_df['lon'], new_df['lat'], 'o-')
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    # disable scientific notation
+    ax.ticklabel_format(useOffset=False)
+    # rotate the x-axis labels
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+    # plot on a football pitch

@@ -36,7 +36,21 @@ def test_local_coordinates():
     assert gps.local_coordinates(100, 45) == pytest.approx((70.71067811865476, 70.71067811865476))
     assert gps.local_coordinates(100, 90) == pytest.approx((100, 0))
 
-def test_local_coordinates_from_lat_lon():
+def test_find_pitch():
+    lat, lon = 63.44523733, 10.45186
+    # the result is a dictionary, and we also need approximate values
+    result = gps.find_pitch(lat, lon)
+    assert result['bearing'] == pytest.approx(36.677596149528995)
+    assert result['length'] == pytest.approx(104.61172932214025)
+    assert result['width'] == pytest.approx(67.65938702776376)
+    assert result['lat'] == [63.445152, 63.44564, 63.445077, 63.444589]
+    assert result['lon'] == [10.450687, 10.4515, 10.453186, 10.452373]
+
+def test_local_coordinates_for_two_points():
     lat1, lon1 = 63.44523733, 10.45186
     lat2, lon2 = 63.44517933, 10.452014
-    assert gps.local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2) == (41.09733383696133, 42.43931498114769, 51.08926705078824, 41.839736236557286, 67.65938702776376, 104.61172932214025, 36.677596149528995)
+    assert gps.local_coordinates_for_two_points(lat1, lon1, lat2, lon2) == (41.09733383696133, 42.43931498114769, 51.08926705078824, 41.839736236557286, 67.65938702776376, 104.61172932214025, 36.677596149528995)
+
+def test_local_coordinates_for_point():
+    lat, lon = 63.44523733, 10.45186
+    assert gps.local_coordinates_for_point(lat, lon) == (41.09733383696133, 42.43931498114769, 67.65938702776376, 104.61172932214025, 36.677596149528995)

@@ -272,7 +272,39 @@ def local_coordinates(distance, bearing):
 
     return x, y
 
-def local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2):
+def find_pitch(lat, lon):
+    '''
+    Find the pitch that contains the latitude and longitude, and return the pitch or None if the coordinates are not inside any pitch.
+
+    Parameters:
+    lat (float): The latitude.
+    lon (float): The longitude.
+
+    Returns:
+    dict: The pitch that contains the latitude and longitude.
+    '''
+    pitch_coordinates = get_pitches()
+
+    for pitch in pitch_coordinates:
+        if (lat >= min(pitch['lat']) and lat <= max(pitch['lat'])) and (lon >= min(pitch['lon']) and lon <= max(pitch['lon'])):
+            break
+    else:
+        return None
+
+    # the base point is the bottom left corner of the pitch
+    # width is the distance from the bottom left corner to the top left corner
+    # the rotation angle is the bearing from the bottom left corner to the top left corner
+    width, bearing = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], pitch['lat'][1], pitch['lon'][1])
+    # length is the distance from the bottom left corner to the bottom right corner
+    length, _ = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], pitch['lat'][3], pitch['lon'][3])
+
+    pitch['width'] = width
+    pitch['length'] = length
+    pitch['bearing'] = bearing
+
+    return pitch
+
+def local_coordinates_for_two_points(lat1, lon1, lat2, lon2):
     '''
     Given the latitude and longitude of 2 points, find the corresponding pitch, and calculate the local coordinates of the points relative to the base point of the pitch.
 
@@ -287,17 +319,12 @@ def local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2):
     tuple: The local coordinates of the points from the base point, the length and width of the pitch in meters, and the bearing of the pitch from the base point to the top left corner (x1, y1, x2, y2, width, length, bearing).
     '''
     # find the corresponding pitch
-    pitch_coordinates = get_pitches()
-    for pitch in pitch_coordinates:
-        if (lat1 >= min(pitch['lat']) and lat1 <= max(pitch['lat'])) and (lon1 >= min(pitch['lon']) and lon1 <= max(pitch['lon'])):
-            break
+    pitch = find_pitch(lat1, lon1)
 
     # todo: make sure the 2 points are on the same pitch
 
-    # find rotation angle:the bearing from the base point to the top left corner of the pitch
-    width, b = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], pitch['lat'][1], pitch['lon'][1])
-    # find the distance from the base point to the bottom right corner of the pitch
-    length, _ = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], pitch['lat'][3], pitch['lon'][3])
+    width, b = pitch['width'], pitch['bearing']
+    length = pitch['length']
 
     # find the distance and bearing from the base point to the 2 points
     d1, b1 = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat1, lon1)
@@ -307,3 +334,25 @@ def local_coordinates_from_lat_lon(lat1, lon1, lat2, lon2):
     x2, y2 = local_coordinates(d2, b2 - b)
 
     return x1, y1, x2, y2, width, length, b
+
+def local_coordinates_for_point(lat, lon):
+    '''
+    Given the latitude and longitude of one point, find the corresponding pitch, and calculate the local coordinates of the point relative to the base point of the pitch.
+
+    Parameters:
+    lat (float): The latitude of the point.
+    lon (float): The longitude of the point.
+    All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
+
+    Returns:
+    tuple: The local coordinates of the point from the base point, the length and width of the pitch in meters, and the bearing of the pitch from the base point to the top left corner (x, y, width, length, bearing).
+    '''
+    # find the corresponding pitch
+    pitch = find_pitch(lat, lon)
+
+    # find the distance and bearing from the base point to the point
+    d, b = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat, lon)
+    # calculate the local coordinates of the 2 points
+    x, y = local_coordinates(d, b - pitch['bearing'])
+
+    return x, y, pitch['width'], pitch['length'], pitch['bearing']

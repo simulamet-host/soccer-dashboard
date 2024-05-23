@@ -125,7 +125,7 @@ def plt_chart(df):
     fig, ax = plt.subplots()
 
     # local coordinates for the start and end points
-    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_from_lat_lon(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_two_points(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
