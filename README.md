@@ -49,6 +49,11 @@ To deploy the app to [Streamlit](https://share.streamlit.io/), paste the content
 - `dev` branch: default branch for development, https://soccer-dashboard.streamlit.app
 - `v2` branch: development branch for version 2, https://soccer-dashboard-v2.streamlit.app/
 
+## Tables in the Database
+
+- `gps`: some example data from the GPS dataset. The table has 1702 rows.
+- `gps-20200601`: data imported from `soccermon\2020-06-01\2020-06-01-TeamB-48bfd4ea-e9e2-45b5-befc-3383cae87fdf.parquet`. In the parquet file, each value in the `time` column has many rows; only the first row of each value was imported. The parquet file has 707830 rows in total, and the imported table has 70784 rows.
+
 ## Development
 
 ### Package Management

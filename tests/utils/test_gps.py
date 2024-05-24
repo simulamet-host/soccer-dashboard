@@ -46,6 +46,9 @@ def test_find_pitch():
     assert result['lat'] == [63.445152, 63.44564, 63.445077, 63.444589]
     assert result['lon'] == [10.450687, 10.4515, 10.453186, 10.452373]
 
+    # sometimes the pitch is not found
+    assert gps.find_pitch(1, 2) == None
+
 def test_local_coordinates_for_two_points():
     lat1, lon1 = 63.44523733, 10.45186
     lat2, lon2 = 63.44517933, 10.452014
@@ -54,3 +57,11 @@ def test_local_coordinates_for_two_points():
 def test_local_coordinates_for_point():
     lat, lon = 63.44523733, 10.45186
     assert gps.local_coordinates_for_point(lat, lon) == (41.09733383696133, 42.43931498114769, 67.65938702776376, 104.61172932214025, 36.677596149528995)
+
+    assert gps.local_coordinates_for_point(59.9172961, 10.8068681) == (0.012435724990500689, -0.00024856453259149597, 67.72861736817303, 104.99316291959485, 295.4772229067301)
+
+    assert gps.local_coordinates_for_point(59.9175581, 10.8057711) == (0.012435700662525683, 67.72836863686541, 67.72861736817303, 104.99316291959485, 295.4772229067301)
+
+    assert gps.local_coordinates_for_point(59.91841, 10.80657) == (104.68129213085548, 68.2773462389974, 67.72861736817303, 104.99316291959485, 295.4772229067301)
+
+    assert gps.local_coordinates_for_point(59.91814, 10.8076) == (102.27204755827937, 3.5385884500755878, 67.72861736817303, 104.99316291959485, 295.4772229067301)

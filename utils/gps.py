@@ -323,6 +323,9 @@ def local_coordinates_for_two_points(lat1, lon1, lat2, lon2):
 
     # todo: make sure the 2 points are on the same pitch
 
+    if pitch is None:
+        return None, None, None, None, None, None, None
+
     width, b = pitch['width'], pitch['bearing']
     length = pitch['length']
 
@@ -349,6 +352,8 @@ def local_coordinates_for_point(lat, lon):
     '''
     # find the corresponding pitch
     pitch = find_pitch(lat, lon)
+    if pitch is None:
+        return None, None, None, None, None
 
     # find the distance and bearing from the base point to the point
     d, b = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat, lon)

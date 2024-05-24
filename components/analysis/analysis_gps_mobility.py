@@ -5,12 +5,15 @@ from utils import data_fetcher
 from utils import gps
 
 def view():
-    # fetch the data from the database
-    table = 'gps'
-    columns = ['*']
-    df = data_fetcher.fetch_data(table, columns)
+    # select data table
+    table = st.radio('Select data table', ['gps', 'gps-20200601'], horizontal=True)
 
-    # each time has many rows; we use the first row of each unique time value
+    # fetch the data from the database
+    columns = ['player_name', 'lat', 'lon', 'time']
+    limit = 3000
+    df = data_fetcher.fetch_data(table, columns, limit=limit)
+
+    # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
 
     # find unique player names
@@ -22,15 +25,10 @@ def view():
 
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
-        raw_chart(new_df)
-        pitch_chart(new_df)
+        with st.expander('Raw data'):
+            raw_chart(new_df)
 
-    # show the first row of each unique time value
-    st.write('First row of each unique time value')
-    st.dataframe(df, column_config={
-        'lat': st.column_config.NumberColumn(format='%.7f'),
-        'lon': st.column_config.NumberColumn(format='%.7f')
-    })
+        pitch_chart(new_df)
 
 def raw_chart(df):
     # plot the raw lat and lon data
@@ -49,7 +47,7 @@ def pitch_chart(df):
     fig, ax = plt.subplots()
 
     # local coordinates
-    df['x'], df['y'], df['Pitch_length'], df['Pitch_width'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_point(row['lat'], row['lon']), axis=1))
+    df['x'], df['y'], df['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_point(row['lat'], row['lon']), axis=1))
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
