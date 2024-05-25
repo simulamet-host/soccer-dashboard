@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import streamlit as st
 
 from utils import data_fetcher
@@ -62,3 +63,16 @@ def pitch_chart(df):
 
     st.pyplot(fig)
 
+    # plot a heatmap
+    st.subheader('Heatmap')
+    # the number of bins in x and y directions
+    n_bins = (100, 60)
+    # count the number of points in each bin
+    mesh, x_edges, y_edges = np.histogram2d(df['x'], df['y'], bins=n_bins, range=[[0, df['Pitch_length'].max()], [0, df['Pitch_width'].max()]])
+    # plot the heatmap on the football pitch
+    fig, ax = plt.subplots()
+    ax.imshow(image, extent=extent)
+    # we want the lowest value to be transparent so that the football pitch is visible
+    mesh[mesh == 0] = np.nan
+    ax.imshow(mesh.T, cmap='YlOrRd', extent=extent, origin='lower', norm=plt.Normalize(vmin=0, vmax=10))
+    st.pyplot(fig)
