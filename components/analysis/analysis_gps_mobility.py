@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import gaussian_kde
 import streamlit as st
 
 from utils import data_fetcher
@@ -59,20 +60,23 @@ def pitch_chart(df):
     ax.imshow(image, extent=extent)
 
     # plot the points
-    ax.plot(df['x'], df['y'], 'o-', color='red')
+    ax.plot(df['x'], df['y'], 'o-', color='red', markersize=5)
 
     st.pyplot(fig)
 
     # plot a heatmap
     st.subheader('Heatmap')
-    # the number of bins in x and y directions
-    n_bins = (100, 60)
-    # count the number of points in each bin
-    mesh, x_edges, y_edges = np.histogram2d(df['x'], df['y'], bins=n_bins, range=[[0, df['Pitch_length'].max()], [0, df['Pitch_width'].max()]])
-    # plot the heatmap on the football pitch
+    x = df['x'].dropna()
+    y = df['y'].dropna()
+    xy = np.vstack([x, y])
+    # use gaussian kernel density estimation to calculate the density of the points
+    z = gaussian_kde(xy)(xy)
+
     fig, ax = plt.subplots()
+    # image of football pitch
     ax.imshow(image, extent=extent)
-    # we want the lowest value to be transparent so that the football pitch is visible
-    mesh[mesh == 0] = np.nan
-    ax.imshow(mesh.T, cmap='YlOrRd', extent=extent, origin='lower', norm=plt.Normalize(vmin=0, vmax=10))
+    # line to connect the points; set the zorder to ensure that it is below the dots; use the first color in the colormap
+    ax.plot(x, y, '-', color=plt.cm.YlOrRd(0), zorder=1)
+    # scatter plot with color based on the density
+    ax.scatter(x, y, c=z, s=15, cmap='YlOrRd', zorder=2)
     st.pyplot(fig)
