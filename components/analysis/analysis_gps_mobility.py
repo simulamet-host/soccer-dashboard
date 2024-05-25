@@ -6,12 +6,13 @@ from utils import gps
 
 def view():
     # select data table
-    table = st.radio('Select data table', ['gps', 'gps-20200601'], horizontal=True)
+    table = st.radio('Select data table', ['gps', 'gps_20200601'], horizontal=True)
 
     # fetch the data from the database
     columns = ['player_name', 'lat', 'lon', 'time']
-    limit = 3000
-    df = data_fetcher.fetch_data(table, columns, limit=limit)
+    # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
+    where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
+    df = data_fetcher.fetch_data(table, columns, where=where)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])

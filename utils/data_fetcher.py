@@ -2,13 +2,14 @@ import streamlit as st
 
 # fetch data from mysql database and return the data
 @st.cache_data()
-def fetch_from_mysql(table: str, columns: list, limit: int = None):
+def fetch_from_mysql(table: str, columns: list, where: str = None, limit: int = None):
     '''
     Fetch data from a MySQL database and return the data as a pandas DataFrame.
 
     Parameters:
     table (str): name of the table to fetch data from
     columns (list): list of columns to fetch, e.g. ['column1', 'column2'], or ['*'] to fetch all columns
+    where (str): where clause to filter the data; default is None
     limit (int): limit the number of rows to fetch; default is None
 
     Returns:
@@ -19,7 +20,7 @@ def fetch_from_mysql(table: str, columns: list, limit: int = None):
 
     # query the database
     limit_str = f'LIMIT {limit}' if limit else ''
-    query = f'SELECT {", ".join(columns)} FROM `{table}` {limit_str}'
+    query = f'SELECT {", ".join(columns)} FROM `{table}` {where} {limit_str}'
     df = conn.query(query)
 
     return df
@@ -27,8 +28,8 @@ def fetch_from_mysql(table: str, columns: list, limit: int = None):
 # fetch data and return the data
 # can choose from various sources; default is mysql
 @st.cache_data()
-def fetch_data(table: str, columns: list, source: str = 'mysql', limit: int = None):
+def fetch_data(table: str, columns: list, source: str = 'mysql', where: str = None, limit: int = None):
     if source == 'mysql':
-        return fetch_from_mysql(table, columns, limit=limit)
+        return fetch_from_mysql(table, columns, where=where, limit=limit)
     else:
         raise ValueError('Source not supported')
