@@ -1,7 +1,9 @@
+from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import gaussian_kde
 import streamlit as st
+import streamlit.components.v1 as components
 
 from utils import data_fetcher
 from utils import gps
@@ -14,7 +16,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, where=where)
+    df = data_fetcher.fetch_data(table, columns, limit=30)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
@@ -59,15 +61,21 @@ def pitch_chart(df):
     extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
     ax.imshow(image, extent=extent)
 
-    # plot the points
-    ax.plot(df['x'], df['y'], 'o-', color='red', markersize=5)
+    # drop na values and reset the index
+    x = df['x'].dropna().reset_index(drop=True)
+    y = df['y'].dropna().reset_index(drop=True)
 
+    # plot the points
+    ax.plot(x, y, 'o-', color='red', markersize=5)
     st.pyplot(fig)
 
+    # heatmap and animation
+    heatmap_chart(x, y, image, extent)
+    animation_chart(x, y, image, extent)
+
+def heatmap_chart(x, y, image, extent):
     # plot a heatmap
     st.subheader('Heatmap')
-    x = df['x'].dropna()
-    y = df['y'].dropna()
     xy = np.vstack([x, y])
     # use gaussian kernel density estimation to calculate the density of the points
     z = gaussian_kde(xy)(xy)
@@ -80,3 +88,23 @@ def pitch_chart(df):
     # scatter plot with color based on the density
     ax.scatter(x, y, c=z, s=15, cmap='YlOrRd', zorder=2)
     st.pyplot(fig)
+
+def animation_chart(x, y, image, extent):
+    # live playback/animation
+    st.subheader('Live playback')
+    fig, ax = plt.subplots()
+    xdata, ydata = [], []
+    ln, = plt.plot([], [], 'ro')
+
+    def init():
+        ax.imshow(image, extent=extent)
+        return ln,
+
+    def update(frame):
+        xdata.append(x[frame])
+        ydata.append(y[frame])
+        ln.set_data(xdata, ydata)
+        return ln,
+
+    ani = FuncAnimation(fig, update, frames=range(len(x)), init_func=init, blit=True)
+    components.html(ani.to_jshtml(), height=600)
