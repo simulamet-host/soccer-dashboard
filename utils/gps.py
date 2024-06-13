@@ -3,6 +3,7 @@ from io import BytesIO
 import math
 from PIL import Image
 
+import numpy as np
 from pygeodesy.sphericalNvector import LatLon
 
 def image_to_base64(image_path, image_format):
@@ -361,3 +362,44 @@ def local_coordinates_for_point(lat, lon):
     x, y = local_coordinates(d, b - pitch['bearing'])
 
     return x, y, pitch['width'], pitch['length'], pitch['bearing']
+
+def equirectangular(lat, lon):
+    '''
+    convert the lat and lon data to cartesian coordinates using equirectangular projection
+
+    Parameters:
+    lat (float): latitude
+    lon (float): longitude
+    All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
+
+    Returns:
+    tuple: The cartesian coordinates (x, y)
+    '''
+    # radius of the Earth in meters
+    R = 6371000
+    # convert the lat and lon data to radians
+    lat = np.radians(lat)
+    lon = np.radians(lon)
+    # convert the lat and lon data to cartesian coordinates (latitude is y, longitude is x)
+    x = R * lon * np.cos(lat)
+    y = R * lat
+
+    return x, y
+
+def rotate_coordinates(x, y, angle_degrees):
+    '''
+    Rotate the coordinates by the given angle. The rotation is counter-clockwise.
+
+    Parameters:
+    x (float): The x-coordinate.
+    y (float): The y-coordinate.
+    angle_degrees (float): The angle to rotate the coordinates, in degrees.
+
+    Returns:
+    tuple: The rotated coordinates (x, y).
+    '''
+    angle = math.radians(angle_degrees)
+    x_rotated = x * math.cos(angle) - y * math.sin(angle)
+    y_rotated = x * math.sin(angle) + y * math.cos(angle)
+
+    return x_rotated, y_rotated

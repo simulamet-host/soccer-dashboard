@@ -58,12 +58,9 @@ def view():
     check_range(df)
 
 def gps_chart(df):
-
-    with st.expander('Sprints on map'):
-        st.header('Sprints in the session')
-        pydeck_chart(df)
-
     plt_chart(df)
+
+    pydeck_chart(df)
 
 def pydeck_chart(df):
     # path for each sprint
@@ -124,6 +121,31 @@ def plt_chart(df):
 
     fig, ax = plt.subplots()
 
+    # use equirectangular projection
+    # use the first point to find the pitch
+    pitch = gps.find_pitch(df.iloc[0]['Lat_start'], df.iloc[0]['Lon_start'])
+    if pitch is None:
+        st.write('Pitch not found')
+        return
+    angle = pitch['bearing']
+    base_point = (pitch['lat'][0], pitch['lon'][0])
+    base_x, base_y = gps.equirectangular(base_point[0], base_point[1])
+
+    # use gps.equirectangular to convert the lat and lon to x and y
+    df['x_start'], df['y_start'] = zip(*df.apply(lambda row: gps.equirectangular(row['Lat_start'], row['Lon_start']), axis=1))
+    df['x_end'], df['y_end'] = zip(*df.apply(lambda row: gps.equirectangular(row['Lat_end'], row['Lon_end']), axis=1))
+    # x and y are relative to the base point
+    df['x_start'] = df['x_start'] - base_x
+    df['y_start'] = df['y_start'] - base_y
+    df['x_end'] = df['x_end'] - base_x
+    df['y_end'] = df['y_end'] - base_y
+
+    # use gps.rotate_coordinates to rotate the coordinates
+    df['rx_start'], df['ry_start'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x_start'], row['y_start'], angle), axis=1))
+    df['rx_end'], df['ry_end'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x_end'], row['y_end'], angle), axis=1))
+
+
+    # use haversine
     # local coordinates for the start and end points
     df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_two_points(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
 
@@ -142,6 +164,10 @@ def plt_chart(df):
 
     # plot the sprints
     for index, row in df.iterrows():
+        # equirectangular
+        ax.plot([row['rx_start'], row['rx_end']], [row['ry_start'], row['ry_end']], linewidth=3, color='blue')
+
+        # haversine
         ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3, color=colors[index])
 
         # show an arrow at the end of the sprint
@@ -150,6 +176,7 @@ def plt_chart(df):
     st.pyplot(fig)
 
     # show the color legend
+    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using the haversine method.')
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)

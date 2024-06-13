@@ -65,3 +65,23 @@ def test_local_coordinates_for_point():
     assert gps.local_coordinates_for_point(59.91841, 10.80657) == (104.68129213085548, 68.2773462389974, 67.72861736817303, 104.99316291959485, 295.4772229067301)
 
     assert gps.local_coordinates_for_point(59.91814, 10.8076) == (102.27204755827937, 3.5385884500755878, 67.72861736817303, 104.99316291959485, 295.4772229067301)
+
+def test_equirectangular():
+    assert gps.equirectangular(63.44523733, 10.45186) == (519562.20140327286, 7054788.510855969)
+
+    assert gps.equirectangular(59.9172961, 10.8068681) == (602335.9954182105, 6662499.344579806)
+
+def test_rotate_coordinates():
+    assert gps.rotate_coordinates(100, 0, 0) == (100, 0)
+    assert gps.rotate_coordinates(100, 0, 90) == pytest.approx((0, 100))
+    assert gps.rotate_coordinates(100, 0, 180) == pytest.approx((-100, 0))
+    assert gps.rotate_coordinates(100, 0, 270) == pytest.approx((0, -100))
+
+    assert gps.rotate_coordinates(100, 0, 30) == pytest.approx((86.60254037844386, 50))
+    assert gps.rotate_coordinates(100, 100, 30) == pytest.approx((36.602540378443884, 136.60254037844388))
+    assert gps.rotate_coordinates(100, 100, 180) == pytest.approx((-100, -100))
+    assert gps.rotate_coordinates(100, 100, 360) == pytest.approx((100, 100))
+    assert gps.rotate_coordinates(100, 100, 580) == pytest.approx((-12.325683343243782, -140.88320528055175))
+    assert gps.rotate_coordinates(0, 100, 300) == pytest.approx((86.60254037844386, 50))
+
+    assert gps.rotate_coordinates(0, -100, 90) == pytest.approx((100, 0))

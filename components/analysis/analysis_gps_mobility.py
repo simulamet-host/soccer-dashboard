@@ -21,6 +21,9 @@ def view():
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
 
+    # drop na values and reset the index
+    df = df.dropna().reset_index(drop=True)
+
     # find unique player names
     players = df['player_name'].unique()
 
@@ -30,10 +33,49 @@ def view():
 
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
-        with st.expander('Raw data'):
-            raw_chart(new_df)
+
+        new_chart(new_df)
 
         pitch_chart(new_df)
+
+        with st.expander('Original coordinates'):
+            raw_chart(new_df)
+
+def new_chart(df):
+    # new equirectangular projection
+    st.subheader('Equirectangular projection')
+
+    # use the first point to find the pitch
+    pitch = gps.find_pitch(df.iloc[0]['lat'], df.iloc[0]['lon'])
+    if pitch is None:
+        st.write('Pitch not found')
+        return
+    angle = pitch['bearing']
+    base_point = (pitch['lat'][0], pitch['lon'][0])
+    base_x, base_y = gps.equirectangular(base_point[0], base_point[1])
+
+    # use gps.equirectangular to convert the lat and lon to x and y
+    df['x'], df['y'] = zip(*df.apply(lambda row: gps.equirectangular(row['lat'], row['lon']), axis=1))
+    # x and y are relative to the base point
+    df['x'] = df['x'] - base_x
+    df['y'] = df['y'] - base_y
+
+    # use gps.rotate_coordinates to rotate the coordinates
+    df['rx'], df['ry'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x'], row['y'], angle), axis=1))
+
+    # plot the rotated x and y data
+    fig, ax = plt.subplots()
+
+    # image of football pitch, with offset
+    image_path = 'assets/pitch.png'
+    image = plt.imread(image_path)
+    # todo: get the correct extent
+    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    ax.imshow(image, extent=extent)
+
+    # plot the dots
+    ax.plot(df['rx'], df['ry'], 'o-', color='red', markersize=5)
+    st.pyplot(fig)
 
 def raw_chart(df):
     # plot the raw lat and lon data
@@ -48,6 +90,9 @@ def raw_chart(df):
     st.pyplot(fig)
 
 def pitch_chart(df):
+    # use haversine
+    st.subheader('Haversine')
+
     # plot on a football pitch
     fig, ax = plt.subplots()
 
@@ -70,8 +115,8 @@ def pitch_chart(df):
     st.pyplot(fig)
 
     # heatmap and animation
-    heatmap_chart(x, y, image, extent)
-    animation_chart(x, y, image, extent)
+    # heatmap_chart(x, y, image, extent)
+    # animation_chart(x, y, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap
