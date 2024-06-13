@@ -43,6 +43,12 @@ For security reasons, never commit the `secrets.toml` file!
 
 To deploy the app to [Streamlit](https://share.streamlit.io/), paste the contents of the `secrets.toml` file as secrets in the app settings from the admin panel. See the [Streamlit documentation](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management) for more details.
 
+### Google Cloud Storage Credentials
+
+Streamlit has [a detailed guide on how to use Google Cloud Storage with Streamlit apps](https://docs.streamlit.io/develop/tutorials/databases/gcs).
+Please follow the guide to set up the Google Cloud Storage project and get the credentials.
+Once you have the credentials, add them to the `.streamlit/secrets.toml` file too.
+
 # INTERNAL NOTES
 
 - `main` branch: production branch, alias https://soccer-dashboard.simula.no
@@ -53,6 +59,10 @@ To deploy the app to [Streamlit](https://share.streamlit.io/), paste the content
 
 - `gps`: some example data from the GPS dataset. The table has 1702 rows.
 - `gps_20200601`: data imported from `soccermon\2020-06-01\2020-06-01-TeamB-48bfd4ea-e9e2-45b5-befc-3383cae87fdf.parquet`. In the parquet file, each value in the `time` column has many rows; only the first row of each value was imported. The parquet file has 707830 rows in total, and the imported table has 70784 rows.
+
+## Google Cloud Storage
+
+We use the `soccer-dashboard-dev` folder in the `HOST-TMP` project for now.
 
 ## Development
 
