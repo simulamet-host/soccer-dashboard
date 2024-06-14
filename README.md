@@ -48,6 +48,7 @@ To deploy the app to [Streamlit](https://share.streamlit.io/), paste the content
 Streamlit has [a detailed guide on how to use Google Cloud Storage with Streamlit apps](https://docs.streamlit.io/develop/tutorials/databases/gcs).
 Please follow the guide to set up the Google Cloud Storage project and get the credentials.
 Once you have the credentials, add them to the `.streamlit/secrets.toml` file too.
+Remember to also add them as secrets in the app settings when deploying the app to Streamlit Cloud.
 
 # INTERNAL NOTES
 

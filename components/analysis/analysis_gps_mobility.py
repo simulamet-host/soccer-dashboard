@@ -17,7 +17,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=1000)
+    df = data_fetcher.fetch_data(table, columns, limit=3000)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
