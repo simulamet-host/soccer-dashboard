@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 import streamlit as st
 import streamlit.components.v1 as components
+from st_files_connection import FilesConnection
 
 from utils import data_fetcher
 from utils import gps
@@ -16,7 +17,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=30)
+    df = data_fetcher.fetch_data(table, columns, limit=1000)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
@@ -115,8 +116,8 @@ def pitch_chart(df):
     st.pyplot(fig)
 
     # heatmap and animation
-    # heatmap_chart(x, y, image, extent)
-    # animation_chart(x, y, image, extent)
+    heatmap_chart(x, y, image, extent)
+    load_animation(x, y, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap
@@ -133,6 +134,21 @@ def heatmap_chart(x, y, image, extent):
     # scatter plot with color based on the density
     ax.scatter(x, y, c=z, s=15, cmap='YlOrRd', zorder=2)
     st.pyplot(fig)
+
+def load_animation(x, y, image, extent):
+    # if the file exists, read and show the content; otherwise, create the file
+    conn = st.connection('gcs', type=FilesConnection)
+    file_path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/animation.html'
+    if conn._instance.exists(file_path):
+        with conn.open(file_path, 'r') as file:
+            ani_html = file.read()
+    else:
+        with conn.open(file_path, 'w') as file:
+            ani = animation_chart(x, y, image, extent)
+            ani_html = ani.to_jshtml()
+            file.write(ani_html)
+
+    components.html(ani_html, height=600)
 
 def animation_chart(x, y, image, extent):
     # live playback/animation
@@ -152,4 +168,5 @@ def animation_chart(x, y, image, extent):
         return ln,
 
     ani = FuncAnimation(fig, update, frames=range(len(x)), init_func=init, blit=True)
-    components.html(ani.to_jshtml(), height=600)
+
+    return ani
