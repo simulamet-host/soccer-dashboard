@@ -17,7 +17,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=3000)
+    df = data_fetcher.fetch_data(table, columns, limit=30)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
@@ -118,6 +118,7 @@ def pitch_chart(df):
     # heatmap and animation
     heatmap_chart(x, y, image, extent)
     load_animation(x, y, image, extent)
+    # step_animation_chart(x, y, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap
@@ -170,3 +171,18 @@ def animation_chart(x, y, image, extent):
     ani = FuncAnimation(fig, update, frames=range(len(x)), init_func=init, blit=True)
 
     return ani
+
+def step_animation_chart(x, y, image, extent):
+    # only show the last 3 points
+    st.subheader('Step animation')
+    fig, ax = plt.subplots()
+    ax.imshow(image, extent=extent)
+    ln, = plt.plot([], [], 'ro')
+
+    def update(i):
+        ln.set_data(x[i:i+3], y[i:i+3])
+        return ln,
+
+    ani = FuncAnimation(fig, update, frames=range(len(x)), blit=True)
+
+    components.html(ani.to_jshtml(), height=600)
