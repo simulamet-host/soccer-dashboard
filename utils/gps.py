@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 import math
 from PIL import Image
+from typing import Iterable, Tuple
 
 import numpy as np
 from pygeodesy.sphericalNvector import LatLon
@@ -305,64 +306,6 @@ def find_pitch(lat, lon):
 
     return pitch
 
-def local_coordinates_for_two_points(lat1, lon1, lat2, lon2):
-    '''
-    Given the latitude and longitude of 2 points, find the corresponding pitch, and calculate the local coordinates of the points relative to the base point of the pitch.
-
-    Parameters:
-    lat1 (float): The latitude of the first point.
-    lon1 (float): The longitude of the first point.
-    lat2 (float): The latitude of the second point.
-    lon2 (float): The longitude of the second point.
-    All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
-
-    Returns:
-    tuple: The local coordinates of the points from the base point, the length and width of the pitch in meters, and the bearing of the pitch from the base point to the top left corner (x1, y1, x2, y2, width, length, bearing).
-    '''
-    # find the corresponding pitch
-    pitch = find_pitch(lat1, lon1)
-
-    # todo: make sure the 2 points are on the same pitch
-
-    if pitch is None:
-        return None, None, None, None, None, None, None
-
-    width, b = pitch['width'], pitch['bearing']
-    length = pitch['length']
-
-    # find the distance and bearing from the base point to the 2 points
-    d1, b1 = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat1, lon1)
-    d2, b2 = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat2, lon2)
-    # calculate the local coordinates of the 2 points
-    x1, y1 = local_coordinates(d1, b1 - b)
-    x2, y2 = local_coordinates(d2, b2 - b)
-
-    return x1, y1, x2, y2, width, length, b
-
-def local_coordinates_for_point(lat, lon):
-    '''
-    Given the latitude and longitude of one point, find the corresponding pitch, and calculate the local coordinates of the point relative to the base point of the pitch.
-
-    Parameters:
-    lat (float): The latitude of the point.
-    lon (float): The longitude of the point.
-    All latitudes and longitudes are in decimal degrees, with positive values indicating north and east, and negative values indicating south and west. Example: 63.444589, 10.452373
-
-    Returns:
-    tuple: The local coordinates of the point from the base point, the length and width of the pitch in meters, and the bearing of the pitch from the base point to the top left corner (x, y, width, length, bearing).
-    '''
-    # find the corresponding pitch
-    pitch = find_pitch(lat, lon)
-    if pitch is None:
-        return None, None, None, None, None
-
-    # find the distance and bearing from the base point to the point
-    d, b = distance_and_bearing(pitch['lat'][0], pitch['lon'][0], lat, lon)
-    # calculate the local coordinates of the 2 points
-    x, y = local_coordinates(d, b - pitch['bearing'])
-
-    return x, y, pitch['width'], pitch['length'], pitch['bearing']
-
 def equirectangular(lat, lon):
     '''
     convert the lat and lon data to cartesian coordinates using equirectangular projection
@@ -376,7 +319,7 @@ def equirectangular(lat, lon):
     tuple: The cartesian coordinates (x, y)
     '''
     # radius of the Earth in meters
-    R = 6371000
+    R = 6371009
     # convert the lat and lon data to radians
     lat = np.radians(lat)
     lon = np.radians(lon)
@@ -403,3 +346,47 @@ def rotate_coordinates(x, y, angle_degrees):
     y_rotated = x * math.sin(angle) + y * math.cos(angle)
 
     return x_rotated, y_rotated
+
+def convert_coordinates(
+    lat_col: Iterable[float],
+    lon_col: Iterable[float],
+    method: str
+) -> Tuple[Tuple[float, ...], Tuple[float, ...]] or None:
+    '''
+    Takes two columns of latitude and longitude and returns the converted coordinates that can be used for plotting on a uniform football pitch.
+
+    Parameters:
+    lat_col (list-like): The column of latitude values.
+    lon_col (list-like): The column of longitude values.
+    method (str): The method to convert the coordinates. Options:
+        - 'equirectangular': equirectangular projection
+        - 'sphericalNvector': spherical N-vector based calculations. Slower.
+
+    Returns:
+    tuple: The converted x and y coordinates. Or None if the pitch is not found.
+    '''
+    # use the first point to find the pitch
+    pitch = find_pitch(lat_col.iloc[0], lon_col.iloc[0])
+    if pitch is None:
+        return None
+    angle = pitch['bearing']
+    base_point = (pitch['lat'][0], pitch['lon'][0])
+
+    if method == 'equirectangular':
+        # use equirectangular projection to convert the lat and lon to x and y
+        x_col, y_col = zip(*[equirectangular(lat, lon) for lat,lon in zip(lat_col, lon_col)])
+        # x and y are relative to the base point
+        base_x, base_y = equirectangular(base_point[0], base_point[1])
+        x_col -= base_x
+        y_col -= base_y
+        # rotate the coordinates
+        coords = [rotate_coordinates(x, y, angle) for x, y in zip(x_col, y_col)]
+
+    elif method == 'sphericalNvector':
+        # find the distance and bearing from the base point to the point using spherical N-vector based calculations
+        distance_col, bearing_col = zip(*[distance_and_bearing(*base_point, lat, lon) for lat, lon in zip(lat_col, lon_col)])
+        # calculate the coordinates of the point relative to the base point on the pitch
+        coords = [local_coordinates(d, b - angle) for d, b in zip(distance_col, bearing_col)]
+
+    x_col, y_col = zip(*coords)
+    return x_col, y_col

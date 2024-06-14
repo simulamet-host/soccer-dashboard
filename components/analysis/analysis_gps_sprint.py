@@ -122,38 +122,29 @@ def plt_chart(df):
     fig, ax = plt.subplots()
 
     # use equirectangular projection
-    # use the first point to find the pitch
-    pitch = gps.find_pitch(df.iloc[0]['Lat_start'], df.iloc[0]['Lon_start'])
-    if pitch is None:
+    coords_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='equirectangular')
+    coords_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='equirectangular')
+    if coords_start is None or coords_end is None:
         st.write('Pitch not found')
         return
-    angle = pitch['bearing']
-    base_point = (pitch['lat'][0], pitch['lon'][0])
-    base_x, base_y = gps.equirectangular(base_point[0], base_point[1])
+    df['rx_start'], df['ry_start'] = coords_start
+    df['rx_end'], df['ry_end'] = coords_end
 
-    # use gps.equirectangular to convert the lat and lon to x and y
-    df['x_start'], df['y_start'] = zip(*df.apply(lambda row: gps.equirectangular(row['Lat_start'], row['Lon_start']), axis=1))
-    df['x_end'], df['y_end'] = zip(*df.apply(lambda row: gps.equirectangular(row['Lat_end'], row['Lon_end']), axis=1))
-    # x and y are relative to the base point
-    df['x_start'] = df['x_start'] - base_x
-    df['y_start'] = df['y_start'] - base_y
-    df['x_end'] = df['x_end'] - base_x
-    df['y_end'] = df['y_end'] - base_y
-
-    # use gps.rotate_coordinates to rotate the coordinates
-    df['rx_start'], df['ry_start'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x_start'], row['y_start'], angle), axis=1))
-    df['rx_end'], df['ry_end'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x_end'], row['y_end'], angle), axis=1))
-
-
-    # use haversine
+    # use sphericalNvector
     # local coordinates for the start and end points
-    df['Lon_start_local'], df['Lat_start_local'], df['Lon_end_local'], df['Lat_end_local'], df ['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_two_points(row['Lat_start'], row['Lon_start'], row['Lat_end'], row['Lon_end']), axis=1))
+    coords_start_local = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='sphericalNvector')
+    coords_end_local = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='sphericalNvector')
+    if coords_start_local is None or coords_end_local is None:
+        st.write('Pitch not found')
+        return
+    df['Lon_start_local'], df['Lat_start_local'] = coords_start_local
+    df['Lon_end_local'], df['Lat_end_local'] = coords_end_local
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
     image = plt.imread(image_path)
     # todo: get the correct extent
-    extent = gps.pitch_image_extent(df['Pitch_length'].max(), df['Pitch_width'].max())
+    # extent = gps.pitch_image_extent(df['Pitch_length'].max(), df['Pitch_width'].max())
     extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
     ax.imshow(image, extent=extent)
 
@@ -167,7 +158,7 @@ def plt_chart(df):
         # equirectangular
         ax.plot([row['rx_start'], row['rx_end']], [row['ry_start'], row['ry_end']], linewidth=3, color='blue')
 
-        # haversine
+        # sphericalNvector
         ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3, color=colors[index])
 
         # show an arrow at the end of the sprint
@@ -176,7 +167,7 @@ def plt_chart(df):
     st.pyplot(fig)
 
     # show the color legend
-    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using the haversine method.')
+    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using sphericalNvector based calculations.')
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)

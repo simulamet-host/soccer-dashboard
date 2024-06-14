@@ -35,34 +35,22 @@ def view():
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
 
-        new_chart(new_df)
+        equi_chart(new_df)
 
         pitch_chart(new_df)
 
         with st.expander('Original coordinates'):
             raw_chart(new_df)
 
-def new_chart(df):
-    # new equirectangular projection
+def equi_chart(df):
+    # equirectangular projection
     st.subheader('Equirectangular projection')
 
-    # use the first point to find the pitch
-    pitch = gps.find_pitch(df.iloc[0]['lat'], df.iloc[0]['lon'])
-    if pitch is None:
+    # convert the lat and lon data to x and y data
+    coords = gps.convert_coordinates(df['lat'], df['lon'], method='equirectangular')
+    if coords is None:
         st.write('Pitch not found')
         return
-    angle = pitch['bearing']
-    base_point = (pitch['lat'][0], pitch['lon'][0])
-    base_x, base_y = gps.equirectangular(base_point[0], base_point[1])
-
-    # use gps.equirectangular to convert the lat and lon to x and y
-    df['x'], df['y'] = zip(*df.apply(lambda row: gps.equirectangular(row['lat'], row['lon']), axis=1))
-    # x and y are relative to the base point
-    df['x'] = df['x'] - base_x
-    df['y'] = df['y'] - base_y
-
-    # use gps.rotate_coordinates to rotate the coordinates
-    df['rx'], df['ry'] = zip(*df.apply(lambda row: gps.rotate_coordinates(row['x'], row['y'], angle), axis=1))
 
     # plot the rotated x and y data
     fig, ax = plt.subplots()
@@ -75,7 +63,7 @@ def new_chart(df):
     ax.imshow(image, extent=extent)
 
     # plot the dots
-    ax.plot(df['rx'], df['ry'], 'o-', color='red', markersize=5)
+    ax.plot(*coords, 'o-', color='red', markersize=5)
     st.pyplot(fig)
 
 def raw_chart(df):
@@ -91,14 +79,17 @@ def raw_chart(df):
     st.pyplot(fig)
 
 def pitch_chart(df):
-    # use haversine
-    st.subheader('Haversine')
+    # use sphericalNvector
+    st.subheader('SphericalNvector')
 
     # plot on a football pitch
     fig, ax = plt.subplots()
 
     # local coordinates
-    df['x'], df['y'], df['Pitch_width'], df['Pitch_length'], _ = zip(*df.apply(lambda row: gps.local_coordinates_for_point(row['lat'], row['lon']), axis=1))
+    coords = gps.convert_coordinates(df['lat'], df['lon'], method='sphericalNvector')
+    if coords is None:
+        st.write('Pitch not found')
+        return
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
@@ -107,18 +98,13 @@ def pitch_chart(df):
     extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
     ax.imshow(image, extent=extent)
 
-    # drop na values and reset the index
-    x = df['x'].dropna().reset_index(drop=True)
-    y = df['y'].dropna().reset_index(drop=True)
-
     # plot the points
-    ax.plot(x, y, 'o-', color='red', markersize=5)
+    ax.plot(*coords, 'o-', color='red', markersize=5)
     st.pyplot(fig)
 
     # heatmap and animation
-    heatmap_chart(x, y, image, extent)
-    load_animation(x, y, image, extent)
-    # step_animation_chart(x, y, image, extent)
+    heatmap_chart(*coords, image, extent)
+    load_animation(*coords, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap
@@ -137,23 +123,30 @@ def heatmap_chart(x, y, image, extent):
     st.pyplot(fig)
 
 def load_animation(x, y, image, extent):
-    # if the file exists, read and show the content; otherwise, create the file
+    # read files from Google Cloud Storage
     conn = st.connection('gcs', type=FilesConnection)
-    file_path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/animation.html'
-    if conn._instance.exists(file_path):
-        with conn.open(file_path, 'r') as file:
-            ani_html = file.read()
-    else:
-        with conn.open(file_path, 'w') as file:
-            ani = animation_chart(x, y, image, extent)
-            ani_html = ani.to_jshtml()
-            file.write(ani_html)
+    path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/'
+    names = ['animation', 'step_animation']
 
-    components.html(ani_html, height=600)
+    for name in names:
+        subheader = 'Live playback' if name == 'animation' else 'Step animation'
+        st.subheader(subheader)
+
+        file = f'{path}{name}.html'
+        # if the file exists, read and show the content; otherwise, create the file
+        if conn._instance.exists(file):
+            with conn.open(file, 'r') as file:
+                ani_html = file.read()
+        else:
+            with conn.open(file, 'w') as file:
+                ani = animation_chart(x, y, image, extent) if name == 'animation' else step_animation_chart(x, y, image, extent)
+                ani_html = ani.to_jshtml()
+                file.write(ani_html)
+
+        components.html(ani_html, height=600)
 
 def animation_chart(x, y, image, extent):
     # live playback/animation
-    st.subheader('Live playback')
     fig, ax = plt.subplots()
     xdata, ydata = [], []
     ln, = plt.plot([], [], 'ro')
@@ -174,7 +167,6 @@ def animation_chart(x, y, image, extent):
 
 def step_animation_chart(x, y, image, extent):
     # only show the last 3 points
-    st.subheader('Step animation')
     fig, ax = plt.subplots()
     ax.imshow(image, extent=extent)
     ln, = plt.plot([], [], 'ro')
@@ -185,4 +177,4 @@ def step_animation_chart(x, y, image, extent):
 
     ani = FuncAnimation(fig, update, frames=range(len(x)), blit=True)
 
-    components.html(ani.to_jshtml(), height=600)
+    return ani
