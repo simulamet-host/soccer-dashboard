@@ -35,20 +35,21 @@ def view():
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
 
-        show_charts(new_df, method='utm')
+        show_charts(new_df, method='utm', table=table)
 
         with st.expander('Original coordinates'):
             raw_chart(new_df)
 
-def show_charts(df, method):
+def show_charts(df, method, table):
     subheader = 'UTM' if method == 'utm' else method.capitalize()
     st.subheader(subheader)
 
     # convert the lat and lon data to x and y data
-    coords = gps.convert_coordinates(df['lat'], df['lon'], method=method)
-    if coords is None:
+    result = gps.convert_coordinates(df['lat'], df['lon'], method=method)
+    if result is None:
         st.write('Pitch not found')
         return
+    coords, pitch = result
 
     # plot the rotated x and y data
     fig, ax = plt.subplots()
@@ -56,8 +57,7 @@ def show_charts(df, method):
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
     image = plt.imread(image_path)
-    # todo: get the correct extent
-    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    extent = gps.pitch_image_extent(pitch['length'], pitch['width'])
     ax.imshow(image, extent=extent)
 
     # plot the dots
@@ -66,7 +66,7 @@ def show_charts(df, method):
 
     # heatmap and animation
     heatmap_chart(*coords, image, extent)
-    load_animation(*coords, image, extent)
+    load_animation(*coords, image, extent, table)
 
 def raw_chart(df):
     # plot the raw lat and lon data
@@ -96,7 +96,7 @@ def heatmap_chart(x, y, image, extent):
     ax.scatter(x, y, c=z, s=15, cmap='YlOrRd', zorder=2)
     st.pyplot(fig)
 
-def load_animation(x, y, image, extent):
+def load_animation(x, y, image, extent, table):
     # read files from Google Cloud Storage
     conn = st.connection('gcs', type=FilesConnection)
     path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/'
@@ -106,7 +106,7 @@ def load_animation(x, y, image, extent):
         subheader = 'Live playback' if name == 'animation' else 'Step animation'
         st.subheader(subheader)
 
-        file = f'{path}{name}.html'
+        file = f'{path}{name}-{table}.html'
         # if the file exists, read and show the content; otherwise, create the file
         if conn._instance.exists(file):
             with conn.open(file, 'r') as file:

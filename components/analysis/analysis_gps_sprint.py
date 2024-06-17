@@ -121,40 +121,22 @@ def plt_chart(df):
 
     fig, ax = plt.subplots()
 
-    # use equirectangular projection
-    coords_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='equirectangular')
-    coords_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='equirectangular')
-    if coords_start is None or coords_end is None:
-        st.write('Pitch not found')
-        return
-    df['rx_start'], df['ry_start'] = coords_start
-    df['rx_end'], df['ry_end'] = coords_end
-
-    # use sphericalNvector
-    # local coordinates for the start and end points
-    coords_start_local = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='sphericalNvector')
-    coords_end_local = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='sphericalNvector')
-    if coords_start_local is None or coords_end_local is None:
-        st.write('Pitch not found')
-        return
-    df['Lon_start_local'], df['Lat_start_local'] = coords_start_local
-    df['Lon_end_local'], df['Lat_end_local'] = coords_end_local
-
-    # use UTM projection
-    coords_start_utm = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='utm')
-    coords_end_utm = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='utm')
-    if coords_start_utm is None or coords_end_utm is None:
-        st.write('Pitch not found')
-        return
-    df['wx_start'], df['wy_start'] = coords_start_utm
-    df['wx_end'], df['wy_end'] = coords_end_utm
+    methods = ['equirectangular', 'sphericalNvector', 'utm']
+    for method in methods:
+        result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
+        result_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method=method)
+        if result_start is None or result_end is None:
+            st.write('Pitch not found')
+            return
+        coords_start, pitch = result_start
+        coords_end, _ = result_end
+        df[f'{method[0]}x_start'], df[f'{method[0]}y_start'] = coords_start
+        df[f'{method[0]}x_end'], df[f'{method[0]}y_end'] = coords_end
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
     image = plt.imread(image_path)
-    # todo: get the correct extent
-    # extent = gps.pitch_image_extent(df['Pitch_length'].max(), df['Pitch_width'].max())
-    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    extent = gps.pitch_image_extent(pitch['length'], pitch['width'])
     ax.imshow(image, extent=extent)
 
     # color the sprints based on the average speed
@@ -165,21 +147,21 @@ def plt_chart(df):
     # plot the sprints
     for index, row in df.iterrows():
         # equirectangular
-        ax.plot([row['rx_start'], row['rx_end']], [row['ry_start'], row['ry_end']], linewidth=3, color='blue')
+        ax.plot([row['ex_start'], row['ex_end']], [row['ey_start'], row['ey_end']], linewidth=3, color='blue')
 
         # sphericalNvector
-        ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3, color=colors[index])
+        ax.plot([row['sx_start'], row['sx_end']], [row['sy_start'], row['sy_end']], linewidth=3, color=colors[index])
 
         # UTM
-        ax.plot([row['wx_start'], row['wx_end']], [row['wy_start'], row['wy_end']], linewidth=3, color='purple')
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color='purple')
 
         # show an arrow at the end of the sprint
-        ax.arrow(row['Lon_start_local'], row['Lat_start_local'], row['Lon_end_local'] - row['Lon_start_local'], row['Lat_end_local'] - row['Lat_start_local'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
+        ax.arrow(row['sx_start'], row['sy_start'], row['sx_end'] - row['sx_start'], row['sy_end'] - row['sy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
 
     st.pyplot(fig)
 
     # show the color legend
-    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using sphericalNvector based calculations.')
+    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using sphericalNvector based calculations. Lines in purple are plotted using UTM projection.')
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)

@@ -6,7 +6,7 @@ from typing import Iterable, Tuple
 
 import numpy as np
 from pygeodesy.sphericalNvector import LatLon
-from pyproj import Transformer
+from pyproj import Geod, Transformer
 
 def image_to_base64(image_path, image_format):
     '''
@@ -252,10 +252,10 @@ def distance_and_bearing(lat1, lon1, lat2, lon2):
     Distance is in meters.
     Bearing is in degrees, measured clockwise from true north (0-360, 0 is true north). Example: 306.7583
     '''
-    p1 = LatLon(lat1, lon1)
-    p2 = LatLon(lat2, lon2)
-    d = p1.distanceTo(p2)
-    b = p1.initialBearingTo(p2)
+    # use WGS84 ellipsoid to calculate the distance and bearing, the most common ellipsoid for GPS data
+    geod = Geod(ellps="WGS84")
+    # note the parameters required by PROJ are lon first!
+    b, _, d = geod.inv(lon1, lat1, lon2, lat2)
 
     return d, b
 
@@ -352,7 +352,11 @@ def convert_coordinates(
     lat_col: Iterable[float],
     lon_col: Iterable[float],
     method: str
-) -> Tuple[Tuple[float, ...], Tuple[float, ...]] or None:
+) -> Tuple[
+        Tuple[Tuple[float, ...], Tuple[float, ...]],  # x and y coordinates
+        dict,  # pitch info
+    ]:
+
     '''
     Takes two columns of latitude and longitude and returns the converted coordinates that can be used for plotting on a uniform football pitch.
 
@@ -366,7 +370,7 @@ def convert_coordinates(
         - 'utm': UTM (Universal Transverse Mercator) projection
 
     Returns:
-    tuple: The converted x and y coordinates. Or None if the pitch is not found.
+    tuple: The converted x and y coordinates, and the pitch info. Or None if the pitch is not found.
     '''
     # use the first point to find the pitch
     pitch = find_pitch(lat_col.iloc[0], lon_col.iloc[0])
@@ -415,7 +419,7 @@ def convert_coordinates(
         coords = [rotate_coordinates(x, y, angle) for x, y in coords]
 
     x_col, y_col = zip(*coords)
-    return x_col, y_col
+    return (x_col, y_col), pitch
 
 def wgs84_to_wm(
     lat: float,
