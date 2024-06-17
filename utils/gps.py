@@ -400,7 +400,7 @@ def convert_coordinates(
         coords = [rotate_coordinates(x, y, angle) for x, y in coords]
 
     elif method == 'utm':
-        # UTM projection
+        # convert from WGS84 (GPS) to UTM (Universal Transverse Mercator)
         # find the UTM zone for the base point
         epsg = utm_zone(*base_point)
         # convert the lat and lon data to UTM coordinates
@@ -431,7 +431,7 @@ def wgs84_to_wm(
     x, y = transformer.transform(lon, lat)
 
     # Mercator projection needs a scale factor at high latitudes
-    # but even with the scale factor, the result is still quite o
+    # but even with the scale factor, the result is still quite off
     # scale_factor = math.cos(math.radians(lat))
     # x *= scale_factor
     # y *= scale_factor

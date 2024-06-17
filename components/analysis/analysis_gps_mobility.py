@@ -17,7 +17,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=1000)
+    df = data_fetcher.fetch_data(table, columns, limit=30)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
@@ -35,21 +35,17 @@ def view():
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
 
-        # equi_chart(new_df)
-
-        utm_chart(new_df)
-
-        # pitch_chart(new_df)
+        show_charts(new_df, method='utm')
 
         with st.expander('Original coordinates'):
             raw_chart(new_df)
 
-def equi_chart(df):
-    # equirectangular projection
-    st.subheader('Equirectangular projection')
+def show_charts(df, method):
+    subheader = 'UTM' if method == 'utm' else method.capitalize()
+    st.subheader(subheader)
 
     # convert the lat and lon data to x and y data
-    coords = gps.convert_coordinates(df['lat'], df['lon'], method='equirectangular')
+    coords = gps.convert_coordinates(df['lat'], df['lon'], method=method)
     if coords is None:
         st.write('Pitch not found')
         return
@@ -68,29 +64,9 @@ def equi_chart(df):
     ax.plot(*coords, 'o-', color='red', markersize=5)
     st.pyplot(fig)
 
-def utm_chart(df):
-    # UTM projection
-    st.subheader('UTM projection')
-
-    # convert the lat and lon data to x and y data
-    coords = gps.convert_coordinates(df['lat'], df['lon'], method='utm')
-    if coords is None:
-        st.write('Pitch not found')
-        return
-
-    # plot the rotated x and y data
-    fig, ax = plt.subplots()
-
-    # image of football pitch, with offset
-    image_path = 'assets/pitch.png'
-    image = plt.imread(image_path)
-    # todo: get the correct extent
-    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
-    ax.imshow(image, extent=extent)
-
-    # plot the dots
-    ax.plot(*coords, 'o-', color='red', markersize=5)
-    st.pyplot(fig)
+    # heatmap and animation
+    heatmap_chart(*coords, image, extent)
+    load_animation(*coords, image, extent)
 
 def raw_chart(df):
     # plot the raw lat and lon data
@@ -103,34 +79,6 @@ def raw_chart(df):
     # rotate the x-axis labels
     plt.xticks(rotation=45)
     st.pyplot(fig)
-
-def pitch_chart(df):
-    # use sphericalNvector
-    st.subheader('SphericalNvector')
-
-    # plot on a football pitch
-    fig, ax = plt.subplots()
-
-    # local coordinates
-    coords = gps.convert_coordinates(df['lat'], df['lon'], method='sphericalNvector')
-    if coords is None:
-        st.write('Pitch not found')
-        return
-
-    # image of football pitch, with offset
-    image_path = 'assets/pitch.png'
-    image = plt.imread(image_path)
-    # todo: get the correct extent
-    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
-    ax.imshow(image, extent=extent)
-
-    # plot the points
-    ax.plot(*coords, 'o-', color='red', markersize=5)
-    st.pyplot(fig)
-
-    # heatmap and animation
-    # heatmap_chart(*coords, image, extent)
-    # load_animation(*coords, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap
