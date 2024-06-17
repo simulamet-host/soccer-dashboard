@@ -140,6 +140,15 @@ def plt_chart(df):
     df['Lon_start_local'], df['Lat_start_local'] = coords_start_local
     df['Lon_end_local'], df['Lat_end_local'] = coords_end_local
 
+    # use UTM projection
+    coords_start_utm = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method='utm')
+    coords_end_utm = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method='utm')
+    if coords_start_utm is None or coords_end_utm is None:
+        st.write('Pitch not found')
+        return
+    df['wx_start'], df['wy_start'] = coords_start_utm
+    df['wx_end'], df['wy_end'] = coords_end_utm
+
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
     image = plt.imread(image_path)
@@ -160,6 +169,9 @@ def plt_chart(df):
 
         # sphericalNvector
         ax.plot([row['Lon_start_local'], row['Lon_end_local']], [row['Lat_start_local'], row['Lat_end_local']], linewidth=3, color=colors[index])
+
+        # UTM
+        ax.plot([row['wx_start'], row['wx_end']], [row['wy_start'], row['wy_end']], linewidth=3, color='purple')
 
         # show an arrow at the end of the sprint
         ax.arrow(row['Lon_start_local'], row['Lat_start_local'], row['Lon_end_local'] - row['Lon_start_local'], row['Lat_end_local'] - row['Lat_start_local'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])

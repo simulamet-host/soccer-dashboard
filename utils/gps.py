@@ -6,6 +6,7 @@ from typing import Iterable, Tuple
 
 import numpy as np
 from pygeodesy.sphericalNvector import LatLon
+from pyproj import Transformer
 
 def image_to_base64(image_path, image_format):
     '''
@@ -361,6 +362,8 @@ def convert_coordinates(
     method (str): The method to convert the coordinates. Options:
         - 'equirectangular': equirectangular projection
         - 'sphericalNvector': spherical N-vector based calculations. Slower.
+        - 'WebMercator': Web Mercator projection (often used in online maps)
+        - 'utm': UTM (Universal Transverse Mercator) projection
 
     Returns:
     tuple: The converted x and y coordinates. Or None if the pitch is not found.
@@ -374,13 +377,12 @@ def convert_coordinates(
 
     if method == 'equirectangular':
         # use equirectangular projection to convert the lat and lon to x and y
-        x_col, y_col = zip(*[equirectangular(lat, lon) for lat,lon in zip(lat_col, lon_col)])
+        coords = [equirectangular(lat, lon) for lat,lon in zip(lat_col, lon_col)]
         # x and y are relative to the base point
-        base_x, base_y = equirectangular(base_point[0], base_point[1])
-        x_col -= base_x
-        y_col -= base_y
+        base_x, base_y = equirectangular(*base_point)
+        coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in zip(x_col, y_col)]
+        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
 
     elif method == 'sphericalNvector':
         # find the distance and bearing from the base point to the point using spherical N-vector based calculations
@@ -388,5 +390,78 @@ def convert_coordinates(
         # calculate the coordinates of the point relative to the base point on the pitch
         coords = [local_coordinates(d, b - angle) for d, b in zip(distance_col, bearing_col)]
 
+    elif method == 'WebMercator':
+        # Web Mercator projection, often used in online maps
+        coords = [wgs84_to_wm(lat, lon) for lat, lon in zip(lat_col, lon_col)]
+        # x and y are relative to the base point
+        base_x, base_y = wgs84_to_wm(*base_point)
+        coords = [(x - base_x, y - base_y) for x, y in coords]
+        # rotate the coordinates
+        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+
+    elif method == 'utm':
+        # UTM projection
+        coords = [wgs84_to_utm(lat, lon) for lat, lon in zip(lat_col, lon_col)]
+        # x and y are relative to the base point
+        base_x, base_y = wgs84_to_utm(*base_point)
+        coords = [(x - base_x, y - base_y) for x, y in coords]
+        # rotate the coordinates
+        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+
     x_col, y_col = zip(*coords)
     return x_col, y_col
+
+def wgs84_to_wm(
+    lat: float,
+    lon: float,
+) -> Tuple[float, float]:
+    '''
+    Convert from WGS84 (GPS coordinates) to Web Mercator (coordinates used in online maps).
+    '''
+    # always_xy=True ensures the function returns in the order of x, y
+    transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+    # note the parameters required by PROJ are lon first!
+    # the current function is lat first to be consistent with the rest of the code
+    x, y = transformer.transform(lon, lat)
+
+    # Mercator projection needs a scale factor at high latitudes
+    # but even with the scale factor, the result is still quite o
+    # scale_factor = math.cos(math.radians(lat))
+    # x *= scale_factor
+    # y *= scale_factor
+
+    return x, y
+
+def wgs84_to_utm(
+    lat: float,
+    lon: float,
+) -> Tuple[float, float]:
+    '''
+    Convert from WGS84 (GPS coordinates) to UTM (Universal Transverse Mercator). UTM is often used for local maps.
+    '''
+    # the UTM zone for the given latitude and longitude, including zones in Svalbard and northern Norway
+    zone = int((lon + 180) // 6) + 1
+    if lat >= 56 and lat < 64 and lon >= 3 and lon < 12:
+        zone = 32
+    elif lat >= 72 and lat < 84:
+        if lon >= 0 and lon < 9:
+            zone = 31
+        elif lon >= 9 and lon < 21:
+            zone = 33
+        elif lon >= 21 and lon < 33:
+            zone = 35
+        elif lon >= 33 and lon < 42:
+            zone = 37
+    # the EPSG code for the UTM zone
+    epsg = f"EPSG:326{zone}"
+    # for the southern hemisphere, the EPSG code is 327xx
+    if lat < 0:
+        epsg = f"EPSG:327{zone}"
+
+    # always_xy=True ensures the function returns in the order of x, y
+    transformer = Transformer.from_crs("EPSG:4326", epsg, always_xy=True)
+    # note the parameters required by PROJ are lon first!
+    # the current function is lat first to be consistent with the rest of the code
+    x, y = transformer.transform(lon, lat)
+
+    return x, y
