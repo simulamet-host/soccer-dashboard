@@ -17,7 +17,7 @@ def view():
     columns = ['player_name', 'lat', 'lon', 'time']
     # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
     where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=30)
+    df = data_fetcher.fetch_data(table, columns, limit=1000)
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
@@ -35,9 +35,11 @@ def view():
         # plot the lat and lon data of the player
         new_df = df[df['player_name'] == player]
 
-        equi_chart(new_df)
+        # equi_chart(new_df)
 
-        pitch_chart(new_df)
+        utm_chart(new_df)
+
+        # pitch_chart(new_df)
 
         with st.expander('Original coordinates'):
             raw_chart(new_df)
@@ -48,6 +50,30 @@ def equi_chart(df):
 
     # convert the lat and lon data to x and y data
     coords = gps.convert_coordinates(df['lat'], df['lon'], method='equirectangular')
+    if coords is None:
+        st.write('Pitch not found')
+        return
+
+    # plot the rotated x and y data
+    fig, ax = plt.subplots()
+
+    # image of football pitch, with offset
+    image_path = 'assets/pitch.png'
+    image = plt.imread(image_path)
+    # todo: get the correct extent
+    extent = [-3.4870576440713417, 108.09878696621159, -1.6914846756940938, 69.35087170345784]
+    ax.imshow(image, extent=extent)
+
+    # plot the dots
+    ax.plot(*coords, 'o-', color='red', markersize=5)
+    st.pyplot(fig)
+
+def utm_chart(df):
+    # UTM projection
+    st.subheader('UTM projection')
+
+    # convert the lat and lon data to x and y data
+    coords = gps.convert_coordinates(df['lat'], df['lon'], method='utm')
     if coords is None:
         st.write('Pitch not found')
         return
@@ -103,8 +129,8 @@ def pitch_chart(df):
     st.pyplot(fig)
 
     # heatmap and animation
-    heatmap_chart(*coords, image, extent)
-    load_animation(*coords, image, extent)
+    # heatmap_chart(*coords, image, extent)
+    # load_animation(*coords, image, extent)
 
 def heatmap_chart(x, y, image, extent):
     # plot a heatmap

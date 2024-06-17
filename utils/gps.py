@@ -401,9 +401,15 @@ def convert_coordinates(
 
     elif method == 'utm':
         # UTM projection
-        coords = [wgs84_to_utm(lat, lon) for lat, lon in zip(lat_col, lon_col)]
+        # find the UTM zone for the base point
+        epsg = utm_zone(*base_point)
+        # convert the lat and lon data to UTM coordinates
+        # always_xy=True ensures the function returns in the order of x, y
+        transformer = Transformer.from_crs("EPSG:4326", epsg, always_xy=True)
+        # note the parameters required by PROJ are lon first!
+        coords = [transformer.transform(lon, lat) for lat, lon in zip(lat_col, lon_col)]
         # x and y are relative to the base point
-        base_x, base_y = wgs84_to_utm(*base_point)
+        base_x, base_y = transformer.transform(base_point[1], base_point[0])
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
         coords = [rotate_coordinates(x, y, angle) for x, y in coords]
@@ -432,12 +438,12 @@ def wgs84_to_wm(
 
     return x, y
 
-def wgs84_to_utm(
+def utm_zone(
     lat: float,
     lon: float,
-) -> Tuple[float, float]:
+) -> str:
     '''
-    Convert from WGS84 (GPS coordinates) to UTM (Universal Transverse Mercator). UTM is often used for local maps.
+    Find the UTM zone for the given latitude and longitude and return the EPSG code for the UTM zone.
     '''
     # the UTM zone for the given latitude and longitude, including zones in Svalbard and northern Norway
     zone = int((lon + 180) // 6) + 1
@@ -458,10 +464,4 @@ def wgs84_to_utm(
     if lat < 0:
         epsg = f"EPSG:327{zone}"
 
-    # always_xy=True ensures the function returns in the order of x, y
-    transformer = Transformer.from_crs("EPSG:4326", epsg, always_xy=True)
-    # note the parameters required by PROJ are lon first!
-    # the current function is lat first to be consistent with the rest of the code
-    x, y = transformer.transform(lon, lat)
-
-    return x, y
+    return epsg
