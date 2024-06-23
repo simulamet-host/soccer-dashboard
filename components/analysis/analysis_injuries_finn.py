@@ -62,6 +62,7 @@ def visualize(df):
 
     vis_overview(df)
     vis_feature(df)
+    vis_time(df)
 
 def vis_overview(df):
     st.subheader('Overview of sessions')
@@ -69,14 +70,7 @@ def vis_overview(df):
     spec = {
         'mark': 'circle',
         'encoding': {
-            'x': {
-                'field': 'date', 'type': 'temporal',
-                'axis': {
-                    'format': '%Y-%m',
-                    'grid': True,
-                    'tickCount': {"interval": "month", "step": 3},
-                },
-            },
+            'x': date_axis(),
             'y': {'field': 'player_id', 'type': 'nominal'},
             'color': {'field': 'session', 'type': 'nominal'}
         }
@@ -85,7 +79,8 @@ def vis_overview(df):
 
 def vis_feature(df):
     # visualization for a specific feature (column)
-    st.subheader('Distribution of a feature')
+    st.subheader('Distribution of a feature for all players')
+
     # exclude columns that are not suitable for visualization
     exclude = ['date', 'player_id', 'session', 'time']
     features = [col for col in df.columns if col not in exclude]
@@ -123,3 +118,54 @@ def vis_feature(df):
             }, use_container_width=True)
 
             st.write(df[feature].value_counts())
+
+def vis_time(df):
+    # time series plot showing how a feature changes over time for selected player(s)
+    st.subheader('Feature over time for selected player(s)')
+
+    # exclude columns that are not suitable for visualization
+    exclude = ['date', 'player_id', 'session', 'time']
+    features = [col for col in df.columns if col not in exclude]
+
+    # select player(s)
+    players = df['player_id'].unique()
+    player = st.multiselect('Select player(s)', players, players[0])
+    # select a feature to visualize
+    feature = st.selectbox('Select a feature to visualize', features)
+
+    # filter the data
+    player_df = df[df['player_id'].isin(player)]
+
+    # line chart for numerical features
+    if player_df[feature].dtype in ['int64', 'float64']:
+        st.vega_lite_chart(player_df, {
+            'mark': 'line',
+            'encoding': {
+                'x': date_axis(),
+                'y': {'field': feature, 'type': 'quantitative'},
+                'color': {'field': 'player_id', 'type': 'nominal'},
+            }
+        }, use_container_width=True)
+    else:
+        # scatter plot for categorical features
+        st.vega_lite_chart(player_df, {
+            'mark': 'point',
+            'encoding': {
+                'x': date_axis(),
+                'y': {'field': feature, 'type': 'nominal',},
+                'color': {'field': 'player_id', 'type': 'nominal'},
+            }
+        }, use_container_width=True)
+
+def date_axis():
+    # if the x axis is date, use the following configuration
+    x = {
+            'field': 'date', 'type': 'temporal',
+            'axis': {
+                'format': '%Y-%m',
+                'grid': True,
+                'tickCount': {"interval": "month", "step": 3},
+            },
+        }
+
+    return x
