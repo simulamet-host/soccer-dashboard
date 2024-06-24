@@ -1,4 +1,4 @@
-import altair as alt
+import matplotlib.pyplot as plt
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
@@ -58,44 +58,9 @@ def view():
     check_range(df)
 
 def gps_chart(df):
-    st.header('Sprints in the session')
+    plt_chart(df)
 
     pydeck_chart(df)
-
-    altair_chart(df)
-
-def altair_chart(df):
-    # plot lines with starting Lat and Long and ending Lat and Long
-    # use the center of the Lat and Lon values plus a small range as the domain
-    range_lat = [df['Lat_start'].mean() - 0.0005, df['Lat_end'].mean() + 0.0005]
-    range_lon = [df['Lon_start'].mean() - 0.001, df['Lon_end'].mean() + 0.001]
-
-    chart = alt.Chart(df).mark_line().encode(
-        x=alt.X('Lon_start', scale=alt.Scale(domain=range_lon)),
-        y=alt.Y('Lat_start', scale=alt.Scale(domain=range_lat)),
-        x2='Lon_end',
-        y2='Lat_end',
-        color=alt.Color('Average_speed', scale=alt.Scale(scheme='turbo')),
-    )
-
-    st.altair_chart(chart, use_container_width=True)
-
-    # image of football pitch
-    image_path = 'assets/pitch.png'
-    # altair can only show images in base64 format
-    image_base64 = gps.image_to_base64(image_path, image_format='PNG')
-    source = pd.DataFrame({'url': [image_base64]})
-
-    # show the image in the chart
-    # rotate the image by 90 degrees
-    chart = alt.Chart(source).mark_image(
-    ).encode(
-        url='url',
-    ).properties(
-        height=500,
-    )
-
-    st.altair_chart(chart, use_container_width=True)
 
 def pydeck_chart(df):
     # path for each sprint
@@ -105,19 +70,7 @@ def pydeck_chart(df):
     df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
 
     # color the paths based on the average speed
-    colors = [
-        # colors are from https://carto.com/carto-colors/ OrYel
-        #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
-        [236, 218, 154],
-        [239, 196, 126],
-        [243, 173, 106],
-        [247, 148, 93],
-        [249, 123, 87],
-        [246, 99, 86],
-        [238, 77, 90],
-    ]
-    # speed should be above 5.2
-    df['color'] = df['Average_speed'].apply(lambda x: colors[int(x - 5.2) * 3 ] if x < 7.2 else colors[-1])
+    df['color'] = df['Average_speed'].apply(gps.get_color_from_speed)
 
     trips_layer = pdk.Layer(
         'TripsLayer',
@@ -125,16 +78,13 @@ def pydeck_chart(df):
         get_path='path',
         get_timestamps='timestamps',
         get_color='color',
-        opacity=0.8,
-        width_min_pixels=2,
+        width_min_pixels=5,
         current_time=100,
-        trail_length=150,
+        trail_length=200,
         pickable=True,
         auto_highlight=True,
         highlight_color=[255, 255, 0],
     )
-
-    st.write('Fading trails indicate the direction')
 
     # use the center of the Lat and Lon values as the initial view state
     mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
@@ -156,6 +106,65 @@ def pydeck_chart(df):
             }
         }
     ))
+
+    st.write(f'Center of the map: Lat: {mean_lat}, Lon: {mean_lon}')
+    st.write('Fading trails indicate the direction.')
+
+    # because pydeck does not support color legend, we have to show the legend manually
+    st.write('Average speed color legend:')
+    html = gps.get_color_legend()
+    st.write(html, unsafe_allow_html=True)
+
+def plt_chart(df):
+    # show sprints on a uniform football pitch
+    st.header('Sprints on a uniform football pitch')
+
+    fig, ax = plt.subplots()
+
+    methods = ['equirectangular', 'sphericalNvector', 'utm']
+    for method in methods:
+        result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
+        result_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method=method)
+        if result_start is None or result_end is None:
+            st.write('Pitch not found')
+            return
+        coords_start, pitch = result_start
+        coords_end, _ = result_end
+        df[f'{method[0]}x_start'], df[f'{method[0]}y_start'] = coords_start
+        df[f'{method[0]}x_end'], df[f'{method[0]}y_end'] = coords_end
+
+    # image of football pitch, with offset
+    image_path = 'assets/pitch.png'
+    image = plt.imread(image_path)
+    extent = gps.pitch_image_extent(pitch['length'], pitch['width'])
+    ax.imshow(image, extent=extent)
+
+    # color the sprints based on the average speed
+    colors = df['Average_speed'].apply(gps.get_color_from_speed)
+    # convert from [236, 218, 154] to hex RGB string, for matplotlib
+    colors = colors.apply(lambda x: f'#{x[0]:02x}{x[1]:02x}{x[2]:02x}')
+
+    # plot the sprints
+    for index, row in df.iterrows():
+        # equirectangular
+        ax.plot([row['ex_start'], row['ex_end']], [row['ey_start'], row['ey_end']], linewidth=3, color='blue')
+
+        # sphericalNvector
+        ax.plot([row['sx_start'], row['sx_end']], [row['sy_start'], row['sy_end']], linewidth=3, color=colors[index])
+
+        # UTM
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color='purple')
+
+        # show an arrow at the end of the sprint
+        ax.arrow(row['sx_start'], row['sy_start'], row['sx_end'] - row['sx_start'], row['sy_end'] - row['sy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
+
+    st.pyplot(fig)
+
+    # show the color legend
+    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using sphericalNvector based calculations. Lines in purple are plotted using UTM projection.')
+    st.write('Average speed color legend:')
+    html = gps.get_color_legend()
+    st.write(html, unsafe_allow_html=True)
 
 @st.cache_data()
 def check_range(df):

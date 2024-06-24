@@ -1,0 +1,5 @@
+# the following command will install everything in the requirements.txt file
+-r requirements.txt
+
+# the packages used in development only
+pytest==8.1.2
