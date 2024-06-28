@@ -11,6 +11,9 @@ def view():
     last_col = df.pop('session')
     df.insert(2, 'session', last_col)
 
+    # shorten the player_id: use the first 6 characters and last 4 characters
+    df['player_id'] = df['player_id'].str[:6] + df['player_id'].str[-4:]
+
     # overview of the data
     with st.expander('Show overview of the data'):
         overview(df)
@@ -139,7 +142,7 @@ def vis_time(df):
     # line chart for numerical features
     if player_df[feature].dtype in ['int64', 'float64']:
         st.vega_lite_chart(player_df, {
-            'mark': 'line',
+            'mark': {'type': 'line', 'point': True, 'tooltip': True},
             'encoding': {
                 'x': date_axis(),
                 'y': {'field': feature, 'type': 'quantitative'},
@@ -162,7 +165,7 @@ def date_axis():
     x = {
             'field': 'date', 'type': 'temporal',
             'axis': {
-                'format': '%Y-%m',
+                'format': '%Y-%m-%d',
                 'grid': True,
                 'tickCount': {"interval": "month", "step": 3},
             },
