@@ -70,13 +70,40 @@ def visualize(df):
 def vis_overview(df):
     st.subheader('Overview of sessions')
     # x-axis is 'date', y-axis is 'player_id', plot dots for each 'session' and color by 'session'
+    # overlay: read from column 'incident_type', if the content is 'Injury', show a red dot, otherwise show nothing
     spec = {
-        'mark': 'circle',
         'encoding': {
             'x': date_axis(),
             'y': {'field': 'player_id', 'type': 'nominal'},
-            'color': {'field': 'session', 'type': 'nominal'}
-        }
+            'tooltip': [
+                {'field': 'date', 'type': 'temporal'},
+                {'field': 'player_id', 'type': 'nominal'},
+                {'field': 'session', 'type': 'nominal'},
+                {'field': 'incident_type', 'type': 'nominal'},
+            ],
+        },
+        # use independent color scales for the two layers
+        'resolve': {'scale': {'color': 'independent'}},
+        'layer': [
+            {
+                'mark': 'circle',
+                'encoding': {
+                    'color': {'field': 'session', 'type': 'nominal'},
+                }
+            },
+            {
+                'mark': 'circle',
+                'encoding': {
+                    'color': {
+                        'field': 'incident_type', 'type': 'nominal',
+                        'scale': {
+                            'domain': ['Injury'],
+                            'range': ['red'],
+                        },
+                    },
+                }
+            }
+        ]
     }
     st.vega_lite_chart(df, spec, use_container_width=True)
 
