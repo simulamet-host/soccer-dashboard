@@ -153,46 +153,123 @@ def vis_time(df):
     # time series plot showing how a feature changes over time for selected player(s)
     st.subheader('Feature over time for selected player(s)')
 
-    # exclude columns that are not suitable for visualization
-    exclude = ['date', 'player_id', 'session', 'time']
-    features = [col for col in df.columns if col not in exclude]
-
     # select player(s)
     players = df['player_id'].unique()
     player = st.multiselect('Select player(s)', players, players[0])
-    # select a feature to visualize
-    feature = st.selectbox('Select a feature to visualize', features)
+
+    # fetch the data of feature groups from Google Cloud Storage
+    # use it to generate category and feature selection dropdowns
+    file = 'host-tmp.appspot.com/soccer-dashboard-dev/Finn/feature_groups.json'
+    feature_groups = data_fetcher.read_gc_file(file, input_format='json')
+
+    # exclude columns that are not suitable for visualization
+    exclude = ['date', 'player_id', 'time']
+    for key in feature_groups:
+        feature_groups[key] = [col for col in feature_groups[key] if col not in exclude]
+
+    # select a category
+    category = st.selectbox('Select a feature category', list(feature_groups.keys()))
+    # select a feature
+    feature = st.selectbox('Select a feature to visualize', feature_groups[category])
 
     # filter the data
     player_df = df[df['player_id'].isin(player)]
 
     # line chart for numerical features
     if player_df[feature].dtype in ['int64', 'float64']:
-        st.vega_lite_chart(player_df, {
+        main_layer = {
             'mark': {'type': 'line', 'point': True, 'tooltip': True},
             'encoding': {
                 'x': date_axis(),
                 'y': {'field': feature, 'type': 'quantitative'},
-                'color': {'field': 'player_id', 'type': 'nominal'},
+                'color': {
+                    'field': 'player_id', 'type': 'nominal',
+                    'scale': {
+                        # colors from Streamlit's default palette, excluding red to avoid confusion with 'Injury'
+                        'range': [
+                            '#0068c9', # blue
+                            '#83c9ff', # light blue
+                            '#ff8700', # orange
+                            '#ffe08e', # light orange
+                            '#09ab3b', # green
+                            '#7defa1', # light green
+                            '#6d3fc0', # purple
+                            '#c89dff', # light purple
+                            '#555867', # dark grey
+                        ],
+                    },
+                },
             }
-        }, use_container_width=True)
+        }
     else:
         # scatter plot for categorical features
-        st.vega_lite_chart(player_df, {
+        # hide null values
+        main_layer = {
             'mark': 'point',
+            'transform': [{'filter': 'datum.' + feature + ' != null'}],
             'encoding': {
                 'x': date_axis(),
-                'y': {'field': feature, 'type': 'nominal',},
+                'y': {'field': feature, 'type': 'nominal'},
                 'color': {'field': 'player_id', 'type': 'nominal'},
+                'size': {'value': 100},
             }
-        }, use_container_width=True)
+        }
+
+    # overlay: read from column 'incident_type', if the content is 'Injury', show a vertical red line, otherwise show nothing
+    injury_layer = {
+        'mark': 'rule',
+        'encoding': {
+            'x': date_axis(),
+            'color': {
+                'field': 'incident_type', 'type': 'nominal',
+                'scale': {
+                    'domain': ['Injury'],
+                    'range': ['red'],
+                },
+            },
+            'size': {'value': 5},
+            'tooltip': [
+                {'field': 'date', 'type': 'temporal'},
+                {'field': 'player_id', 'type': 'nominal'},
+                {'field': 'incident_type', 'type': 'nominal'},
+            ]
+        },
+    }
+    # label for the vertical line; value is player_id
+    label_injury_layer = {
+        'mark': {
+            'type': 'text',
+            'tooltip': False,
+        },
+        'encoding': {
+            'x': date_axis(),
+            'y': {'value': 0},
+            'text': {'field': 'player_id', 'type': 'nominal'},
+            # only show the text when incident_type is 'Injury'
+            'opacity': {
+                'condition': {'test': 'datum.incident_type == "Injury"', 'value': 1},
+                'value': 0
+            },
+        },
+    }
+
+    spec = {
+        'resolve': {'scale': {'color': 'independent'}},
+        'layer': [
+            main_layer,
+            injury_layer,
+            label_injury_layer,
+        ]
+    }
+    st.vega_lite_chart(player_df, spec, use_container_width=True)
 
 def date_axis():
     # if the x axis is date, use the following configuration
     x = {
             'field': 'date', 'type': 'temporal',
             'axis': {
-                'format': '%Y-%m-%d',
+                # date format: Jan 1, 2020
+                'format': '%b %d, %Y',
                 'grid': True,
                 'tickCount': {"interval": "month", "step": 3},
             },
