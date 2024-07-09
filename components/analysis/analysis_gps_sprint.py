@@ -121,17 +121,16 @@ def plt_chart(df):
 
     fig, ax = plt.subplots()
 
-    methods = ['equirectangular', 'sphericalNvector', 'utm']
-    for method in methods:
-        result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
-        result_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method=method)
-        if result_start is None or result_end is None:
-            st.write('Pitch not found')
-            return
-        coords_start, pitch = result_start
-        coords_end, _ = result_end
-        df[f'{method[0]}x_start'], df[f'{method[0]}y_start'] = coords_start
-        df[f'{method[0]}x_end'], df[f'{method[0]}y_end'] = coords_end
+    method = 'utm'
+    result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
+    result_end = gps.convert_coordinates(df['Lat_end'], df['Lon_end'], method=method)
+    if result_start is None or result_end is None:
+        st.write('Pitch not found')
+        return
+    coords_start, pitch = result_start
+    coords_end, _ = result_end
+    df['ux_start'], df['uy_start'] = coords_start
+    df['ux_end'], df['uy_end'] = coords_end
 
     # image of football pitch, with offset
     image_path = 'assets/pitch.png'
@@ -146,22 +145,14 @@ def plt_chart(df):
 
     # plot the sprints
     for index, row in df.iterrows():
-        # equirectangular
-        ax.plot([row['ex_start'], row['ex_end']], [row['ey_start'], row['ey_end']], linewidth=3, color='blue')
-
-        # sphericalNvector
-        ax.plot([row['sx_start'], row['sx_end']], [row['sy_start'], row['sy_end']], linewidth=3, color=colors[index])
-
-        # UTM
-        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color='purple')
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=colors[index])
 
         # show an arrow at the end of the sprint
-        ax.arrow(row['sx_start'], row['sy_start'], row['sx_end'] - row['sx_start'], row['sy_end'] - row['sy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
+        ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
 
     st.pyplot(fig)
 
     # show the color legend
-    st.write('Lines in blue are plotted using equirectangular projection. Lines in orange are plotted using sphericalNvector based calculations. Lines in purple are plotted using UTM projection.')
     st.write('Average speed color legend:')
     html = gps.get_color_legend()
     st.write(html, unsafe_allow_html=True)

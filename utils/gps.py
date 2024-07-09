@@ -5,7 +5,6 @@ from PIL import Image
 from typing import Iterable, Tuple
 
 import numpy as np
-from pygeodesy.sphericalNvector import LatLon
 from pyproj import Geod, Transformer
 
 def image_to_base64(image_path, image_format):
@@ -365,7 +364,7 @@ def convert_coordinates(
     lon_col (list-like): The column of longitude values.
     method (str): The method to convert the coordinates. Options:
         - 'equirectangular': equirectangular projection
-        - 'sphericalNvector': spherical N-vector based calculations. Slower.
+        - 'distance_bearing': distance and bearing based calculations. Slower.
         - 'WebMercator': Web Mercator projection (often used in online maps)
         - 'utm': UTM (Universal Transverse Mercator) projection
 
@@ -388,8 +387,8 @@ def convert_coordinates(
         # rotate the coordinates
         coords = [rotate_coordinates(x, y, angle) for x, y in coords]
 
-    elif method == 'sphericalNvector':
-        # find the distance and bearing from the base point to the point using spherical N-vector based calculations
+    elif method == 'distance_bearing':
+        # find the distance and bearing from the base point to the point
         distance_col, bearing_col = zip(*[distance_and_bearing(*base_point, lat, lon) for lat, lon in zip(lat_col, lon_col)])
         # calculate the coordinates of the point relative to the base point on the pitch
         coords = [local_coordinates(d, b - angle) for d, b in zip(distance_col, bearing_col)]
