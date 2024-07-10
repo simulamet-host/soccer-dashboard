@@ -55,7 +55,7 @@ def view():
     st.write(df[df['Top_speed'] == df['Top_speed'].max()])
     st.write(df[df['Top_speed'] == df['Top_speed'].min()])
 
-    check_range(df)
+    # check_range(df)
 
 def gps_chart(df):
     plt_chart(df)

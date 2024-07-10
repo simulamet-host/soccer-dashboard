@@ -39,12 +39,12 @@ def select_data():
         '2020-07-10-TeamB-2f23d7d5-2326-49ce-b9c8-5a6303f785c5.parquet',
     ]
     # select match date
-    # find the unique dates from the file names
-    dates = list(set([file[:10] for file in files]))
+    # find the unique dates from the file names with a fixed order
+    dates = sorted(set([file[:10] for file in files]))
     date = st.selectbox('Select match date', dates)
     # select player
-    # find files with the selected date, and the part after date and before .parquet is the player name
-    players = [file.split('.')[0][11:] for file in files if date in file]
+    # find files with the selected date, and the part after date and before .parquet is the player name, with a fixed order
+    players = sorted(set([file[11:-8] for file in files if file[:10] == date]))
     player = st.selectbox('Select player', players)
 
     # extract path components from the selected date and player
@@ -114,6 +114,10 @@ def heatmap_chart(x, y, image, extent):
     st.pyplot(fig)
 
 def load_animation(x, y, image, extent, session):
+    # use 1 out of 5 points
+    x = x[::5]
+    y = y[::5]
+
     # read files from Google Cloud Storage
     conn = st.connection('gcs', type=FilesConnection)
     path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/'
@@ -122,17 +126,19 @@ def load_animation(x, y, image, extent, session):
     for name in names:
         subheader = 'Live playback' if name == 'animation' else 'Step animation'
         st.subheader(subheader)
+        st.write('For performance reasons, only 1% of the data is shown')
 
         file = f'{path}{name}-{session}.html'
         # if the file exists, read and show the content; otherwise, create the file
         if conn._instance.exists(file):
-            with conn.open(file, 'r') as file:
-                ani_html = file.read()
+            with conn.open(file, 'r') as f:
+                ani_html = f.read()
         else:
-            with conn.open(file, 'w') as file:
-                ani = animation_chart(x, y, image, extent) if name == 'animation' else step_animation_chart(x, y, image, extent)
-                ani_html = ani.to_jshtml()
-                file.write(ani_html)
+            ani = animation_chart(x, y, image, extent) if name == 'animation' else step_animation_chart(x, y, image, extent)
+            ani_html = ani.to_jshtml()
+            # save the animation to a file
+            with conn.open(file, 'w') as f:
+                f.write(ani_html)
 
         components.html(ani_html, height=600)
 
