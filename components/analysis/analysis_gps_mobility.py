@@ -10,37 +10,54 @@ from utils import data_fetcher
 from utils import gps
 
 def view():
-    # select data table
-    table = st.radio('Select data table', ['gps', 'gps_20200601'], horizontal=True)
-
-    # fetch the data from the database
-    columns = ['player_name', 'lat', 'lon', 'time']
-    # because there are too many rows in table gps_20200601, we only take 1 row out of every 10 rows
-    where = 'WHERE id % 10 = 0' if table == 'gps_20200601' else None
-    df = data_fetcher.fetch_data(table, columns, limit=30)
+    df, session = select_data()
 
     # each time may have many rows; we use the first row of each unique time value
     df = df.drop_duplicates(subset=['time'])
-
     # drop na values and reset the index
     df = df.dropna().reset_index(drop=True)
+    # drop rows where lat or lon is 0
+    df = df[(df['lat'] != 0) & (df['lon'] != 0)]
 
-    # find unique player names
-    players = df['player_name'].unique()
+    # use only 5% of the data
+    new_df = df.iloc[int(0.05 * len(df)):int(0.10 * len(df))]
+    st.write('For performance reasons, only 5% of the data is shown')
 
-    for player in players:
-        # the name of the player
-        st.write(f'Mobility of the player *{player}*')
+    show_charts(new_df, method='utm', session=session)
 
-        # plot the lat and lon data of the player
-        new_df = df[df['player_name'] == player]
+    with st.expander('Original coordinates'):
+        raw_chart(new_df)
 
-        show_charts(new_df, method='utm', table=table)
+def select_data():
+    # the complete path of a file is like this: host-tmp.appspot.com/soccer-dashboard-dev/SoccerMon/Objective/TeamB/2020/2020-07/2020-07-04/2020-07-04-TeamB-2f23d7d5-2326-49ce-b9c8-5a6303f785c5.parquet
+    path = 'host-tmp.appspot.com/soccer-dashboard-dev/SoccerMon/Objective/'
+    # available files
+    files = [
+        '2020-07-04-TeamB-101fbccc-ded7-33e8-b421-eaeb534097ca.parquet',
+        '2020-07-04-TeamB-247a8333-f7b0-b7d2-cda8-056c3d15eef7.parquet',
+        '2020-07-10-TeamB-101fbccc-ded7-33e8-b421-eaeb534097ca.parquet',
+        '2020-07-10-TeamB-2f23d7d5-2326-49ce-b9c8-5a6303f785c5.parquet',
+    ]
+    # select match date
+    # find the unique dates from the file names
+    dates = list(set([file[:10] for file in files]))
+    date = st.selectbox('Select match date', dates)
+    # select player
+    # find files with the selected date, and the part after date and before .parquet is the player name
+    players = [file.split('.')[0][11:] for file in files if date in file]
+    player = st.selectbox('Select player', players)
 
-        with st.expander('Original coordinates'):
-            raw_chart(new_df)
+    # extract path components from the selected date and player
+    team = player.split('-')[0]
+    year, month, _ = date.split('-')
+    session = f'{date}-{player}'
+    file = f'{path}{team}/{year}/{year}-{month}/{date}/{session}.parquet'
 
-def show_charts(df, method, table):
+    df = data_fetcher.read_gc_file(file, input_format='parquet')
+
+    return df, session
+
+def show_charts(df, method, session):
     subheader = 'UTM' if method == 'utm' else method.capitalize()
     st.subheader(subheader)
 
@@ -66,7 +83,7 @@ def show_charts(df, method, table):
 
     # heatmap and animation
     heatmap_chart(*coords, image, extent)
-    load_animation(*coords, image, extent, table)
+    load_animation(*coords, image, extent, session)
 
 def raw_chart(df):
     # plot the raw lat and lon data
@@ -96,7 +113,7 @@ def heatmap_chart(x, y, image, extent):
     ax.scatter(x, y, c=z, s=15, cmap='YlOrRd', zorder=2)
     st.pyplot(fig)
 
-def load_animation(x, y, image, extent, table):
+def load_animation(x, y, image, extent, session):
     # read files from Google Cloud Storage
     conn = st.connection('gcs', type=FilesConnection)
     path = 'host-tmp.appspot.com/soccer-dashboard-dev/animations/'
@@ -106,7 +123,7 @@ def load_animation(x, y, image, extent, table):
         subheader = 'Live playback' if name == 'animation' else 'Step animation'
         st.subheader(subheader)
 
-        file = f'{path}{name}-{table}.html'
+        file = f'{path}{name}-{session}.html'
         # if the file exists, read and show the content; otherwise, create the file
         if conn._instance.exists(file):
             with conn.open(file, 'r') as file:

@@ -6,7 +6,9 @@ from typing import Iterable, Tuple
 
 import numpy as np
 from pyproj import Geod, Transformer
+import streamlit as st
 
+@st.cache_data()
 def image_to_base64(image_path, image_format):
     '''
     Convert an image to base64 format.
@@ -25,6 +27,7 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
+@st.cache_data()
 def pitch_image_offset():
     '''
     The image of the football pitch (assets/pitch.png) is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1800x1160 pixels, centered in the image.
@@ -47,6 +50,7 @@ def pitch_image_offset():
 
     return x1, x2, y1, y2
 
+@st.cache_data()
 def pitch_image_extent(length, width):
     '''
     Consider the pitch image offset in pixels and the actual pitch length and width in meters, calculate the extent of the pitch image in meters.
@@ -71,6 +75,7 @@ def pitch_image_extent(length, width):
 
     return x1_m, x2_m, y1_m, y2_m
 
+@st.cache_data()
 def get_color_settings():
     colors = [
         # colors are from https://carto.com/carto-colors/ OrYel
@@ -89,6 +94,7 @@ def get_color_settings():
 
     return colors, min_speed, step
 
+@st.cache_data()
 def get_color_from_speed(speed):
     '''
     Get the color based on the speed.
@@ -112,6 +118,7 @@ def get_color_from_speed(speed):
 
     return color
 
+@st.cache_data()
 def get_color_legend():
     '''
     Returns:
@@ -134,6 +141,7 @@ def get_color_legend():
 
     return html
 
+@st.cache_data()
 def get_pitches():
     # latitude and longitude of the 4 corners of football pitches
     # the order is bottom left, top left, top right, bottom right (clockwise from bottom left) when the pitch is displayed as a rectangle with the long side horizontal
@@ -163,9 +171,13 @@ def get_pitches():
         #     'lat': [60.425952, 60.425342, 60.425342, 60.426059],
         #     'lon': [5.472727, 5.472581, 5.470827, 5.470827]
         # },
+        {
+            'lat': [60.426013, 60.426304, 60.425514, 60.425223],
+            'lon': [5.304449, 5.305454, 5.306391, 5.305386]
+        },
         # {
-        #     'lat': [60.426304, 60.425514, 60.425223, 60.426013],
-        #     'lon': [5.305454, 5.306391, 5.305386, 5.304449]
+        #     'lat': [60.425952, 60.425341, 60.425446, 60.426059],
+        #     'lon': [5.472728, 5.472587, 5.470685, 5.470827]
         # },
         {
             'lat': [59.917296, 59.917558, 59.918411, 59.918148],
@@ -192,10 +204,6 @@ def get_pitches():
         #     'lon': [10.584996, 10.584336, 10.582837, 10.583499]
         # },
         # {
-        #     'lat': [60.425952, 60.425341, 60.425446, 60.426059],
-        #     'lon': [5.472728, 5.472587, 5.470685, 5.470827]
-        # },
-        # {
         #     'lat': [59.921436, 59.920977, 59.921600, 59.922060],
         #     'lon': [10.805464, 10.804661, 10.803248, 10.804051]
         # },
@@ -216,6 +224,7 @@ def get_pitches():
 
     return pitch_coordinates
 
+@st.cache_data()
 def in_pitch(lat, long):
     '''
     Check if the latitude and longitude are inside any football pitch.
@@ -235,6 +244,7 @@ def in_pitch(lat, long):
 
     return False
 
+@st.cache_data()
 def distance_and_bearing(lat1, lon1, lat2, lon2):
     '''
     Given the latitude and longitude of two points, calculate the distance and initial bearing from the first point to the second point.
@@ -258,6 +268,7 @@ def distance_and_bearing(lat1, lon1, lat2, lon2):
 
     return d, b
 
+@st.cache_data()
 def local_coordinates(distance, bearing):
     '''
     Given the distance and bearing, calculate the local coordinates of a point relative to the base point (0, 0).
@@ -274,6 +285,7 @@ def local_coordinates(distance, bearing):
 
     return x, y
 
+@st.cache_data()
 def find_pitch(lat, lon):
     '''
     Find the pitch that contains the latitude and longitude, and return the pitch or None if the coordinates are not inside any pitch.
@@ -306,6 +318,7 @@ def find_pitch(lat, lon):
 
     return pitch
 
+@st.cache_data()
 def equirectangular(lat, lon):
     '''
     convert the lat and lon data to cartesian coordinates using equirectangular projection
@@ -329,6 +342,7 @@ def equirectangular(lat, lon):
 
     return x, y
 
+@st.cache_data()
 def rotate_coordinates(x, y, angle_degrees):
     '''
     Rotate the coordinates by the given angle. The rotation is counter-clockwise.
@@ -347,6 +361,7 @@ def rotate_coordinates(x, y, angle_degrees):
 
     return x_rotated, y_rotated
 
+@st.cache_data()
 def convert_coordinates(
     lat_col: Iterable[float],
     lon_col: Iterable[float],
@@ -420,6 +435,7 @@ def convert_coordinates(
     x_col, y_col = zip(*coords)
     return (x_col, y_col), pitch
 
+@st.cache_data()
 def wgs84_to_wm(
     lat: float,
     lon: float,
@@ -441,6 +457,7 @@ def wgs84_to_wm(
 
     return x, y
 
+@st.cache_data()
 def utm_zone(
     lat: float,
     lon: float,
