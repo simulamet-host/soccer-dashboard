@@ -11,13 +11,4 @@ def page_setup():
     )
 
     # sidebar menu
-    sub_pages = {
-        'Game Performance': "pages/analysis_game_performance.py",
-        'Illnesses': "pages/analysis_illnesses.py",
-        "Injuries": "pages/analysis_injuries.py",
-        "Injuries - Finn": "pages/analysis_injuries_finn.py",
-        'Training Load': "pages/analysis_training_load.py",
-        'Wellness': "pages/analysis_wellness.py",
-        'GPS': "pages/analysis_gps.py",
-    }
-    menu.menu(sub_pages, position=3)
+    menu.menu()
