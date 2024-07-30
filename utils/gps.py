@@ -8,7 +8,6 @@ import numpy as np
 from pyproj import Geod, Transformer
 import streamlit as st
 
-@st.cache_data()
 def image_to_base64(image_path, image_format):
     '''
     Convert an image to base64 format.
@@ -27,7 +26,6 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
-@st.cache_data()
 def pitch_image_offset():
     '''
     The image of the football pitch (assets/pitch.png) is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1800x1160 pixels, centered in the image.
@@ -50,7 +48,6 @@ def pitch_image_offset():
 
     return x1, x2, y1, y2
 
-@st.cache_data()
 def pitch_image_extent(length, width):
     '''
     Consider the pitch image offset in pixels and the actual pitch length and width in meters, calculate the extent of the pitch image in meters.
@@ -75,7 +72,6 @@ def pitch_image_extent(length, width):
 
     return x1_m, x2_m, y1_m, y2_m
 
-@st.cache_data()
 def get_color_settings():
     colors = [
         # colors are from https://carto.com/carto-colors/ OrYel
@@ -94,7 +90,6 @@ def get_color_settings():
 
     return colors, min_speed, step
 
-@st.cache_data()
 def get_color_from_speed(speed):
     '''
     Get the color based on the speed.
@@ -118,7 +113,6 @@ def get_color_from_speed(speed):
 
     return color
 
-@st.cache_data()
 def get_color_legend():
     '''
     Returns:
@@ -141,7 +135,6 @@ def get_color_legend():
 
     return html
 
-@st.cache_data()
 def get_pitches():
     # latitude and longitude of the 4 corners of football pitches
     # the order is bottom left, top left, top right, bottom right (clockwise from bottom left) when the pitch is displayed as a rectangle with the long side horizontal
@@ -224,7 +217,6 @@ def get_pitches():
 
     return pitch_coordinates
 
-@st.cache_data()
 def in_pitch(lat, long):
     '''
     Check if the latitude and longitude are inside any football pitch.
@@ -244,7 +236,6 @@ def in_pitch(lat, long):
 
     return False
 
-@st.cache_data()
 def distance_and_bearing(lat1, lon1, lat2, lon2):
     '''
     Given the latitude and longitude of two points, calculate the distance and initial bearing from the first point to the second point.
@@ -268,8 +259,7 @@ def distance_and_bearing(lat1, lon1, lat2, lon2):
 
     return d, b
 
-@st.cache_data()
-def local_coordinates(distance, bearing):
+def local_coordinate(distance, bearing):
     '''
     Given the distance and bearing, calculate the local coordinates of a point relative to the base point (0, 0).
     Parameters:
@@ -285,7 +275,6 @@ def local_coordinates(distance, bearing):
 
     return x, y
 
-@st.cache_data()
 def find_pitch(lat, lon):
     '''
     Find the pitch that contains the latitude and longitude, and return the pitch or None if the coordinates are not inside any pitch.
@@ -318,7 +307,6 @@ def find_pitch(lat, lon):
 
     return pitch
 
-@st.cache_data()
 def equirectangular(lat, lon):
     '''
     convert the lat and lon data to cartesian coordinates using equirectangular projection
@@ -342,8 +330,7 @@ def equirectangular(lat, lon):
 
     return x, y
 
-@st.cache_data()
-def rotate_coordinates(x, y, angle_degrees):
+def rotate_coordinate(x, y, angle_degrees):
     '''
     Rotate the coordinates by the given angle. The rotation is counter-clockwise.
 
@@ -400,13 +387,13 @@ def convert_coordinates(
         base_x, base_y = equirectangular(*base_point)
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     elif method == 'distance_bearing':
         # find the distance and bearing from the base point to the point
         distance_col, bearing_col = zip(*[distance_and_bearing(*base_point, lat, lon) for lat, lon in zip(lat_col, lon_col)])
         # calculate the coordinates of the point relative to the base point on the pitch
-        coords = [local_coordinates(d, b - angle) for d, b in zip(distance_col, bearing_col)]
+        coords = [local_coordinate(d, b - angle) for d, b in zip(distance_col, bearing_col)]
 
     elif method == 'WebMercator':
         # Web Mercator projection, often used in online maps
@@ -415,7 +402,7 @@ def convert_coordinates(
         base_x, base_y = wgs84_to_wm(*base_point)
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     elif method == 'utm':
         # convert from WGS84 (GPS) to UTM (Universal Transverse Mercator)
@@ -430,12 +417,11 @@ def convert_coordinates(
         base_x, base_y = transformer.transform(base_point[1], base_point[0])
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     x_col, y_col = zip(*coords)
     return (x_col, y_col), pitch
 
-@st.cache_data()
 def wgs84_to_wm(
     lat: float,
     lon: float,
@@ -457,7 +443,6 @@ def wgs84_to_wm(
 
     return x, y
 
-@st.cache_data()
 def utm_zone(
     lat: float,
     lon: float,
