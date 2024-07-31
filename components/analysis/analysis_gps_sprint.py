@@ -27,6 +27,9 @@ def view():
     # chart for the GPS data
     gps_chart(filtered_df.copy())
 
+    show_data(filtered_df, player, session, df)
+
+def show_data(filtered_df, player, session, df):
     # show the filtered data
     st.header(f'GPS data for player *{player}* in session *{session}*')
     st.write(filtered_df)
@@ -58,9 +61,27 @@ def view():
     # check_range(df)
 
 def gps_chart(df):
+    new_chart(df)
+
     plt_chart(df)
 
     pydeck_chart(df)
+
+def new_chart(df):
+    st.header('new chart')
+    fig, ax = plt.subplots()
+
+    # use the center of the Lat and Lon values to determine the satellite image
+    mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
+    mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
+    # zoom level
+    zoom = 17
+
+    # plot the data on satellite image
+    image = gps.fetch_sat_img(mean_lat, mean_lon, zoom)
+    ax.imshow(image)
+
+    st.pyplot(fig)
 
 def pydeck_chart(df):
     # path for each sprint

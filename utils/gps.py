@@ -1,8 +1,10 @@
 import base64
 from io import BytesIO
+from itertools import product
 import math
 from PIL import Image
-from typing import Iterable, Tuple
+import requests
+from typing import Dict, Iterable, Tuple
 
 import numpy as np
 from pyproj import Geod, Transformer
@@ -470,3 +472,108 @@ def utm_zone(
         epsg = f"EPSG:327{zone}"
 
     return epsg
+
+def fetch_sat_img(lat_deg: float, lon_deg: float, zoom: int) -> Image:
+    '''
+    Given latitude and longitude (in decimal degrees) and a zoom level, return the satellite image that cover the area.
+    '''
+    # get the tile numbers that cover the area
+    tiles = get_tile_numbers(lat_deg, lon_deg, zoom)
+    # destructure the dictionary
+    xpoint, ypoint, xtile, ytile, xmin, xmax, ymin, ymax = tiles.values()
+
+    # full size image to add the tiles to
+    tile_size = 256
+    img = Image.new('RGB',
+                    ((xmax - xmin + 1) * tile_size, (ymax - ymin + 1) * tile_size))
+
+    # loop through every tile inside the bounding box
+    for x, y in product(range(xmin, xmax + 1), range(ymin, ymax + 1)):
+        tile = fetch_tile(x, y, zoom)
+        # paste the tile into the full image
+        img.paste(tile, ((x - xmin) * tile_size, (y - ymin) * tile_size))
+
+    # crop the image to the area around the point
+    factor = 0.6
+    x_center = (xpoint - xmin) * tile_size
+    y_center = (ypoint - ymin) * tile_size
+    crop_radius = int(tile_size * factor)
+    img = img.crop(
+        (x_center - crop_radius, y_center - crop_radius,
+         x_center + crop_radius, y_center + crop_radius)
+    )
+
+    return img
+
+def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int]:
+    '''
+    Given latitude and longitude (in decimal degrees) and a zoom level, return the tile numbers that cover the area (can be multiple tiles).
+    '''
+    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    lat_rad = math.radians(lat_deg)
+    n = 2.0 ** zoom
+    xpoint = (lon_deg + 180.0) / 360.0 * n
+    ypoint = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+
+    # the tile numbers of the point
+    xtile = int(xpoint)
+    ytile = int(ypoint)
+
+    # the fractional part of the tile numbers
+    xfrac = xpoint - xtile
+    yfrac = ypoint - ytile
+
+    # if the point is near the edge of a tile, get nearby tiles as well, so the whole area can be displayed
+    threshold = 0.4
+    # the bounding box of the tiles
+    xmin = xtile
+    xmax = xtile
+    ymin = ytile
+    ymax = ytile
+
+    if xfrac < threshold:
+        xmin -= 1
+    if yfrac < threshold:
+        ymin -= 1
+
+    if xfrac > 1 - threshold:
+        xmax += 1
+    if yfrac > 1 - threshold:
+        ymax += 1
+
+    # limit the number of tiles to prevent accidental large downloads
+    assert (xmax - xmin + 1) * (ymax - ymin + 1) <= 9, 'Too many tiles to download'
+
+    # return a dictionary
+    tiles = {
+        'xpoint': xpoint,
+        'ypoint': ypoint,
+        'xtile': xtile,
+        'ytile': ytile,
+        'xmin': xmin,
+        'xmax': xmax,
+        'ymin': ymin,
+        'ymax': ymax
+    }
+
+    return tiles
+
+@st.cache_data()
+def fetch_tile(x: int, y: int, zoom: int) -> Image:
+    '''
+    Fetch one tile of the satellite image from online providers like Mapbox.
+    x and y are the tile numbers, and zoom is the zoom level.
+    '''
+    # mapbox access token
+    token = st.secrets['mapbox']['token']
+
+    # the URL for the satellite image from Mapbox
+    path = 'https://api.mapbox.com/v4/mapbox.satellite/'
+    url = f'{path}{zoom}/{x}/{y}.jpg?access_token={token}'
+
+    # make the request
+    resp = requests.get(url)
+    resp.raise_for_status()
+    image = Image.open(BytesIO(resp.content))
+
+    return image
