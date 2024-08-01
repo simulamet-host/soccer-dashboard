@@ -87,3 +87,27 @@ def test_utm_zone():
     assert gps.utm_zone(63.445152, 10.450687) == 'EPSG:32632'
 
     assert gps.utm_zone(59.917296, 10.806868) == 'EPSG:32632'
+
+def test_latlon_to_tile():
+    result1 = gps.latlon_to_tile(35.6590699, 139.7006793, 18)
+    assert round(result1[0], 4) == 232798.9302
+    assert round(result1[1], 4) == 103246.4104
+
+    result2 = gps.latlon_to_tile(63.445136579999996, 10.451842707499999, 17)
+    assert round(result2[0], 4) == 69341.3998
+    assert round(result2[1], 4) == 35412.376
+
+def test_get_tile_numbers():
+    assert gps.get_tile_numbers(63.445136579999996, 10.451842707499999, 17) == {
+        'xmin': 69340,
+        'xmax': 69341,
+        'ymin': 35411,
+        'ymax': 35412
+    }
+
+    assert gps.get_tile_numbers(63.445, 10.4495, 17) == {
+        'xmin': 69340,
+        'xmax': 69340,
+        'ymin': 35412,
+        'ymax': 35412
+    }

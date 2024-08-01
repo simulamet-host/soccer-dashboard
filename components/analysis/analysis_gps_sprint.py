@@ -74,14 +74,34 @@ def new_chart(df):
     # use the center of the Lat and Lon values to determine the satellite image
     mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
     mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
-    # zoom level
-    zoom = 17
 
-    # plot the data on satellite image
-    image = gps.fetch_sat_img(mean_lat, mean_lon, zoom)
-    ax.imshow(image)
+    # show satellite image
+    image, extent = gps.fetch_sat_img(mean_lat, mean_lon)
+    # ax.set_xlim(extent[0], extent[1])
+    # ax.set_ylim(extent[2], extent[3])
+    # setting 'extent' changes the aspect ratio, so we have to set it manually to keep the original aspect ratio of the image
+    aspect = (image.width / image.height) * (extent[1] - extent[0]) / (extent[3] - extent[2])
+    ax.imshow(image, extent=extent, aspect=aspect)
+    # plot the sprints
+    for index, row in df.iterrows():
+        ax.plot([row['Lon_start'], row['Lon_end']], [row['Lat_start'], row['Lat_end']], linewidth=2, color='red')
 
-    st.pyplot(fig)
+        # show an arrowhead at the end of the sprint
+        ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], fc='red', ec='red', width=0.00001)
+
+    # hide the axis
+    ax.axis('off')
+
+    # show Mapbox logo at the bottom left corner
+    mapbox_logo = plt.imread('assets/mapbox-logo-white.png')
+    inset_ax = ax.inset_axes([0.01, -0.04, 0.12, 0.12])
+    inset_ax.imshow(mapbox_logo)
+    inset_ax.axis('off')
+    # add text attribution at the bottom right corner
+    text_attribution = '© Mapbox © OpenStreetMap Improve this map © Maxar'
+    ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=5)
+
+    st.pyplot(fig, use_container_width=False)
 
 def pydeck_chart(df):
     # path for each sprint
@@ -168,7 +188,7 @@ def plt_chart(df):
     for index, row in df.iterrows():
         ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=colors[index])
 
-        # show an arrow at the end of the sprint
+        # show an arrowhead at the end of the sprint
         ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
 
     st.pyplot(fig)

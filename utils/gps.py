@@ -473,14 +473,22 @@ def utm_zone(
 
     return epsg
 
-def fetch_sat_img(lat_deg: float, lon_deg: float, zoom: int) -> Image:
+def fetch_sat_img(
+    lat_deg: float,
+    lon_deg: float
+) -> Tuple[
+    Image.Image,
+    Tuple[float, float, float, float]
+]:
     '''
-    Given latitude and longitude (in decimal degrees) and a zoom level, return the satellite image that cover the area.
+    Given latitude and longitude (in decimal degrees), return the satellite image that cover the area, and the extent of the image in latitude and longitude.
     '''
+    # zoom level
+    zoom = 17
     # get the tile numbers that cover the area
     tiles = get_tile_numbers(lat_deg, lon_deg, zoom)
     # destructure the dictionary
-    xpoint, ypoint, xtile, ytile, xmin, xmax, ymin, ymax = tiles.values()
+    xmin, xmax, ymin, ymax = tiles.values()
 
     # full size image to add the tiles to
     tile_size = 256
@@ -494,26 +502,52 @@ def fetch_sat_img(lat_deg: float, lon_deg: float, zoom: int) -> Image:
         img.paste(tile, ((x - xmin) * tile_size, (y - ymin) * tile_size))
 
     # crop the image to the area around the point
-    factor = 0.6
-    x_center = (xpoint - xmin) * tile_size
-    y_center = (ypoint - ymin) * tile_size
-    crop_radius = int(tile_size * factor)
-    img = img.crop(
-        (x_center - crop_radius, y_center - crop_radius,
-         x_center + crop_radius, y_center + crop_radius)
-    )
+    # add some padding around the point
+    x_padding = 0.0016
+    y_padding = 0.0007
+    lat_min = lat_deg - y_padding
+    lat_max = lat_deg + y_padding
+    lon_min = lon_deg - x_padding
+    lon_max = lon_deg + x_padding
+    # the pixel coordinates of the corners of the cropped image
+    x1, y1 = latlon_to_tile(lat_max, lon_min, zoom)
+    x2, y2 = latlon_to_tile(lat_min, lon_max, zoom)
+    x1, y1, x2, y2 = x1 * tile_size, y1 * tile_size, x2 * tile_size, y2 * tile_size
 
-    return img
+    # the arguments are relative to the top left corner
+    img = img.crop((
+        x1 - xmin * tile_size,
+        y1 - ymin * tile_size,
+        x2 - xmin * tile_size,
+        y2 - ymin * tile_size
+    ))
+
+    # the extent of the cropped image in latitude and longitude
+    extent = (lon_min, lon_max, lat_min, lat_max)
+
+    return img, extent
+
+def latlon_to_tile(
+        lat_deg: float,
+        lon_deg: float,
+        zoom: int,
+) -> Tuple[float, float]:
+    '''
+    Given latitude and longitude (in decimal degrees) and a zoom level, return the point in the tile numbering system (with fractional part).
+    '''
+    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    lat_rad = math.radians(lat_deg)
+    n = 2.0 ** zoom
+    x = (lon_deg + 180.0) / 360.0 * n
+    y = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+
+    return x, y
 
 def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int]:
     '''
     Given latitude and longitude (in decimal degrees) and a zoom level, return the tile numbers that cover the area (can be multiple tiles).
     '''
-    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-    lat_rad = math.radians(lat_deg)
-    n = 2.0 ** zoom
-    xpoint = (lon_deg + 180.0) / 360.0 * n
-    ypoint = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+    xpoint, ypoint = latlon_to_tile(lat_deg, lon_deg, zoom)
 
     # the tile numbers of the point
     xtile = int(xpoint)
@@ -546,10 +580,6 @@ def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int
 
     # return a dictionary
     tiles = {
-        'xpoint': xpoint,
-        'ypoint': ypoint,
-        'xtile': xtile,
-        'ytile': ytile,
         'xmin': xmin,
         'xmax': xmax,
         'ymin': ymin,
@@ -559,7 +589,7 @@ def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int
     return tiles
 
 @st.cache_data()
-def fetch_tile(x: int, y: int, zoom: int) -> Image:
+def fetch_tile(x: int, y: int, zoom: int) -> Image.Image:
     '''
     Fetch one tile of the satellite image from online providers like Mapbox.
     x and y are the tile numbers, and zoom is the zoom level.
