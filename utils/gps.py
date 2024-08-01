@@ -74,69 +74,6 @@ def pitch_image_extent(length, width):
 
     return x1_m, x2_m, y1_m, y2_m
 
-def get_color_settings():
-    colors = [
-        # colors are from https://carto.com/carto-colors/ OrYel
-        #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
-        [236, 218, 154],
-        [239, 196, 126],
-        [243, 173, 106],
-        [247, 148, 93],
-        [249, 123, 87],
-        [246, 99, 86],
-        [238, 77, 90],
-    ]
-
-    min_speed = 5.4
-    step = 0.4
-
-    return colors, min_speed, step
-
-def get_color_from_speed(speed):
-    '''
-    Get the color based on the speed.
-
-    Parameters:
-    speed (float): The speed.
-
-    Returns:
-    list: The RGB color.
-    '''
-    colors, min_speed, step = get_color_settings()
-
-    max_speed = min_speed + step * (len(colors) - 1)
-
-    if speed < min_speed:
-        color = colors[0]
-    elif speed > max_speed:
-        color = colors[-1]
-    else:
-        color = colors[int((speed - min_speed) / step) + 1]
-
-    return color
-
-def get_color_legend():
-    '''
-    Returns:
-    str: The color legend in HTML format.
-    '''
-    colors, min_speed, step = get_color_settings()
-
-    html = ''
-    html += '<div style="margin: 0 0 0 24px">'
-    for i, color in enumerate(colors):
-        num_str = f'{(i * step) + min_speed:.1f}'
-        html += f'<div style="display: inline-block; width: 36px;">{num_str}</div>' if i < len(colors) - 1 else ''
-    html += '</div>'
-
-    html += '<div style="margin: 0 0 20px 0">'
-    for color in colors:
-        color_str = f'rgb({color[0]}, {color[1]}, {color[2]})'
-        html += f'<div style="display: inline-block; background-color: {color_str}; height: 20px; width: 36px;"></div>'
-    html += '</div>'
-
-    return html
-
 def get_pitches():
     # latitude and longitude of the 4 corners of football pitches
     # the order is bottom left, top left, top right, bottom right (clockwise from bottom left) when the pitch is displayed as a rectangle with the long side horizontal

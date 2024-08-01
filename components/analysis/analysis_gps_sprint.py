@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import pandas as pd
-import pydeck as pdk
 import streamlit as st
 
 from utils import data_fetcher
@@ -67,9 +65,7 @@ def show_data(filtered_df, player, session, df):
 def gps_chart(df, norm):
     new_chart(df, norm)
 
-    plt_chart(df)
-
-    pydeck_chart(df)
+    plt_chart(df, norm)
 
 def new_chart(df, norm):
     st.header('new chart')
@@ -116,60 +112,7 @@ def new_chart(df, norm):
 
     st.pyplot(fig, use_container_width=False)
 
-def pydeck_chart(df):
-    # path for each sprint
-    df['path'] = df.apply(lambda row: [[row['Lon_start'], row['Lat_start']], [row['Lon_end'], row['Lat_end']]], axis=1)
-    # timestamps for each sprint. should be 32-bit floating numbers
-    # set to 0 and 100 because we only care about the start and end of the sprint
-    df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
-
-    # color the paths based on the average speed
-    df['color'] = df['Average_speed'].apply(gps.get_color_from_speed)
-
-    trips_layer = pdk.Layer(
-        'TripsLayer',
-        data=df,
-        get_path='path',
-        get_timestamps='timestamps',
-        get_color='color',
-        width_min_pixels=5,
-        current_time=100,
-        trail_length=200,
-        pickable=True,
-        auto_highlight=True,
-        highlight_color=[255, 255, 0],
-    )
-
-    # use the center of the Lat and Lon values as the initial view state
-    mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
-    mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
-    view_state = pdk.ViewState(
-        latitude=mean_lat,
-        longitude=mean_lon,
-        zoom=17,
-    )
-
-    st.pydeck_chart(pdk.Deck(
-        map_style='mapbox://styles/mapbox/satellite-v9',
-        initial_view_state=view_state,
-        layers=[trips_layer],
-        tooltip={
-            'html': 'Start: {Lat_start}, {Lon_start} <br> End: {Lat_end}, {Lon_end} <br> Average speed: {Average_speed} <br> Top speed: {Top_speed}',
-            'style': {
-                'color': 'white'
-            }
-        }
-    ))
-
-    st.write(f'Center of the map: Lat: {mean_lat}, Lon: {mean_lon}')
-    st.write('Fading trails indicate the direction.')
-
-    # because pydeck does not support color legend, we have to show the legend manually
-    st.write('Average speed color legend:')
-    html = gps.get_color_legend()
-    st.write(html, unsafe_allow_html=True)
-
-def plt_chart(df):
+def plt_chart(df, norm):
     # show sprints on a uniform football pitch
     st.header('Sprints on a uniform football pitch')
 
@@ -192,24 +135,22 @@ def plt_chart(df):
     extent = gps.pitch_image_extent(pitch['length'], pitch['width'])
     ax.imshow(image, extent=extent)
 
-    # color the sprints based on the average speed
-    colors = df['Average_speed'].apply(gps.get_color_from_speed)
-    # convert from [236, 218, 154] to hex RGB string, for matplotlib
-    colors = colors.apply(lambda x: f'#{x[0]:02x}{x[1]:02x}{x[2]:02x}')
+    # set the colormap
+    cmap = plt.cm.get_cmap('YlOrRd')
 
     # plot the sprints
     for index, row in df.iterrows():
-        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=colors[index])
+        color = cmap(norm(row['Average_speed']))
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=color)
 
         # show an arrowhead at the end of the sprint
-        ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
+        ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=color, ec=color)
+
+    # colorbar for the average speed
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.5, orientation='horizontal')
 
     st.pyplot(fig)
-
-    # show the color legend
-    st.write('Average speed color legend:')
-    html = gps.get_color_legend()
-    st.write(html, unsafe_allow_html=True)
 
 @st.cache_data()
 def check_range(df):

@@ -8,21 +8,6 @@ def test_pitch_image_offset():
 def test_pitch_image_extent():
     assert gps.pitch_image_extent(105.2300539943234, 67.95372350891176) == (-3.5076684664774467, 108.73772246080084, -1.698843087722794, 69.65256659663456)
 
-def test_get_color_from_speed():
-    assert gps.get_color_from_speed(5.2) == [236, 218, 154]
-    assert gps.get_color_from_speed(5.41) == [239, 196, 126]
-    assert gps.get_color_from_speed(5.6) == [239, 196, 126]
-    assert gps.get_color_from_speed(5.81) == [243, 173, 106]
-    assert gps.get_color_from_speed(6.0) == [243, 173, 106]
-    assert gps.get_color_from_speed(6.21) == [247, 148, 93]
-    assert gps.get_color_from_speed(6.4) == [247, 148, 93]
-    assert gps.get_color_from_speed(6.61) == [249, 123, 87]
-    assert gps.get_color_from_speed(6.8) == [249, 123, 87]
-    assert gps.get_color_from_speed(7.01) == [246, 99, 86]
-    assert gps.get_color_from_speed(7.2) == [246, 99, 86]
-    assert gps.get_color_from_speed(7.41) == [238, 77, 90]
-    assert gps.get_color_from_speed(7.6) == [238, 77, 90]
-
 def test_distance_and_bearing():
     lat1, lon1, lat2, lon2 = 63.445152, 10.450687, 63.444589, 10.452373
     d, b = gps.distance_and_bearing(lat1, lon1, lat2, lon2)
