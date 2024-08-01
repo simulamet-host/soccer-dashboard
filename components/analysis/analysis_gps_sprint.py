@@ -24,8 +24,12 @@ def view():
     # filter the data based on the selected team
     filtered_df = df[(df['Player_name'] == player) & (df['Session_Id'] == session)]
 
+    # color the sprints based on the average speed
+    # normalize the speed from the whole dataset, so the color is consistent
+    norm = plt.Normalize(df['Average_speed'].min(), df['Average_speed'].max())
+
     # chart for the GPS data
-    gps_chart(filtered_df.copy())
+    gps_chart(filtered_df.copy(), norm)
 
     show_data(filtered_df, player, session, df)
 
@@ -60,16 +64,16 @@ def show_data(filtered_df, player, session, df):
 
     # check_range(df)
 
-def gps_chart(df):
-    new_chart(df)
+def gps_chart(df, norm):
+    new_chart(df, norm)
 
     plt_chart(df)
 
     pydeck_chart(df)
 
-def new_chart(df):
+def new_chart(df, norm):
     st.header('new chart')
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
     # use the center of the Lat and Lon values to determine the satellite image
     mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
@@ -82,24 +86,33 @@ def new_chart(df):
     # setting 'extent' changes the aspect ratio, so we have to set it manually to keep the original aspect ratio of the image
     aspect = (image.width / image.height) * (extent[1] - extent[0]) / (extent[3] - extent[2])
     ax.imshow(image, extent=extent, aspect=aspect)
+
+    # set the colormap
+    cmap = plt.cm.get_cmap('YlOrRd')
+
     # plot the sprints
     for index, row in df.iterrows():
-        ax.plot([row['Lon_start'], row['Lon_end']], [row['Lat_start'], row['Lat_end']], linewidth=2, color='red')
+        color = cmap(norm(row['Average_speed']))
+        ax.plot([row['Lon_start'], row['Lon_end']], [row['Lat_start'], row['Lat_end']], linewidth=1, color=color)
 
         # show an arrowhead at the end of the sprint
-        ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], fc='red', ec='red', width=0.00001)
+        ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], width=0.000001, fc=color, ec=color, head_width=0.00003)
+
+    # colorbar for the average speed
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.7)
 
     # hide the axis
     ax.axis('off')
 
     # show Mapbox logo at the bottom left corner
     mapbox_logo = plt.imread('assets/mapbox-logo-white.png')
-    inset_ax = ax.inset_axes([0.01, -0.04, 0.12, 0.12])
+    inset_ax = ax.inset_axes([0.01, -0.04, 0.14, 0.14])
     inset_ax.imshow(mapbox_logo)
     inset_ax.axis('off')
     # add text attribution at the bottom right corner
     text_attribution = '© Mapbox © OpenStreetMap Improve this map © Maxar'
-    ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=5)
+    ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=4.8)
 
     st.pyplot(fig, use_container_width=False)
 
