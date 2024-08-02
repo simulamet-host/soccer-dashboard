@@ -10,14 +10,33 @@ def view():
     columns = ['*']
     df = data_fetcher.fetch_data(table, columns)
 
-    # radio button to select the team
-    team = st.radio('Select team', df['Team_name'].unique(), horizontal=True)
+    # select data
+    with st.expander('**Select data**', expanded=True):
+        # radio button to select the team
+        team = st.radio('Select team', df['Team_name'].unique(), horizontal=True)
 
-    # dropdown to select the player
-    player = st.selectbox('Select player', df[df['Team_name'] == team]['Player_name'].unique())
+        # dropdown to select the player
+        player = st.selectbox('Select player', df[df['Team_name'] == team]['Player_name'].unique())
 
-    # dropdown to select the session
-    session = st.selectbox('Select session', df[df['Player_name'] == player]['Session_Id'].unique())
+        # dropdown to select the session
+        session = st.selectbox('Select session', df[df['Player_name'] == player]['Session_Id'].unique())
+
+    # select style
+    with st.expander('**Customize style**', expanded=True):
+        # use satellite view or pitch view
+        view = st.radio('Select view', ['Satellite view', 'Pitch view', 'Both'], horizontal=True)
+
+        # display arrowhead at the end of the sprint
+        arrowhead = st.radio('Display arrowhead at the end of the sprint', ['Yes', 'No'], horizontal=True)
+
+        # pick color scheme
+        col1, col2 = st.columns([1, 3], vertical_alignment='bottom')
+        # the options
+        with col1:
+            color_scheme = st.radio('Pick color scheme', ['Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds', 'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu'], index=7)
+        # the image showing the color scheme
+        with col2:
+            st.image('assets/colormaps.png', width=300)
 
     # filter the data based on the selected team
     filtered_df = df[(df['Player_name'] == player) & (df['Session_Id'] == session)]
@@ -27,7 +46,7 @@ def view():
     norm = plt.Normalize(df['Average_speed'].min(), df['Average_speed'].max())
 
     # chart for the GPS data
-    gps_chart(filtered_df.copy(), norm)
+    gps_chart(filtered_df.copy(), norm, view, arrowhead, color_scheme)
 
     show_data(filtered_df, player, session, df)
 
@@ -62,13 +81,17 @@ def show_data(filtered_df, player, session, df):
 
     # check_range(df)
 
-def gps_chart(df, norm):
-    new_chart(df, norm)
+def gps_chart(df, norm, view, arrowhead, color_scheme):
+    if view == 'Satellite view' or view == 'Both':
+        satel_chart(df, norm, arrowhead, color_scheme)
+    if view == 'Pitch view' or view == 'Both':
+        pitch_chart(df, norm, arrowhead, color_scheme)
 
-    plt_chart(df, norm)
+    # the positioning of the pitch view and the satellite view is not matching perfectly
+    # tried using matplotlib.transforms.Affine2D().rotate_deg_around() to rotate the plot, but the result is also not perfect
 
-def new_chart(df, norm):
-    st.header('new chart')
+def satel_chart(df, norm, arrowhead, color_scheme):
+    st.header('Satellite view')
     fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
     # use the mean of the Lat and Lon values to find the pitch
@@ -90,15 +113,16 @@ def new_chart(df, norm):
     ax.imshow(image, extent=extent, aspect=aspect)
 
     # set the colormap
-    cmap = plt.cm.get_cmap('YlOrRd')
+    cmap = plt.cm.get_cmap(color_scheme)
 
     # plot the sprints
     for index, row in df.iterrows():
         color = cmap(norm(row['Average_speed']))
         ax.plot([row['Lon_start'], row['Lon_end']], [row['Lat_start'], row['Lat_end']], linewidth=1, color=color)
 
-        # show an arrowhead at the end of the sprint
-        ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], width=0.000001, fc=color, ec=color, head_width=0.00003)
+        if arrowhead == 'Yes':
+            # show an arrowhead at the end of the sprint
+            ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], width=0.000001, fc=color, ec=color, head_width=0.00003)
 
     # colorbar for the average speed
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
@@ -122,11 +146,11 @@ def attr_map(ax):
     text_attribution = '© Mapbox © OpenStreetMap Improve this map © Maxar'
     ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=4.8)
 
-def plt_chart(df, norm):
+def pitch_chart(df, norm, arrowhead, color_scheme):
     # show sprints on a uniform football pitch
-    st.header('Sprints on a uniform football pitch')
+    st.header('Pitch view')
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
     method = 'utm'
     result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
@@ -146,21 +170,22 @@ def plt_chart(df, norm):
     ax.imshow(image, extent=extent)
 
     # set the colormap
-    cmap = plt.cm.get_cmap('YlOrRd')
+    cmap = plt.cm.get_cmap(color_scheme)
 
     # plot the sprints
     for index, row in df.iterrows():
         color = cmap(norm(row['Average_speed']))
-        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=color)
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=2, color=color)
 
-        # show an arrowhead at the end of the sprint
-        ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=color, ec=color)
+        if arrowhead == 'Yes':
+            # show an arrowhead at the end of the sprint
+            ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=2, head_length=1.5, fc=color, ec=color)
 
     # colorbar for the average speed
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.5, orientation='horizontal')
+    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.6, orientation='horizontal')
 
-    st.pyplot(fig)
+    st.pyplot(fig, use_container_width=False)
 
 @st.cache_data()
 def check_range(df):
