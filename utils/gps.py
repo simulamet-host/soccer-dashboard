@@ -80,8 +80,8 @@ def get_pitches():
     # the bottom left corner will be used as the base point (0, 0) for calculating the local coordinates of other points on the pitch, so it is important to get the correct order
     pitch_coordinates = [
         {
-            'lat': [63.445152, 63.445640, 63.445077, 63.444589],
-            'lon': [10.450687, 10.451500, 10.453186, 10.452373]
+            'lat': [63.445152, 63.445640, 63.445078, 63.444589],
+            'lon': [10.450687, 10.451500, 10.453188, 10.452373]
         },
         # {
         #     'lat': [38.709955, 38.709013, 38.709006, 38.709948],
@@ -214,7 +214,7 @@ def local_coordinate(distance, bearing):
 
     return x, y
 
-def find_pitch(lat, lon):
+def find_pitch(lat: float, lon: float) -> Dict:
     '''
     Find the pitch that contains the latitude and longitude, and return the pitch or None if the coordinates are not inside any pitch.
 
@@ -243,6 +243,9 @@ def find_pitch(lat, lon):
     pitch['width'] = width
     pitch['length'] = length
     pitch['bearing'] = bearing
+
+    # center of the pitch
+    pitch['center'] = (np.mean(pitch['lat']), np.mean(pitch['lon']))
 
     return pitch
 
@@ -424,8 +427,7 @@ def fetch_sat_img(
     zoom = 17
     # get the tile numbers that cover the area
     tiles = get_tile_numbers(lat_deg, lon_deg, zoom)
-    # destructure the dictionary
-    xmin, xmax, ymin, ymax = tiles.values()
+    xmin, xmax, ymin, ymax = tiles['xmin'], tiles['xmax'], tiles['ymin'], tiles['ymax']
 
     # full size image to add the tiles to
     tile_size = 256
@@ -447,9 +449,8 @@ def fetch_sat_img(
     lon_min = lon_deg - x_padding
     lon_max = lon_deg + x_padding
     # the pixel coordinates of the corners of the cropped image
-    x1, y1 = latlon_to_tile(lat_max, lon_min, zoom)
-    x2, y2 = latlon_to_tile(lat_min, lon_max, zoom)
-    x1, y1, x2, y2 = x1 * tile_size, y1 * tile_size, x2 * tile_size, y2 * tile_size
+    x1, y1 = latlon_to_pixel(lat_max, lon_min, zoom, tile_size)
+    x2, y2 = latlon_to_pixel(lat_min, lon_max, zoom, tile_size)
 
     # the arguments are relative to the top left corner
     img = img.crop((
@@ -465,9 +466,9 @@ def fetch_sat_img(
     return img, extent
 
 def latlon_to_tile(
-        lat_deg: float,
-        lon_deg: float,
-        zoom: int,
+    lat_deg: float,
+    lon_deg: float,
+    zoom: int,
 ) -> Tuple[float, float]:
     '''
     Given latitude and longitude (in decimal degrees) and a zoom level, return the point in the tile numbering system (with fractional part).
@@ -477,6 +478,21 @@ def latlon_to_tile(
     n = 2.0 ** zoom
     x = (lon_deg + 180.0) / 360.0 * n
     y = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+
+    return x, y
+
+def latlon_to_pixel(
+    lat_deg: float,
+    lon_deg: float,
+    zoom: int,
+    tile_size: int,
+) -> Tuple[int, int]:
+    '''
+    Given latitude and longitude (in decimal degrees), a zoom level, and the size of a tile, return the pixel coordinates of the point
+    '''
+    xpoint, ypoint = latlon_to_tile(lat_deg, lon_deg, zoom)
+    x = int(xpoint * tile_size)
+    y = int(ypoint * tile_size)
 
     return x, y
 
@@ -495,7 +511,7 @@ def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int
     yfrac = ypoint - ytile
 
     # if the point is near the edge of a tile, get nearby tiles as well, so the whole area can be displayed
-    threshold = 0.4
+    threshold = 0.45
     # the bounding box of the tiles
     xmin = xtile
     xmax = xtile

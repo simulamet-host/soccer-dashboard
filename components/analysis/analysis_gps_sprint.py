@@ -71,16 +71,22 @@ def new_chart(df, norm):
     st.header('new chart')
     fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
-    # use the center of the Lat and Lon values to determine the satellite image
+    # use the mean of the Lat and Lon values to find the pitch
     mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
     mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
+    pitch = gps.find_pitch(mean_lat, mean_lon)
+    if pitch is None:
+        st.write('Cannot find pitch information')
+        return
 
-    # show satellite image
-    image, extent = gps.fetch_sat_img(mean_lat, mean_lon)
+    # use the center of the pitch to determine the satellite image
+    center_lat, center_lon = pitch['center']
+    image, extent = gps.fetch_sat_img(center_lat, center_lon)
+
     # ax.set_xlim(extent[0], extent[1])
     # ax.set_ylim(extent[2], extent[3])
-    # setting 'extent' changes the aspect ratio, so we have to set it manually to keep the original aspect ratio of the image
-    aspect = (image.width / image.height) * (extent[1] - extent[0]) / (extent[3] - extent[2])
+    # setting 'extent' changes the aspect ratio, so we need to set the ratio to keep the original aspect ratio of the image
+    aspect = (image.height / image.width) * (extent[1] - extent[0]) / (extent[3] - extent[2])
     ax.imshow(image, extent=extent, aspect=aspect)
 
     # set the colormap
@@ -101,6 +107,12 @@ def new_chart(df, norm):
     # hide the axis
     ax.axis('off')
 
+    # attribution for the map (Mapbox, etc.)
+    attr_map(ax)
+
+    st.pyplot(fig, use_container_width=False)
+
+def attr_map(ax):
     # show Mapbox logo at the bottom left corner
     mapbox_logo = plt.imread('assets/mapbox-logo-white.png')
     inset_ax = ax.inset_axes([0.01, -0.04, 0.14, 0.14])
@@ -109,8 +121,6 @@ def new_chart(df, norm):
     # add text attribution at the bottom right corner
     text_attribution = '© Mapbox © OpenStreetMap Improve this map © Maxar'
     ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=4.8)
-
-    st.pyplot(fig, use_container_width=False)
 
 def plt_chart(df, norm):
     # show sprints on a uniform football pitch

@@ -82,6 +82,14 @@ def test_latlon_to_tile():
     assert round(result2[0], 4) == 69341.3998
     assert round(result2[1], 4) == 35412.376
 
+def test_latlon_to_pixel():
+    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    # 232798 * 256 + 238 = 59596526
+    # 103246 * 256 + 105 = 26431081
+    assert gps.latlon_to_pixel(35.6590699, 139.7006793, 18, 256) == (59596526, 26431081)
+
+    assert gps.latlon_to_pixel(63.445136579999996, 10.451842707499999, 17, 256) == (17751398, 9065568)
+
 def test_get_tile_numbers():
     assert gps.get_tile_numbers(63.445136579999996, 10.451842707499999, 17) == {
         'xmin': 69340,
