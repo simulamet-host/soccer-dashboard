@@ -4,5 +4,5 @@ mysqlclient==2.2.4
 pyproj==3.5.0
 scipy==1.10.1
 SQLAlchemy==2.0.27
-streamlit==1.33.0
+streamlit==1.37.0
 st-files-connection==0.1.0
