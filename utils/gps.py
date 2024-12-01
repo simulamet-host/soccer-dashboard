@@ -1,14 +1,15 @@
 import base64
 from io import BytesIO
+from itertools import product
 import math
 from PIL import Image
-from typing import Iterable, Tuple
+import requests
+from typing import Dict, Iterable, Tuple
 
 import numpy as np
 from pyproj import Geod, Transformer
 import streamlit as st
 
-@st.cache_data()
 def image_to_base64(image_path, image_format):
     '''
     Convert an image to base64 format.
@@ -27,7 +28,6 @@ def image_to_base64(image_path, image_format):
 
     return f'data:image/{image_format};base64,{image_base64}'
 
-@st.cache_data()
 def pitch_image_offset():
     '''
     The image of the football pitch (assets/pitch.png) is 1920x1218 pixels. The image contains some area around the pitch, so the actual pitch area is smaller. The position of the actual pitch is 1800x1160 pixels, centered in the image.
@@ -50,7 +50,6 @@ def pitch_image_offset():
 
     return x1, x2, y1, y2
 
-@st.cache_data()
 def pitch_image_extent(length, width):
     '''
     Consider the pitch image offset in pixels and the actual pitch length and width in meters, calculate the extent of the pitch image in meters.
@@ -75,81 +74,14 @@ def pitch_image_extent(length, width):
 
     return x1_m, x2_m, y1_m, y2_m
 
-@st.cache_data()
-def get_color_settings():
-    colors = [
-        # colors are from https://carto.com/carto-colors/ OrYel
-        #ecda9a,#efc47e,#f3ad6a,#f7945d,#f97b57,#f66356,#ee4d5a
-        [236, 218, 154],
-        [239, 196, 126],
-        [243, 173, 106],
-        [247, 148, 93],
-        [249, 123, 87],
-        [246, 99, 86],
-        [238, 77, 90],
-    ]
-
-    min_speed = 5.4
-    step = 0.4
-
-    return colors, min_speed, step
-
-@st.cache_data()
-def get_color_from_speed(speed):
-    '''
-    Get the color based on the speed.
-
-    Parameters:
-    speed (float): The speed.
-
-    Returns:
-    list: The RGB color.
-    '''
-    colors, min_speed, step = get_color_settings()
-
-    max_speed = min_speed + step * (len(colors) - 1)
-
-    if speed < min_speed:
-        color = colors[0]
-    elif speed > max_speed:
-        color = colors[-1]
-    else:
-        color = colors[int((speed - min_speed) / step) + 1]
-
-    return color
-
-@st.cache_data()
-def get_color_legend():
-    '''
-    Returns:
-    str: The color legend in HTML format.
-    '''
-    colors, min_speed, step = get_color_settings()
-
-    html = ''
-    html += '<div style="margin: 0 0 0 24px">'
-    for i, color in enumerate(colors):
-        num_str = f'{(i * step) + min_speed:.1f}'
-        html += f'<div style="display: inline-block; width: 36px;">{num_str}</div>' if i < len(colors) - 1 else ''
-    html += '</div>'
-
-    html += '<div style="margin: 0 0 20px 0">'
-    for color in colors:
-        color_str = f'rgb({color[0]}, {color[1]}, {color[2]})'
-        html += f'<div style="display: inline-block; background-color: {color_str}; height: 20px; width: 36px;"></div>'
-    html += '</div>'
-
-    return html
-
-@st.cache_data()
 def get_pitches():
     # latitude and longitude of the 4 corners of football pitches
     # the order is bottom left, top left, top right, bottom right (clockwise from bottom left) when the pitch is displayed as a rectangle with the long side horizontal
     # the bottom left corner will be used as the base point (0, 0) for calculating the local coordinates of other points on the pitch, so it is important to get the correct order
     pitch_coordinates = [
         {
-            'lat': [63.445152, 63.445640, 63.445077, 63.444589],
-            'lon': [10.450687, 10.451500, 10.453186, 10.452373]
+            'lat': [63.445152, 63.445640, 63.445078, 63.444589],
+            'lon': [10.450687, 10.451500, 10.453188, 10.452373]
         },
         # {
         #     'lat': [38.709955, 38.709013, 38.709006, 38.709948],
@@ -224,7 +156,6 @@ def get_pitches():
 
     return pitch_coordinates
 
-@st.cache_data()
 def in_pitch(lat, long):
     '''
     Check if the latitude and longitude are inside any football pitch.
@@ -244,7 +175,6 @@ def in_pitch(lat, long):
 
     return False
 
-@st.cache_data()
 def distance_and_bearing(lat1, lon1, lat2, lon2):
     '''
     Given the latitude and longitude of two points, calculate the distance and initial bearing from the first point to the second point.
@@ -268,8 +198,7 @@ def distance_and_bearing(lat1, lon1, lat2, lon2):
 
     return d, b
 
-@st.cache_data()
-def local_coordinates(distance, bearing):
+def local_coordinate(distance, bearing):
     '''
     Given the distance and bearing, calculate the local coordinates of a point relative to the base point (0, 0).
     Parameters:
@@ -285,8 +214,7 @@ def local_coordinates(distance, bearing):
 
     return x, y
 
-@st.cache_data()
-def find_pitch(lat, lon):
+def find_pitch(lat: float, lon: float) -> Dict:
     '''
     Find the pitch that contains the latitude and longitude, and return the pitch or None if the coordinates are not inside any pitch.
 
@@ -316,9 +244,11 @@ def find_pitch(lat, lon):
     pitch['length'] = length
     pitch['bearing'] = bearing
 
+    # center of the pitch
+    pitch['center'] = (np.mean(pitch['lat']), np.mean(pitch['lon']))
+
     return pitch
 
-@st.cache_data()
 def equirectangular(lat, lon):
     '''
     convert the lat and lon data to cartesian coordinates using equirectangular projection
@@ -342,8 +272,7 @@ def equirectangular(lat, lon):
 
     return x, y
 
-@st.cache_data()
-def rotate_coordinates(x, y, angle_degrees):
+def rotate_coordinate(x, y, angle_degrees):
     '''
     Rotate the coordinates by the given angle. The rotation is counter-clockwise.
 
@@ -400,13 +329,13 @@ def convert_coordinates(
         base_x, base_y = equirectangular(*base_point)
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     elif method == 'distance_bearing':
         # find the distance and bearing from the base point to the point
         distance_col, bearing_col = zip(*[distance_and_bearing(*base_point, lat, lon) for lat, lon in zip(lat_col, lon_col)])
         # calculate the coordinates of the point relative to the base point on the pitch
-        coords = [local_coordinates(d, b - angle) for d, b in zip(distance_col, bearing_col)]
+        coords = [local_coordinate(d, b - angle) for d, b in zip(distance_col, bearing_col)]
 
     elif method == 'WebMercator':
         # Web Mercator projection, often used in online maps
@@ -415,7 +344,7 @@ def convert_coordinates(
         base_x, base_y = wgs84_to_wm(*base_point)
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     elif method == 'utm':
         # convert from WGS84 (GPS) to UTM (Universal Transverse Mercator)
@@ -430,12 +359,11 @@ def convert_coordinates(
         base_x, base_y = transformer.transform(base_point[1], base_point[0])
         coords = [(x - base_x, y - base_y) for x, y in coords]
         # rotate the coordinates
-        coords = [rotate_coordinates(x, y, angle) for x, y in coords]
+        coords = [rotate_coordinate(x, y, angle) for x, y in coords]
 
     x_col, y_col = zip(*coords)
     return (x_col, y_col), pitch
 
-@st.cache_data()
 def wgs84_to_wm(
     lat: float,
     lon: float,
@@ -457,7 +385,6 @@ def wgs84_to_wm(
 
     return x, y
 
-@st.cache_data()
 def utm_zone(
     lat: float,
     lon: float,
@@ -485,3 +412,151 @@ def utm_zone(
         epsg = f"EPSG:327{zone}"
 
     return epsg
+
+def fetch_sat_img(
+    lat_deg: float,
+    lon_deg: float
+) -> Tuple[
+    Image.Image,
+    Tuple[float, float, float, float]
+]:
+    '''
+    Given latitude and longitude (in decimal degrees), return the satellite image that cover the area, and the extent of the image in latitude and longitude.
+    '''
+    # zoom level
+    zoom = 17
+    # get the tile numbers that cover the area
+    tiles = get_tile_numbers(lat_deg, lon_deg, zoom)
+    xmin, xmax, ymin, ymax = tiles['xmin'], tiles['xmax'], tiles['ymin'], tiles['ymax']
+
+    # full size image to add the tiles to
+    tile_size = 256
+    img = Image.new('RGB',
+                    ((xmax - xmin + 1) * tile_size, (ymax - ymin + 1) * tile_size))
+
+    # loop through every tile inside the bounding box
+    for x, y in product(range(xmin, xmax + 1), range(ymin, ymax + 1)):
+        tile = fetch_tile(x, y, zoom)
+        # paste the tile into the full image
+        img.paste(tile, ((x - xmin) * tile_size, (y - ymin) * tile_size))
+
+    # crop the image to the area around the point
+    # add some padding around the point
+    x_padding = 0.0016
+    y_padding = 0.0007
+    lat_min = lat_deg - y_padding
+    lat_max = lat_deg + y_padding
+    lon_min = lon_deg - x_padding
+    lon_max = lon_deg + x_padding
+    # the pixel coordinates of the corners of the cropped image
+    x1, y1 = latlon_to_pixel(lat_max, lon_min, zoom, tile_size)
+    x2, y2 = latlon_to_pixel(lat_min, lon_max, zoom, tile_size)
+
+    # the arguments are relative to the top left corner
+    img = img.crop((
+        x1 - xmin * tile_size,
+        y1 - ymin * tile_size,
+        x2 - xmin * tile_size,
+        y2 - ymin * tile_size
+    ))
+
+    # the extent of the cropped image in latitude and longitude
+    extent = (lon_min, lon_max, lat_min, lat_max)
+
+    return img, extent
+
+def latlon_to_tile(
+    lat_deg: float,
+    lon_deg: float,
+    zoom: int,
+) -> Tuple[float, float]:
+    '''
+    Given latitude and longitude (in decimal degrees) and a zoom level, return the point in the tile numbering system (with fractional part).
+    '''
+    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    lat_rad = math.radians(lat_deg)
+    n = 2.0 ** zoom
+    x = (lon_deg + 180.0) / 360.0 * n
+    y = (1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n
+
+    return x, y
+
+def latlon_to_pixel(
+    lat_deg: float,
+    lon_deg: float,
+    zoom: int,
+    tile_size: int,
+) -> Tuple[int, int]:
+    '''
+    Given latitude and longitude (in decimal degrees), a zoom level, and the size of a tile, return the pixel coordinates of the point
+    '''
+    xpoint, ypoint = latlon_to_tile(lat_deg, lon_deg, zoom)
+    x = int(xpoint * tile_size)
+    y = int(ypoint * tile_size)
+
+    return x, y
+
+def get_tile_numbers(lat_deg: float, lon_deg: float, zoom: int) -> Dict[str, int]:
+    '''
+    Given latitude and longitude (in decimal degrees) and a zoom level, return the tile numbers that cover the area (can be multiple tiles).
+    '''
+    xpoint, ypoint = latlon_to_tile(lat_deg, lon_deg, zoom)
+
+    # the tile numbers of the point
+    xtile = int(xpoint)
+    ytile = int(ypoint)
+
+    # the fractional part of the tile numbers
+    xfrac = xpoint - xtile
+    yfrac = ypoint - ytile
+
+    # if the point is near the edge of a tile, get nearby tiles as well, so the whole area can be displayed
+    threshold = 0.45
+    # the bounding box of the tiles
+    xmin = xtile
+    xmax = xtile
+    ymin = ytile
+    ymax = ytile
+
+    if xfrac < threshold:
+        xmin -= 1
+    if yfrac < threshold:
+        ymin -= 1
+
+    if xfrac > 1 - threshold:
+        xmax += 1
+    if yfrac > 1 - threshold:
+        ymax += 1
+
+    # limit the number of tiles to prevent accidental large downloads
+    assert (xmax - xmin + 1) * (ymax - ymin + 1) <= 9, 'Too many tiles to download'
+
+    # return a dictionary
+    tiles = {
+        'xmin': xmin,
+        'xmax': xmax,
+        'ymin': ymin,
+        'ymax': ymax
+    }
+
+    return tiles
+
+@st.cache_data()
+def fetch_tile(x: int, y: int, zoom: int) -> Image.Image:
+    '''
+    Fetch one tile of the satellite image from online providers like Mapbox.
+    x and y are the tile numbers, and zoom is the zoom level.
+    '''
+    # mapbox access token
+    token = st.secrets['mapbox']['token']
+
+    # the URL for the satellite image from Mapbox
+    path = 'https://api.mapbox.com/v4/mapbox.satellite/'
+    url = f'{path}{zoom}/{x}/{y}.jpg?access_token={token}'
+
+    # make the request
+    resp = requests.get(url)
+    resp.raise_for_status()
+    image = Image.open(BytesIO(resp.content))
+
+    return image

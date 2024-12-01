@@ -1,27 +1,43 @@
 import streamlit as st
 
-def menu(sub_pages: dict = None, position: int = -1):
-    main_pages = {
-        "Homepage": "homepage.py",
-        "Dataset Overview": "pages/dataset_overview.py",
-        "Analysis": "pages/analysis.py",
+def menu():
+    # define the pages and their paths, and sub-pages if any
+    pages = {
+        "🏠 Homepage": {
+            "path": "homepage.py",
+        },
+        "🌍 GPS": {
+            "path": "pages/gps__sprints.py",
+            "sub_pages": {
+                'Sprints': "pages/gps__sprints.py",
+                'Overall Mobility': "pages/gps__mobility.py",
+            }
+        },
+        "💉 Injuries - Objective": {
+            "path": "pages/injuries_objective__overview.py",
+            "sub_pages": {
+                'Overview': "pages/injuries_objective__overview.py",
+                'Analysis': "pages/injuries_objective__analysis.py",
+            }
+        },
+        "🗃️ Other": {
+            "path": "pages/other__dataset_overview.py",
+            "sub_pages": {
+                'Dataset Overview': "pages/other__dataset_overview.py",
+                'Game Performance': "pages/other__game_performance.py",
+                'Illnesses': "pages/other__illnesses.py",
+                "Injuries - Subjective": "pages/other__injuries.py",
+                'Training Load': "pages/other__training_load.py",
+                'Wellness': "pages/other__wellness.py",
+            }
+        },
     }
 
-    # if sub_pages is not provided, or position is not valid, display all the main pages
-    if not sub_pages or position < 0 or position > len(main_pages):
-        for page in main_pages:
-            st.sidebar.page_link(main_pages[page], label=page)
-    else:
-        # display the main pages before the position
-        for page in list(main_pages.keys())[:position]:
-            st.sidebar.page_link(main_pages[page], label=page)
-
-        # sub pages
-        for page in sub_pages:
-            # prefix the page label to indicate that it's a sub page
-            label = f" • {page}"
-            st.sidebar.page_link(sub_pages[page], label=label)
-
-        # rest of the main pages
-        for page in list(main_pages.keys())[position:]:
-            st.sidebar.page_link(main_pages[page], label=page)
+    # display the menu in the sidebar
+    for page in pages:
+        st.sidebar.page_link(pages[page]["path"], label=page)
+        if "sub_pages" in pages[page]:
+            for sub_page in pages[page]["sub_pages"]:
+                path = pages[page]["sub_pages"][sub_page]
+                label = "  ➤ " + sub_page
+                st.sidebar.page_link(path, label=label)

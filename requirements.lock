@@ -71,7 +71,7 @@ six==1.16.0
 smmap==5.0.1
 SQLAlchemy==2.0.27
 st-files-connection==0.1.0
-streamlit==1.33.0
+streamlit==1.37.0
 tenacity==8.2.3
 toml==0.10.2
 tomli==2.0.1

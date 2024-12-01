@@ -4,7 +4,7 @@ from components.common import menu
 
 def page_setup():
     st.set_page_config(
-        page_title="Dataset Overview - Soccer Dashboard",
+        page_title="Injuries - Objective - Soccer Dashboard",
         page_icon="⚽",
         layout="wide",
         initial_sidebar_state="auto",

@@ -8,21 +8,6 @@ def test_pitch_image_offset():
 def test_pitch_image_extent():
     assert gps.pitch_image_extent(105.2300539943234, 67.95372350891176) == (-3.5076684664774467, 108.73772246080084, -1.698843087722794, 69.65256659663456)
 
-def test_get_color_from_speed():
-    assert gps.get_color_from_speed(5.2) == [236, 218, 154]
-    assert gps.get_color_from_speed(5.41) == [239, 196, 126]
-    assert gps.get_color_from_speed(5.6) == [239, 196, 126]
-    assert gps.get_color_from_speed(5.81) == [243, 173, 106]
-    assert gps.get_color_from_speed(6.0) == [243, 173, 106]
-    assert gps.get_color_from_speed(6.21) == [247, 148, 93]
-    assert gps.get_color_from_speed(6.4) == [247, 148, 93]
-    assert gps.get_color_from_speed(6.61) == [249, 123, 87]
-    assert gps.get_color_from_speed(6.8) == [249, 123, 87]
-    assert gps.get_color_from_speed(7.01) == [246, 99, 86]
-    assert gps.get_color_from_speed(7.2) == [246, 99, 86]
-    assert gps.get_color_from_speed(7.41) == [238, 77, 90]
-    assert gps.get_color_from_speed(7.6) == [238, 77, 90]
-
 def test_distance_and_bearing():
     lat1, lon1, lat2, lon2 = 63.445152, 10.450687, 63.444589, 10.452373
     d, b = gps.distance_and_bearing(lat1, lon1, lat2, lon2)
@@ -34,10 +19,10 @@ def test_distance_and_bearing():
     assert d2 == 67.85848380408736
     assert b2 == 36.714548029102495
 
-def test_local_coordinates():
-    assert gps.local_coordinates(100, 0) == (0, 100)
-    assert gps.local_coordinates(100, 45) == pytest.approx((70.71067811865476, 70.71067811865476))
-    assert gps.local_coordinates(100, 90) == pytest.approx((100, 0))
+def test_local_coordinate():
+    assert gps.local_coordinate(100, 0) == (0, 100)
+    assert gps.local_coordinate(100, 45) == pytest.approx((70.71067811865476, 70.71067811865476))
+    assert gps.local_coordinate(100, 90) == pytest.approx((100, 0))
 
 def test_find_pitch():
     lat, lon = 63.44523733, 10.45186
@@ -57,20 +42,20 @@ def test_equirectangular():
 
     assert gps.equirectangular(59.9172961, 10.8068681) == (602336.846308802, 6662508.756366668)
 
-def test_rotate_coordinates():
-    assert gps.rotate_coordinates(100, 0, 0) == (100, 0)
-    assert gps.rotate_coordinates(100, 0, 90) == pytest.approx((0, 100))
-    assert gps.rotate_coordinates(100, 0, 180) == pytest.approx((-100, 0))
-    assert gps.rotate_coordinates(100, 0, 270) == pytest.approx((0, -100))
+def test_rotate_coordinate():
+    assert gps.rotate_coordinate(100, 0, 0) == (100, 0)
+    assert gps.rotate_coordinate(100, 0, 90) == pytest.approx((0, 100))
+    assert gps.rotate_coordinate(100, 0, 180) == pytest.approx((-100, 0))
+    assert gps.rotate_coordinate(100, 0, 270) == pytest.approx((0, -100))
 
-    assert gps.rotate_coordinates(100, 0, 30) == pytest.approx((86.60254037844386, 50))
-    assert gps.rotate_coordinates(100, 100, 30) == pytest.approx((36.602540378443884, 136.60254037844388))
-    assert gps.rotate_coordinates(100, 100, 180) == pytest.approx((-100, -100))
-    assert gps.rotate_coordinates(100, 100, 360) == pytest.approx((100, 100))
-    assert gps.rotate_coordinates(100, 100, 580) == pytest.approx((-12.325683343243782, -140.88320528055175))
-    assert gps.rotate_coordinates(0, 100, 300) == pytest.approx((86.60254037844386, 50))
+    assert gps.rotate_coordinate(100, 0, 30) == pytest.approx((86.60254037844386, 50))
+    assert gps.rotate_coordinate(100, 100, 30) == pytest.approx((36.602540378443884, 136.60254037844388))
+    assert gps.rotate_coordinate(100, 100, 180) == pytest.approx((-100, -100))
+    assert gps.rotate_coordinate(100, 100, 360) == pytest.approx((100, 100))
+    assert gps.rotate_coordinate(100, 100, 580) == pytest.approx((-12.325683343243782, -140.88320528055175))
+    assert gps.rotate_coordinate(0, 100, 300) == pytest.approx((86.60254037844386, 50))
 
-    assert gps.rotate_coordinates(0, -100, 90) == pytest.approx((100, 0))
+    assert gps.rotate_coordinate(0, -100, 90) == pytest.approx((100, 0))
 
 def test_wgs84_to_wm():
     assert gps.wgs84_to_wm(48.137154, 11.576124) == (1288648.2290397931, 6129702.780250119)
@@ -87,3 +72,35 @@ def test_utm_zone():
     assert gps.utm_zone(63.445152, 10.450687) == 'EPSG:32632'
 
     assert gps.utm_zone(59.917296, 10.806868) == 'EPSG:32632'
+
+def test_latlon_to_tile():
+    result1 = gps.latlon_to_tile(35.6590699, 139.7006793, 18)
+    assert round(result1[0], 4) == 232798.9302
+    assert round(result1[1], 4) == 103246.4104
+
+    result2 = gps.latlon_to_tile(63.445136579999996, 10.451842707499999, 17)
+    assert round(result2[0], 4) == 69341.3998
+    assert round(result2[1], 4) == 35412.376
+
+def test_latlon_to_pixel():
+    # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    # 232798 * 256 + 238 = 59596526
+    # 103246 * 256 + 105 = 26431081
+    assert gps.latlon_to_pixel(35.6590699, 139.7006793, 18, 256) == (59596526, 26431081)
+
+    assert gps.latlon_to_pixel(63.445136579999996, 10.451842707499999, 17, 256) == (17751398, 9065568)
+
+def test_get_tile_numbers():
+    assert gps.get_tile_numbers(63.445136579999996, 10.451842707499999, 17) == {
+        'xmin': 69340,
+        'xmax': 69341,
+        'ymin': 35411,
+        'ymax': 35412
+    }
+
+    assert gps.get_tile_numbers(63.445, 10.4495, 17) == {
+        'xmin': 69340,
+        'xmax': 69340,
+        'ymin': 35412,
+        'ymax': 35412
+    }

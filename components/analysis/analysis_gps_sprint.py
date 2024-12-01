@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import pandas as pd
-import pydeck as pdk
 import streamlit as st
 
 from utils import data_fetcher
@@ -12,21 +10,47 @@ def view():
     columns = ['*']
     df = data_fetcher.fetch_data(table, columns)
 
-    # radio button to select the team
-    team = st.radio('Select team', df['Team_name'].unique(), horizontal=True)
+    # select data
+    with st.expander('**Select data**', expanded=True):
+        # radio button to select the team
+        team = st.radio('Select team', df['Team_name'].unique(), horizontal=True)
 
-    # dropdown to select the player
-    player = st.selectbox('Select player', df[df['Team_name'] == team]['Player_name'].unique())
+        # dropdown to select the player
+        player = st.selectbox('Select player', df[df['Team_name'] == team]['Player_name'].unique())
 
-    # dropdown to select the session
-    session = st.selectbox('Select session', df[df['Player_name'] == player]['Session_Id'].unique())
+        # dropdown to select the session
+        session = st.selectbox('Select session', df[df['Player_name'] == player]['Session_Id'].unique())
+
+    # select style
+    with st.expander('**Customize style**', expanded=True):
+        # use satellite view or pitch view
+        view = st.radio('Select view', ['Satellite view', 'Pitch view', 'Both'], horizontal=True)
+
+        # display arrowhead at the end of the sprint
+        arrowhead = st.radio('Display arrowhead at the end of the sprint', ['Yes', 'No'], horizontal=True)
+
+        # pick color scheme
+        col1, col2 = st.columns([1, 3], vertical_alignment='bottom')
+        # the options
+        with col1:
+            color_scheme = st.radio('Pick color scheme', ['Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds', 'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu'], index=7)
+        # the image showing the color scheme
+        with col2:
+            st.image('assets/colormaps.png', width=300)
 
     # filter the data based on the selected team
     filtered_df = df[(df['Player_name'] == player) & (df['Session_Id'] == session)]
 
-    # chart for the GPS data
-    gps_chart(filtered_df.copy())
+    # color the sprints based on the average speed
+    # normalize the speed from the whole dataset, so the color is consistent
+    norm = plt.Normalize(df['Average_speed'].min(), df['Average_speed'].max())
 
+    # chart for the GPS data
+    gps_chart(filtered_df.copy(), norm, view, arrowhead, color_scheme)
+
+    show_data(filtered_df, player, session, df)
+
+def show_data(filtered_df, player, session, df):
     # show the filtered data
     st.header(f'GPS data for player *{player}* in session *{session}*')
     st.write(filtered_df)
@@ -57,69 +81,76 @@ def view():
 
     # check_range(df)
 
-def gps_chart(df):
-    plt_chart(df)
+def gps_chart(df, norm, view, arrowhead, color_scheme):
+    if view == 'Satellite view' or view == 'Both':
+        satel_chart(df, norm, arrowhead, color_scheme)
+    if view == 'Pitch view' or view == 'Both':
+        pitch_chart(df, norm, arrowhead, color_scheme)
 
-    pydeck_chart(df)
+    # the positioning of the pitch view and the satellite view is not matching perfectly
+    # tried using matplotlib.transforms.Affine2D().rotate_deg_around() to rotate the plot, but the result is also not perfect
 
-def pydeck_chart(df):
-    # path for each sprint
-    df['path'] = df.apply(lambda row: [[row['Lon_start'], row['Lat_start']], [row['Lon_end'], row['Lat_end']]], axis=1)
-    # timestamps for each sprint. should be 32-bit floating numbers
-    # set to 0 and 100 because we only care about the start and end of the sprint
-    df['timestamps'] = df.apply(lambda row: [0, 100], axis=1)
+def satel_chart(df, norm, arrowhead, color_scheme):
+    st.header('Satellite view')
+    fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
-    # color the paths based on the average speed
-    df['color'] = df['Average_speed'].apply(gps.get_color_from_speed)
-
-    trips_layer = pdk.Layer(
-        'TripsLayer',
-        data=df,
-        get_path='path',
-        get_timestamps='timestamps',
-        get_color='color',
-        width_min_pixels=5,
-        current_time=100,
-        trail_length=200,
-        pickable=True,
-        auto_highlight=True,
-        highlight_color=[255, 255, 0],
-    )
-
-    # use the center of the Lat and Lon values as the initial view state
+    # use the mean of the Lat and Lon values to find the pitch
     mean_lat = df[['Lat_start', 'Lat_end']].mean().mean()
     mean_lon = df[['Lon_start', 'Lon_end']].mean().mean()
-    view_state = pdk.ViewState(
-        latitude=mean_lat,
-        longitude=mean_lon,
-        zoom=17,
-    )
+    pitch = gps.find_pitch(mean_lat, mean_lon)
+    if pitch is None:
+        st.write('Cannot find pitch information')
+        return
 
-    st.pydeck_chart(pdk.Deck(
-        map_style='mapbox://styles/mapbox/satellite-v9',
-        initial_view_state=view_state,
-        layers=[trips_layer],
-        tooltip={
-            'html': 'Start: {Lat_start}, {Lon_start} <br> End: {Lat_end}, {Lon_end} <br> Average speed: {Average_speed} <br> Top speed: {Top_speed}',
-            'style': {
-                'color': 'white'
-            }
-        }
-    ))
+    # use the center of the pitch to determine the satellite image
+    center_lat, center_lon = pitch['center']
+    image, extent = gps.fetch_sat_img(center_lat, center_lon)
 
-    st.write(f'Center of the map: Lat: {mean_lat}, Lon: {mean_lon}')
-    st.write('Fading trails indicate the direction.')
+    # ax.set_xlim(extent[0], extent[1])
+    # ax.set_ylim(extent[2], extent[3])
+    # setting 'extent' changes the aspect ratio, so we need to set the ratio to keep the original aspect ratio of the image
+    aspect = (image.height / image.width) * (extent[1] - extent[0]) / (extent[3] - extent[2])
+    ax.imshow(image, extent=extent, aspect=aspect)
 
-    # because pydeck does not support color legend, we have to show the legend manually
-    st.write('Average speed color legend:')
-    html = gps.get_color_legend()
-    st.write(html, unsafe_allow_html=True)
+    # set the colormap
+    cmap = plt.cm.get_cmap(color_scheme)
 
-def plt_chart(df):
+    # plot the sprints
+    for index, row in df.iterrows():
+        color = cmap(norm(row['Average_speed']))
+        ax.plot([row['Lon_start'], row['Lon_end']], [row['Lat_start'], row['Lat_end']], linewidth=1, color=color)
+
+        if arrowhead == 'Yes':
+            # show an arrowhead at the end of the sprint
+            ax.arrow(row['Lon_start'], row['Lat_start'], row['Lon_end'] - row['Lon_start'], row['Lat_end'] - row['Lat_start'], width=0.000001, fc=color, ec=color, head_width=0.00003)
+
+    # colorbar for the average speed
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.7)
+
+    # hide the axis
+    ax.axis('off')
+
+    # attribution for the map (Mapbox, etc.)
+    attr_map(ax)
+
+    st.pyplot(fig, use_container_width=False)
+
+def attr_map(ax):
+    # show Mapbox logo at the bottom left corner
+    mapbox_logo = plt.imread('assets/mapbox-logo-white.png')
+    inset_ax = ax.inset_axes([0.01, -0.04, 0.14, 0.14])
+    inset_ax.imshow(mapbox_logo)
+    inset_ax.axis('off')
+    # add text attribution at the bottom right corner
+    text_attribution = '© Mapbox © OpenStreetMap Improve this map © Maxar'
+    ax.text(0.99, 0.01, text_attribution, color='white', ha='right', va='bottom', transform=ax.transAxes, fontsize=4.8)
+
+def pitch_chart(df, norm, arrowhead, color_scheme):
     # show sprints on a uniform football pitch
-    st.header('Sprints on a uniform football pitch')
+    st.header('Pitch view')
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4.5, 4.5))
 
     method = 'utm'
     result_start = gps.convert_coordinates(df['Lat_start'], df['Lon_start'], method=method)
@@ -138,24 +169,23 @@ def plt_chart(df):
     extent = gps.pitch_image_extent(pitch['length'], pitch['width'])
     ax.imshow(image, extent=extent)
 
-    # color the sprints based on the average speed
-    colors = df['Average_speed'].apply(gps.get_color_from_speed)
-    # convert from [236, 218, 154] to hex RGB string, for matplotlib
-    colors = colors.apply(lambda x: f'#{x[0]:02x}{x[1]:02x}{x[2]:02x}')
+    # set the colormap
+    cmap = plt.cm.get_cmap(color_scheme)
 
     # plot the sprints
     for index, row in df.iterrows():
-        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=3, color=colors[index])
+        color = cmap(norm(row['Average_speed']))
+        ax.plot([row['ux_start'], row['ux_end']], [row['uy_start'], row['uy_end']], linewidth=2, color=color)
 
-        # show an arrow at the end of the sprint
-        ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=3, head_length=2, fc=colors[index], ec=colors[index])
+        if arrowhead == 'Yes':
+            # show an arrowhead at the end of the sprint
+            ax.arrow(row['ux_start'], row['uy_start'], row['ux_end'] - row['ux_start'], row['uy_end'] - row['uy_start'], head_width=2, head_length=1.5, fc=color, ec=color)
 
-    st.pyplot(fig)
+    # colorbar for the average speed
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    fig.colorbar(sm, ax=ax, label='Average speed (m/s)', shrink=0.6, orientation='horizontal')
 
-    # show the color legend
-    st.write('Average speed color legend:')
-    html = gps.get_color_legend()
-    st.write(html, unsafe_allow_html=True)
+    st.pyplot(fig, use_container_width=False)
 
 @st.cache_data()
 def check_range(df):

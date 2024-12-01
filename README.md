@@ -91,9 +91,7 @@ The entry point of the app is `homepage.py`.
 
 The app is organized into multiple pages, each in a separate Python file, all placed in the `pages` directory. No subdirectories are allowed, due to Streamlit's limitations.
 
-The navigation menu on the left sidebar is dynamically generated based on the titles and corresponding pages defined in the `main_pages` in `components/common/menu.py`.
-
-The subpages under each main page are defined in each main page's directory in the `components` directory. For example, the subpages under the "Overview" page are defined in `components/dataset_overview/overview_common.py`. The position of the subpages (e.g., which main page these subpages should appear under) is also defined there.
+The navigation menu (including subitems under each main item) on the left sidebar is dynamically generated based on the titles and corresponding pages defined in the `main_pages` in `components/common/menu.py`.
 
 ### Testing
 
